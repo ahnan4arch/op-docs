@@ -1,0 +1,123 @@
+
+DIV.ui-layout-pane {
+	padding: 0px;
+}
+DIV.ui-layout-north {
+	overflow-x: hidden;
+	overflow-y: hidden;
+	padding: 3px;
+	background-color: #eaeaea;
+}
+DIV.ui-layout-north > TABLE {
+	width: 100%;
+}
+DIV.ui-layout-north TD.home {
+	padding-left: 10px;
+}
+DIV.ui-layout-north TD.title {
+	font-family: Helvetica, Arial, sans-serif;
+	color: rgb(0, 127, 133);
+	font-size: 18px;
+	font-weight: bold;
+	padding-left: 10px;
+}
+DIV.ui-layout-north TD.copyright {
+	font-size: 11px;
+	padding-top: 4px;
+	padding-right: 10px;
+	text-align: right;
+}
+DIV.ui-layout-west {
+	overflow-x: auto;
+}
+DIV.ui-layout-center {
+	overflow-x: hidden;
+}
+DIV.reloading {
+	background-color: #eaeaea;
+}
+
+
+#toc {
+	padding: 0px;
+	font-size: 11px;
+	line-height: 16px;
+	white-space: nowrap;
+}
+#toc UL {
+	padding-left: 10px;
+}
+#toc LI {
+	list-style: none;
+	cursor: pointer;
+}
+#toc LI:hover {
+	background-color: #eaeaea;
+}
+#toc LI.highlight {
+	background-color: #dadada !important;
+}
+#toc LI > SPAN.counter {
+	font-size: 9px;
+	margin-left: 10px;
+	color: #cacaca;
+	padding-left: 3px;
+	padding-right: 3px;
+}
+#toc > UL > LI {
+	font-weight: bold;
+	color: rgb(0, 127, 133);
+	font-size: 14px;
+	line-height: 19px;
+}
+
+
+#doc {
+	padding-left: 20px;
+	padding-right: 20px;
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	line-height: 19px;
+}
+#doc CODE {
+	background-color: #eaeaea;
+	padding-left: 5px;
+	padding-right: 5px;
+	border-radius: 5px;
+}
+#doc PRE {
+	border: 1px solid #dadada;
+	background-color: #eaeaea;
+	padding-left: 5px;
+	overflow-x: auto;
+}
+#doc PRE > CODE {
+	font-size: 10px;
+	font-family: monospace;
+	background-color: transparent;
+}
+#doc H1:nth-child(1) {
+	margin-top: 20px;
+}
+#doc H1 {
+	font-size: 24px;
+	border-bottom: 3px solid rgb(0, 127, 133);
+	margin-top: 40px;
+	margin-bottom: 20px;
+	color: rgb(0, 127, 133);
+}
+#doc H2 {
+	font-size: 20px;
+}
+#doc H3 {
+	font-size: 16px;
+}
+#doc SPAN.section-counter,
+#doc SPAN.section-counter-toc {
+	font-size: 12px;
+	padding-right: 10px;
+}
+
+#doc BUTTON.edit {
+	margin-left: 10px;
+}
