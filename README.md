@@ -28,7 +28,7 @@ Commit and push to github.
 Deployment
 ----------
 
-	dotcloud push
+	make deploy
 
 First time setup:
 
