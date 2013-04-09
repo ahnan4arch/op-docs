@@ -29,3 +29,8 @@ Deployment
 ----------
 
 	dotcloud push
+
+First time setup:
+
+	sudo easy_install pip && sudo pip install dotcloud
+	dotcloud setup
