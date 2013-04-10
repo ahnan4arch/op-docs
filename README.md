@@ -30,7 +30,16 @@ Deployment
 
 	make deploy
 
-First time setup:
+First time deploy setup for [dotCloud](http://dotcloud.com):
 
-	sudo easy_install pip && sudo pip install dotcloud
-	dotcloud setup
+    sudo easy_install pip && sudo pip install dotcloud
+    dotcloud setup
+
+Initial [dotCloud](http://dotcloud.com) application setup:
+
+    dotcloud create -f live <name>
+    dotcloud push
+
+Deployments:
+
+  * Production: http://docs.openpeer.org/
