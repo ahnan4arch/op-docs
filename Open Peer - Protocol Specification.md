@@ -1160,9 +1160,15 @@ Example of the "0" package is JSON in place text with the following data in the 
 General Request, Reply, Notify and Result Formation Rules
 =========================================================
 
+Open Peer has four types of messages:
+  * request - the request types requires a "result" as a response to the request whose ID matches the request.
+  * result - a result is in response to a request whose ID must match the request
+  * reply - this is a special case "reply" to a request during the find where the finder returns an immediate result to the request but each peer location can give its own reply with the same ID as the request subsequently
+  * notify - this is a special type of request whose result is ignored and not required (and no response is presumed to occur with a notify type)
+
 All request types and results use a simplified JSON format. The messages are sent either over HTTPS/TLS/MLS/Message or over RUDP/UDP or SCP protocols. Alternative protocols are acceptable so long as they maintain the integrity and public/private key aspects of these protocols.  
 
-Every request type must include an ID and a method being invoked. Every result message must mirror the request type's ID and include an epoch (whereas the epoch is optional on request types).  
+Every request must include the federated domain which the request is being processed and the application ID associated with the request (the result/reply should use the application ID of the original request). Every request type must include an ID and a handler service and method being invoked (to assist with message handling, processing and routing). The ID must be cryptographically strong and random thus checks to see which data channel the response comes on is not required. Every result message must mirror the request type's ID and include a timestamp to assist with detecting network time problems (whereas the timestamp is optional on request types).  
 
 Even though all requests/responses are written in human readable form in this document, all requests/responses are sent on the wire in their Open Peer canonical form using the algorithm for the canonicalization of JSON signatures as specified in this document. This allows any clients or servers receive JSON requests that have non-compliant JSON parsers/generators to be able to easily validate signatures even if they cannot convert from raw JSON to canonical JSON easily. Further, this ensures the wire format is optimal on the wire since the canonical form is fairly compact (although if compression is applied in a higher layer then the wire savings might become moot).  
 
@@ -1313,6 +1319,8 @@ The request nor the response should have an ID associated with the request/respo
      {
       "request": {
         "$domain": "example.com",
+        "$appid": "xyz123",
+        "$id": "abc123",
         "$handler": "bootstrapper",
         "$method": "services-get"
       }
@@ -1321,6 +1329,8 @@ The request nor the response should have an ID associated with the request/respo
     {
       "result": {
         "$domain": "example.com",
+        "$appid": "xyz123",
+        "$id": "abc123",
         "$handler": "bootstrapper",
         "$method": "services-get",
         "$timestamp": 439439493,
@@ -1519,6 +1529,7 @@ The request nor the response should have an ID associated with the request/respo
     {
       "request": {
         "$domain": "example.com",
+        "$appid": "xyz123",
         "$handler": "bootstrapper",
         "$method": "services-get"
       }
@@ -1580,6 +1591,7 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
       {
       "request": {
         "$domain": "example.com",
+        "$appid": "xyz123",
         "$handler": "bootstrapper-finder",
         "$method": "finders-get",
         "$id": "abd23",
@@ -1591,6 +1603,7 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
     {
       "result": {
         "$domain": "example.com",
+        "$appid": "xyz123",
         "$handler": "bootstrapper-finder",
         "$method": "finders-get",
         "$id": "abc123",
@@ -1682,6 +1695,7 @@ The client must ensure the server has an HTTPS certificate that was issued by a 
      {
       "request": {
         "$domain": "example.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "certificates",
         "$method": "certificates-get"
@@ -1691,6 +1705,7 @@ The client must ensure the server has an HTTPS certificate that was issued by a 
     {
       "result": {
         "$domain": "example.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "certificates",
         "$method": "certificates-get",
@@ -1741,8 +1756,7 @@ The client must ensure the server has an HTTPS certificate that was issued by a 
         }
       }
     }
-    
-       
+
 Identity Lockbox Service Requests
 =================================
 
@@ -1769,6 +1783,7 @@ This request obtains access to a lockbox. Access is granted by way of login proo
     * Lockbox account ID - (optional, if known) the assigned account ID for the lockbox
     * Lockbox key "lockbox half" - (optional, if known and only key was just generated), this is server side base-64 encoded XORed portion of the lockbox key that must be combined with the client side portion of the key to create the full lockbox key. If specified the identity access token and proof must be specified.
     * Lockbox key "hash" - hash of the combined XORed lockbox key. If the lockbox key "lockbox half" is specified then this lockbox hash is reset to this hash specified otherwise this hash can be used to login to the lockbox account (by specifying the original identity with the "identity access token" and "proof" information being optional).
+    * Lockbox reset flag - (optional) if specified and true, a new lockbox must be created for the identity specified (and an identity must be specified for access) and this identity must become unassociated with any other lockboxes. If this identity was previously the only associated identity with a previous lockbox then the previous lockbox can be deleted entirely.
 
 ### Returns
 
@@ -1792,15 +1807,16 @@ This request obtains access to a lockbox. Access is granted by way of login proo
 
 Access to the lockbox does not grant access to the contents of the lockbox. The lockbox key must be obtained through an alternative method.  
 
-The server will validate the identity login via the identity service to access the account or validate the client has the correct lockbox key hash to access the account.  
+The server will validate the identity login via the identity service to access the account or validate the client has the correct lockbox key hash to access the account. An identity that has a different provider is considered a different identity. Thus an identity is deemed unique by its identity and its identity provider combined.
 
 If the lockbox key "lockbox half" is specified because it was regenerated then all the information associated to the account is purged. The grants to the various namespaced values still remain valid but the data contained is completely wiped out. The remaining identities that were not used to login during the regeneration need to be marked as needing update since they will have the incorrect lockbox key "identity half".  
 
 ### Example
 
-     {
+    {
       "request": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-access",
@@ -1845,10 +1861,11 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
         }
       }
     }
-    
+
     {
       "result": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-access",
@@ -1901,9 +1918,10 @@ Success or failure.
 
 ### Example
 
-     {
+    {
       "request": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-access-validate",
@@ -1921,6 +1939,7 @@ Success or failure.
     {
       "result": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$method": "identity-access-validate",
         "$timestamp": 439439493
@@ -1960,9 +1979,10 @@ If all the identities associated to the lockbox are removed then the lockbox acc
 
 ### Example
 
-     {
+    {
       "request": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-identities-update",
@@ -2000,6 +2020,7 @@ If all the identities associated to the lockbox are removed then the lockbox acc
     {
       "result": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-identities-update",
@@ -2061,9 +2082,10 @@ Success or failure.
 
 ### Example
 
-          {
+    {
       "notify": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-namespace-grant-window",
@@ -2107,6 +2129,7 @@ None.
      {
       "notify": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-namespace-grant",
@@ -2162,6 +2185,7 @@ If permission was not granted to the namespace then the namespaces array will no
      {
       "notify": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-namespace-grant-complete",
@@ -2214,6 +2238,7 @@ No value names within the same namespace URL should be identical.
      {
       "request": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-content-get",
@@ -2246,6 +2271,7 @@ No value names within the same namespace URL should be identical.
     {
       "result": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-content-get",
@@ -2265,7 +2291,6 @@ No value names within the same namespace URL should be identical.
             }
           ]
         }
-
       }
     }
    
@@ -2301,6 +2326,7 @@ No value names within the same permission URL should be identical.
      {
       "request": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-content-set",
@@ -2338,6 +2364,7 @@ No value names within the same permission URL should be identical.
     {
       "result": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-content-get",
@@ -2389,6 +2416,7 @@ Success or failure.
      {
       "notify": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-admin-window",
@@ -2431,6 +2459,7 @@ None.
     {
       "notify": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-admin",
@@ -2473,6 +2502,7 @@ This notification is sent from the inner browser window to the outer window as a
      {
       "notify": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-admin-complete"
@@ -2518,6 +2548,7 @@ The domain signing proof can authorize namespaces within its own domain and no o
     {
       "request": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-namespace-grant",
@@ -2568,6 +2599,7 @@ The domain signing proof can authorize namespaces within its own domain and no o
     {
       "result": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-namespace-grant",
@@ -2612,6 +2644,7 @@ List of resulting identities that resolve in the order requested as follows:
      {
       "request": {
         "$domain": "test.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lookup",
         "$method": "identity-lookup-check",
@@ -2637,6 +2670,7 @@ List of resulting identities that resolve in the order requested as follows:
     {
       "result": {
         "$domain": "test.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "identity-lookup",
         "$method": "identity-lookup-check",
@@ -2710,6 +2744,7 @@ List of resulting identities that resolve in the order requested as follows:
      {
       "request": {
         "$domain": "test.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lookup",
         "$method": "identity-lookup",
@@ -2735,6 +2770,7 @@ List of resulting identities that resolve in the order requested as follows:
     {
       "result": {
         "$domain": "test.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "identity-lookup",
         "$method": "identity-lookup",
@@ -2854,6 +2890,7 @@ This notification is allowed to be sent more than once to the outer frame as nee
     {
       "notify": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
         "$method": "identity-access-window",
@@ -2907,6 +2944,7 @@ Once the inner frame receives this notification it is allowed to replace the out
     {
       "notify": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
         "$method": "identity-access-start",
@@ -2969,6 +3007,7 @@ By using information not stored on a server, this ensures that should the server
      {
       "notify": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
         "$method": "identity-access-complete",
@@ -3022,6 +3061,7 @@ The lockbox key should be encrypted locally in JavaScript before being sent a se
      {
       "request": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
         "$method": "identity-access-lockbox-update",
@@ -3042,6 +3082,7 @@ The lockbox key should be encrypted locally in JavaScript before being sent a se
     {
       "result": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$method": "identity-access-lockbox-update",
         "$timestamp": 439439493
@@ -3078,6 +3119,7 @@ Success or failure.
      {
       "request": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
         "$method": "identity-access-validate",
@@ -3097,6 +3139,7 @@ Success or failure.
     {
       "result": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$method": "identity-access-validate",
         "$timestamp": 439439493
@@ -3132,6 +3175,7 @@ Success or failure.
      {
       "request": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
         "$method": "identity-lookup-update",
@@ -3153,6 +3197,7 @@ Success or failure.
     {
       "result": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$method": "identity-lookup-update",
         "$timestamp": 439439493
@@ -3186,6 +3231,7 @@ Signed identity bundle by the identity service.
     {
       "request": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
         "$method": "identity-sign",
@@ -3204,6 +3250,7 @@ Signed identity bundle by the identity service.
     {
       "result": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
         "$method": "identity-sign",
@@ -3270,6 +3317,7 @@ List of services available to peer contact services, containing:
     {
       "request": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "peer",
         "$method": "peer-services-get",
@@ -3287,6 +3335,7 @@ List of services available to peer contact services, containing:
     {
       "result": {
         "$domain": "provider.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "peer",
         "$method": "peer-services-get",
@@ -3361,6 +3410,7 @@ The client should verify signature was generated by the certificate was issued b
      {
       "request": {
         "$domain": "example.com",
+        "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "peer-salt",
         "$method": "signed-salt-get",
@@ -3907,6 +3957,7 @@ If a Section-B of the public peer file is not present, the peer does not wish to
     {
       "request": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "session-create",
@@ -3956,6 +4007,7 @@ If a Section-B of the public peer file is not present, the peer does not wish to
     {
       "result": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "session-create",
@@ -3995,6 +4047,7 @@ If the client is done with the current session it may immediately disconnect aft
     {
       "request": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "session-delete",
@@ -4011,6 +4064,7 @@ If the client is done with the current session it may immediately disconnect aft
     {
       "result": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "session-delete",
@@ -4052,6 +4106,7 @@ Since the client and server are the only entities that know the session ID, the 
      {
       "request": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "session-keep-alive"
@@ -4061,6 +4116,7 @@ Since the client and server are the only entities that know the session ID, the 
     {
       "result": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "session-keep-alive",
@@ -4114,6 +4170,7 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
     {
       "request": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
@@ -4204,6 +4261,7 @@ Since the request was successfully issued, the information contained in the deta
     {
       "result": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
@@ -4257,6 +4315,7 @@ In theory, a malicious peer later responding the Peer Location Find Request coul
      {
       "request": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
@@ -4299,6 +4358,7 @@ A peer finder should keep track of the request to response ratio (i.e. the numbe
     {
       "request": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
@@ -4351,6 +4411,7 @@ However, a compromised finder could misdirect the contacted peer by substituting
     {
       "reply": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
@@ -4432,6 +4493,7 @@ This is an internal communication from peer finder to peer finder. The receiving
     {
       "reply": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
@@ -4469,6 +4531,7 @@ The client will receive location candidates that it believes will belong to the 
     {
       "reply": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
@@ -4513,6 +4576,7 @@ Same as Peer Location Find Request (C)
      {
       "request": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
@@ -4549,6 +4613,7 @@ Same as Peer Location Find Request (D)
     {
       "request": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
@@ -4589,6 +4654,7 @@ Same as Peer Location Find Reply (E)
     {
       "reply": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
@@ -4670,6 +4736,7 @@ Same as Peer Location Find Reply (F)
      {
       "reply": {
         "$domain": "domain.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
