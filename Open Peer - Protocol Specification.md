@@ -1371,43 +1371,6 @@ The request nor the response should have an ID associated with the request/respo
               }
             },
             {
-              "$id": "0c16f792d6e0727e0acdd9174ae737d0abedef12",
-              "type": "identity-lockbox",
-              "version": "1.0",
-              "methods": {
-                "method": [
-                  {
-                    "name": "public-peer-files-get",
-                    "uri": "https://peer-contact.example.com/public-peer-files-get"
-                  },
-                  {
-                    "name": "peer-contact-login",
-                    "uri": "https://peer-contact.example.com/peer-contact-login"
-                  },
-                  {
-                    "name": "private-peer-file-get",
-                    "uri": "https://peer-contact.example.com/private-peer-file-get"
-                  },
-                  {
-                    "name": "private-peer-file-set",
-                    "uri": "https://peer-contact.example.com/private-peer-file-set"
-                  },
-                  {
-                    "name": "peer-contact-identity-associate",
-                    "uri": "https://peer-contact.example.com/peer-contact-identity-associate"
-                  },
-                  {
-                    "name": "peer-contact-identity-association-update",
-                    "uri": "https://peer-contact.ex.com/peer-contact-identity-association-update"
-                  },
-                  {
-                    "name": "peer-contact-services-get",
-                    "uri": "https://peer-contact.example.com/peer-contact-services-get"
-                  }
-                ]
-              }
-            },
-            {
               "$id": "d0b528b3f8e66455d154b1deac1e357e",
               "type": "identity-lockbox",
               "version": "1.0",
@@ -1935,7 +1898,7 @@ Success or failure.
         }
       }
     }
-    
+
     {
       "result": {
         "$domain": "provider.com",
@@ -2016,7 +1979,7 @@ If all the identities associated to the lockbox are removed then the lockbox acc
         }
       }
     }
-    
+
     {
       "result": {
         "$domain": "provider.com",
@@ -2510,8 +2473,8 @@ This notification is sent from the inner browser window to the outer window as a
     }
    
 
-Lockbox Namespace Grant Request
--------------------------------
+Lockbox Namespace Preappoved Grant Request
+------------------------------------------
 
 ### Purpose
 
@@ -2525,7 +2488,7 @@ This request allows a client to automatically request additional grants to names
     * Image - a human visual image for the brand that must be square in shape.
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-permission- grant")
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-namespace-preapproval-grant")
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
   * Grant
     * ID - ID as passed into the lockbox access request
@@ -2551,7 +2514,7 @@ The domain signing proof can authorize namespaces within its own domain and no o
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
-        "$method": "lockbox-namespace-grant",
+        "$method": "lockbox-namespace-preapproved-grant",
     
         "agent": {
           "product": "hookflash/1.0.1001a (iOS/iPad)",
@@ -2602,7 +2565,7 @@ The domain signing proof can authorize namespaces within its own domain and no o
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
-        "$method": "lockbox-namespace-grant",
+        "$method": "lockbox-namespace-preapproved-grant",
         "$timestamp": 439439493
       }
     }
