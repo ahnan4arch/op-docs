@@ -1102,7 +1102,7 @@ The algorithms used for encrypting must be limited to the algorithms supported b
 
 Example of the "0" package is JSON in place text with the following data in the bundle: 
 
-     {
+    {
       "keyingBundle": {
         "keying": {
           "$id": "f25f588141f7232e40b1529667b8ea626d078d20",
@@ -1204,7 +1204,7 @@ General Result Error Code Reasons
 
 Error replies appear as follows:  
 
-     {
+    {
       "result": {
         "$method": "method",
         "$timestamp": 439439493,
@@ -1316,7 +1316,7 @@ The request nor the response should have an ID associated with the request/respo
 
 ### Example
 
-     {
+    {
       "request": {
         "$domain": "example.com",
         "$appid": "xyz123",
@@ -1551,7 +1551,7 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
 
 ### Example
 
-      {
+    {
       "request": {
         "$domain": "example.com",
         "$appid": "xyz123",
@@ -1562,7 +1562,7 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
         "servers": 2
       }
     }
-    
+
     {
       "result": {
         "$domain": "example.com",
@@ -1655,7 +1655,7 @@ The client must ensure the server has an HTTPS certificate that was issued by a 
 
 ### Example  
 
-     {
+    {
       "request": {
         "$domain": "example.com",
         "$appid": "xyz123",
@@ -1664,7 +1664,7 @@ The client must ensure the server has an HTTPS certificate that was issued by a 
         "$method": "certificates-get"
       }
     }
-    
+
     {
       "result": {
         "$domain": "example.com",
@@ -2089,7 +2089,7 @@ None.
 
 ### Example
 
-     {
+    {
       "notify": {
         "$domain": "provider.com",
         "$appid": "xyz123",
@@ -2145,7 +2145,7 @@ If permission was not granted to the namespace then the namespaces array will no
 
 ### Example
 
-     {
+    {
       "notify": {
         "$domain": "provider.com",
         "$appid": "xyz123",
@@ -2198,7 +2198,7 @@ No value names within the same namespace URL should be identical.
 
 ### Example
 
-     {
+    {
       "request": {
         "$domain": "domain.com",
         "$appid": "xyz123",
@@ -2230,7 +2230,7 @@ No value names within the same namespace URL should be identical.
     
       }
     }
-    
+
     {
       "result": {
         "$domain": "provider.com",
@@ -2286,7 +2286,7 @@ No value names within the same permission URL should be identical.
 
 ### Example
 
-     {
+    {
       "request": {
         "$domain": "domain.com",
         "$appid": "xyz123",
@@ -2323,7 +2323,7 @@ No value names within the same permission URL should be identical.
     
       }
     }
-    
+
     {
       "result": {
         "$domain": "provider.com",
@@ -2376,7 +2376,7 @@ Success or failure.
 
 ### Example
 
-     {
+    {
       "notify": {
         "$domain": "provider.com",
         "$appid": "xyz123",
@@ -2462,7 +2462,7 @@ This notification is sent from the inner browser window to the outer window as a
 
 ### Example
 
-     {
+    {
       "notify": {
         "$domain": "provider.com",
         "$appid": "xyz123",
@@ -2558,7 +2558,7 @@ The domain signing proof can authorize namespaces within its own domain and no o
         }
       }
     }
-    
+
     {
       "result": {
         "$domain": "provider.com",
@@ -2604,7 +2604,7 @@ List of resulting identities that resolve in the order requested as follows:
 
 ### Example
 
-     {
+    {
       "request": {
         "$domain": "test.com",
         "$appid": "xyz123",
@@ -2629,7 +2629,7 @@ List of resulting identities that resolve in the order requested as follows:
         }
       }
     }
-    
+
     {
       "result": {
         "$domain": "test.com",
@@ -2704,7 +2704,7 @@ List of resulting identities that resolve in the order requested as follows:
 
 ### Example
 
-     {
+    {
       "request": {
         "$domain": "test.com",
         "$appid": "xyz123",
@@ -2729,7 +2729,7 @@ List of resulting identities that resolve in the order requested as follows:
         }
       }
     }
-    
+
     {
       "result": {
         "$domain": "test.com",
@@ -2967,7 +2967,7 @@ By using information not stored on a server, this ensures that should the server
 
 ### Example
 
-     {
+    {
       "notify": {
         "$domain": "provider.com",
         "$appid": "xyz123",
@@ -3021,7 +3021,7 @@ The lockbox key should be encrypted locally in JavaScript before being sent a se
 
 ### Example
 
-     {
+    {
       "request": {
         "$domain": "provider.com",
         "$appid": "xyz123",
@@ -3041,7 +3041,7 @@ The lockbox key should be encrypted locally in JavaScript before being sent a se
         }
       }
     }
-    
+
     {
       "result": {
         "$domain": "provider.com",
@@ -3079,7 +3079,7 @@ Success or failure.
 
 ### Example
 
-     {
+    {
       "request": {
         "$domain": "provider.com",
         "$appid": "xyz123",
@@ -3098,7 +3098,7 @@ Success or failure.
         }
       }
     }
-    
+
     {
       "result": {
         "$domain": "provider.com",
@@ -3135,7 +3135,7 @@ Success or failure.
 
 ### Example
 
-     {
+    {
       "request": {
         "$domain": "provider.com",
         "$appid": "xyz123",
@@ -3156,7 +3156,7 @@ Success or failure.
         }
       }
     }
-    
+
     {
       "result": {
         "$domain": "provider.com",
@@ -3209,7 +3209,7 @@ Signed identity bundle by the identity service.
         }
       }
     }
-    
+
     {
       "result": {
         "$domain": "provider.com",
@@ -3294,7 +3294,7 @@ List of services available to peer contact services, containing:
     
       }
     }
-    
+
     {
       "result": {
         "$domain": "provider.com",
@@ -3370,7 +3370,7 @@ The client should verify signature was generated by the certificate was issued b
 
 ### Example
 
-     {
+    {
       "request": {
         "$domain": "example.com",
         "$appid": "xyz123",
@@ -3381,7 +3381,7 @@ The client should verify signature was generated by the certificate was issued b
         "salts": 2
       }
     }
-    
+
     {
       "result": {
         "$id": "abc123",
@@ -3480,7 +3480,7 @@ The "all" or "some" permissions for relationships that allow a contact to receiv
 
 ### Example
 
-     {
+    {
       "request": {
         "$id": "abc123",
         "$handler": "peer-common",
@@ -3520,7 +3520,7 @@ The "all" or "some" permissions for relationships that allow a contact to receiv
         }
       }
     }
-    
+
     {
       "result": {
         "$id": "abc123",
@@ -3617,7 +3617,7 @@ The "publish to relationships" section is only returned if the contact requestin
         }
       }
     }
-    
+
     {
       "result": {
         "$id": "abc123",
@@ -3703,7 +3703,7 @@ If the document version or lineage is specified then the document version and li
         }
       }
     }
-    
+
     {
       "result": {
         "$id": "abc123",
@@ -3743,7 +3743,7 @@ The server only allows subscriptions where permissions allow.
 
 ### Example
 
-     {
+    {
       "request": {
         "$id": "abc123",
         "$handler": "peer-common",
@@ -3771,7 +3771,7 @@ The server only allows subscriptions where permissions allow.
         }
       }
     }
-    
+
     {
       "result": {
         "$id": "abc123",
@@ -3837,7 +3837,7 @@ Clients should consider documents with newer lineage to be "newer" regardless of
 
 ### Example
 
-     {
+    {
       "request": {
         "$id": "abc123",
         "$handler": "peer-common",
@@ -3862,7 +3862,7 @@ Clients should consider documents with newer lineage to be "newer" regardless of
         }
       }
     }
-    
+
     {
       "result": {
         "$id": "abc123",
@@ -3966,7 +3966,7 @@ If a Section-B of the public peer file is not present, the peer does not wish to
         }
       }
     }
-    
+
     {
       "result": {
         "$domain": "domain.com",
@@ -4023,7 +4023,7 @@ If the client is done with the current session it may immediately disconnect aft
         }
       }
     }
-    
+
     {
       "result": {
         "$domain": "domain.com",
@@ -4075,7 +4075,7 @@ Since the client and server are the only entities that know the session ID, the 
         "$method": "session-keep-alive"
       }
     }
-    
+
     {
       "result": {
         "$domain": "domain.com",
@@ -4275,7 +4275,7 @@ In theory, a malicious peer later responding the Peer Location Find Request coul
 
 ### Example
 
-     {
+    {
       "request": {
         "$domain": "domain.com",
         "$appid": "xyz123",
@@ -4536,7 +4536,7 @@ Same as Peer Location Find Request (C)
 
 ### Example
 
-     {
+    {
       "request": {
         "$domain": "domain.com",
         "$appid": "xyz123",
@@ -4696,7 +4696,7 @@ Same as Peer Location Find Reply (F)
 
 ### Example
 
-     {
+    {
       "reply": {
         "$domain": "domain.com",
         "$appid": "xyz123",
@@ -4832,7 +4832,7 @@ The contacted peer must verify the request has not expired and should verify the
         }
       }
     }
-    
+
     {
       "result": {
         "$id": "abc123",
@@ -4884,7 +4884,7 @@ The client must have an established peer session to issue this request.
         "$method": "peer-keep-alive"
       }
     }
-    
+
     {
       "result": {
         "$id": "abc123",
