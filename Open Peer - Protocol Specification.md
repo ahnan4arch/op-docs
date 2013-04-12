@@ -1385,8 +1385,8 @@ The request nor the response should have an ID associated with the request/respo
                     "uri": "https://lockbox.example.com/lockbox-identities-update"
                   },
                   {
-                    "name": "lockbox-permissions-grant-inner-frame",
-                    "uri": "https://lockbox.example.com/lockbox-permissions-grant-inner-frame"
+                    "name": "lockbox-namespace-grant-inner-frame",
+                    "uri": "https://lockbox.example.com/lockbox-namespace-grant-inner-frame"
                   },
                   {
                     "name": "lockbox-content-get",
@@ -1399,6 +1399,10 @@ The request nor the response should have an ID associated with the request/respo
                   {
                     "name": "lockbox-admin-inner-frame",
                     "uri": "https://lockbox.example.com/lockbox-admin-inner-frame"
+                  },
+                  {
+                    "name": "lockbox-namespace-preapproved-grant",
+                    "uri": "https://lockbox.example.com/lockbox-namespace-preapproved-grant"
                   }
                 ]
               }
@@ -2060,8 +2064,8 @@ Success or failure.
     }
 
   
-Lockbox Namespace Grant Notification
-------------------------------------
+Lockbox Namespace Grant Start Notification
+------------------------------------------
 
 ### Purpose
 
@@ -2095,7 +2099,7 @@ None.
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
-        "$method": "lockbox-namespace-grant",
+        "$method": "lockbox-namespace-grant-start",
     
         "agent": {
           "product": "hookflash/1.0.1001a (iOS/iPad)",
@@ -2391,8 +2395,8 @@ Success or failure.
     }
    
 
-Lockbox Admin Notification
---------------------------
+Lockbox Admin Start Notification
+--------------------------------
 
 ### Purpose
 
@@ -2425,7 +2429,7 @@ None.
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "lockbox",
-        "$method": "lockbox-admin",
+        "$method": "lockbox-admin-start",
     
         "agent": {
           "product": "hookflash/1.0.1001a (iOS/iPad)",
