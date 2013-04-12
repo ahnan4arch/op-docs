@@ -2539,6 +2539,7 @@ The domain signing proof can authorize namespaces within its own domain and no o
     
         "authorizationBundle": {
           "authorization": {
+            "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
             "proof": "bdd7cf06e641ee5be2f28bc051201565f05ef15e",
             "expires": 573454,
             "namespaces": {
@@ -4629,6 +4630,7 @@ Same as Peer Location Find Reply (E)
     
         "findProofBundle" : {
           "findProof": {
+            "$id": "d53255d06a17778b88501f570301e7621c5a7bc4",
             "requestfindProofBundleDigestValue": "ZDUzMjU1ZDA2YTE...NjIxYzVhN2JjNA==",
             "location": {
               "$id": "d0866fe404867a94949771bfd606f68c3c3c5bd1",
