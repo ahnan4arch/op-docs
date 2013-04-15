@@ -1803,7 +1803,7 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
         },
     
         "agent": {
-          "product": "hookflash/1.0.1001a (iOS/iPad)",
+          "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
           "name": "hookflash",
           "image": "https://hookflash.com/brandsquare.png",
         },
@@ -1812,20 +1812,7 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
           "domain": "example.com",
           "key": "Wm1SellXWmtabVJoWm1wcmFuSmlhMnB5WW1WbWEycHlaV3ByY21ZPQ==",
           "hash": "cf69f9e4ed98bb739b4c72fc4fff403467014874"
-        },
-    
-        "identities": {
-         "identity": [
-            {
-              "uri": "identity://domain.com/alice",
-              "provider": "domain.com"
-            },
-            {
-              "uri": "identity:phone:16045551212",
-              "provider": "example.com"
-            }
-          ]
-        }
+        }    
       }
     }
 
@@ -1857,6 +1844,19 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
               "https://other.com/pemissionname"
             ]
           }
+        },
+    
+        "identities": {
+         "identity": [
+            {
+              "uri": "identity://domain.com/alice",
+              "provider": "domain.com"
+            },
+            {
+              "uri": "identity:phone:16045551212",
+              "provider": "example.com"
+            }
+          ]
         }
       }
     }
@@ -2102,7 +2102,7 @@ None.
         "$method": "lockbox-namespace-grant-start",
     
         "agent": {
-          "product": "hookflash/1.0.1001a (iOS/iPad)",
+          "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
           "name": "hookflash",
           "image": "https://hookflash.com/brandsquare.png",
         },
@@ -2432,7 +2432,7 @@ None.
         "$method": "lockbox-admin-start",
     
         "agent": {
-          "product": "hookflash/1.0.1001a (iOS/iPad)",
+          "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
           "name": "hookflash",
           "image": "https://hookflash.com/brandsquare.png",
         },
@@ -2521,7 +2521,7 @@ The domain signing proof can authorize namespaces within its own domain and no o
         "$method": "lockbox-namespace-preapproved-grant",
     
         "agent": {
-          "product": "hookflash/1.0.1001a (iOS/iPad)",
+          "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
           "name": "hookflash",
           "image": "https://hookflash.com/brandsquare.png",
         },
@@ -2918,7 +2918,7 @@ Once the inner frame receives this notification it is allowed to replace the out
         "$method": "identity-access-start",
     
         "agent": {
-          "product": "hookflash/1.0.1001a (iOS/iPad)",
+          "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
           "name": "hookflash",
           "image": "https://hookflash.com/brandsquare.png",
         },
