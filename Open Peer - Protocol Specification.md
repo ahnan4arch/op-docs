@@ -1810,7 +1810,7 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
     
         "lockbox": {
           "domain": "example.com",
-          "key": "Wm1SellXWmtabVJoWm1wcmFuSmlhMnB5WW1WbWEycHlaV3ByY21ZPQ==",
+          "keyLockboxHalf": "Wm1SellXWmtabVJoWm1wcmFuSmlhMnB5WW1WbWEycHlaV3ByY21ZPQ==",
           "hash": "cf69f9e4ed98bb739b4c72fc4fff403467014874"
         }    
       }
@@ -1832,7 +1832,7 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
           "accessSecretExpires": 8483943493,
     
           "domain": "example.com",
-          "key": "Wm1SellXWmtabVJoWm1wcmFuSmlhMnB5WW1WbWEycHlaV3ByY21ZPQ=="
+          "keyLockboxHalf": "Wm1SellXWmtabVJoWm1wcmFuSmlhMnB5WW1WbWEycHlaV3ByY21ZPQ=="
         },
     
         "grant": {
@@ -2991,7 +2991,7 @@ By using information not stored on a server, this ensures that should the server
     
         "lockbox": {
           "domain": "domain.com",
-          "key": "V20x...IbGFWM0J5WTIxWlBRPT0=",
+          "keyIdentityHalf": "V20x...IbGFWM0J5WTIxWlBRPT0=",
           "reset": false
         }
       }
@@ -3038,11 +3038,14 @@ The lockbox key should be encrypted locally in JavaScript before being sent a se
         "identity": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
+          "accessSecretProofExpires": 43843298934,
+    
+          "uri": "identity://domain.com/alice",
+          "provider": "domain.com"
         },
         "lockbox": {
           "domain": "domain.com",
-          "key": "V20x...IbGFWM0J5WTIxWlBRPT0="
+          "keyIdentityHalf": "V20x...IbGFWM0J5WTIxWlBRPT0="
         }
       }
     }
@@ -3099,7 +3102,8 @@ Success or failure.
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
           "accessSecretProofExpires": 43843298934,
     
-          "uri": "identity://domain.com/alice"
+          "uri": "identity://domain.com/alice",
+          "provider": "domain.com"
         }
       }
     }
@@ -3153,6 +3157,9 @@ Success or failure.
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
           "accessSecretProofExpires": 43843298934,
+    
+          "uri": "identity://domain.com/alice",
+          "provider": "domain.com"
     
           "stableID": "0acc990c7b6e7d5cb9a3183d432e37776fb182bf",
           "peer": {...},
@@ -3210,7 +3217,8 @@ Signed identity bundle by the identity service.
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
           "accessSecretProofExpires": 43843298934,
     
-          "uri": "identity://domain.com/alice"
+          "uri": "identity://domain.com/alice",
+          "provider": "domain.com"
         }
       }
     }
