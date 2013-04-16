@@ -1836,10 +1836,14 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
         "grant": {
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
     
-          "namespaces": {
+          "namespaces":{
             "namespace": [
-              "https://domain.com/pemissionname",
-              "https://other.com/pemissionname"
+              {
+                "$id": "https://domain.com/pemissionname"
+              },
+              {
+                "$id": "https://other.com/pemissionname"
+              }
             ]
           }
         },
@@ -2080,7 +2084,7 @@ Once the browser window receives notification that it is ready, this request is 
     * Image - a human visual image for the brand that must be square in shape.
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-permission- grant")
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-permission-grant")
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
   * Grant
     * ID - ID as passed into the lockbox access request
@@ -2127,10 +2131,14 @@ None.
         "grant": {
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
     
-          "namespaces": {
+          "namespaces":{
             "namespace": [
-              "https://domain.com/pemissionname",
-              "https://other.com/pemissionname"
+              {
+                "$id": "https://domain.com/pemissionname"
+              },
+              {
+                "$id": "https://other.com/pemissionname"
+              }
             ]
           }
         },
@@ -2176,10 +2184,14 @@ If permission was not granted to the namespace then the namespaces array will no
         "grant": {
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
     
-          "namespaces": {
+          "namespaces":{
             "namespace": [
-              "https://domain.com/pemissionname",
-              "https://other.com/pemissionname"
+              {
+                "$id": "https://domain.com/pemissionname"
+              },
+              {
+                "$id": "https://other.com/pemissionname"
+              }
             ]
           }
         }
@@ -2234,18 +2246,18 @@ No value names within the same namespace URL should be identical.
         }
     
         "grant": {
-          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543"
-        }
+          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
     
-        "content": {
-          "data": [
-            {
-              "$id": "https://domain.com/pemissionname"
-            },
-            {
-              "$id": "https://other.com/pemissionname"
-            }
-          ]
+          "namespaces":{
+            "namespace": [
+              {
+                "$id": "https://domain.com/pemissionname"
+              },
+              {
+                "$id": "https://other.com/pemissionname"
+              }
+            ]
+          }
         }
     
       }
@@ -2260,20 +2272,25 @@ No value names within the same namespace URL should be identical.
         "$method": "lockbox-content-get",
         "$timestamp": 439439493,
     
-        "content": {
-          "data": [
-            {
-              "$id": "https://domain.com/pemissionname",
-              "value1": "ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
-              "value2": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
-            },
-            {
-              "$id": "https://other.com/pemissionname",
-              "what1": "ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
-              "what2": "Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
-            }
-          ]
+        "grant": {
+          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
+    
+          "namespaces":{
+            "namespace": [
+              {
+                "$id": "https://domain.com/pemissionname"
+                "value1": "ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
+                "value2": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
+              },
+              {
+                "$id": "https://other.com/pemissionname"
+                "what1": "ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
+                "what2": "Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
+              }
+            ]
+          }
         }
+    
       }
     }
 
@@ -2322,23 +2339,22 @@ No value names within the same permission URL should be identical.
         }
     
         "grant": {
-          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543"
-        }
+          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
     
-        "content": {
-          "data": [
-            {
-              "$id": "https://domain.com/pemissionname",
-              "value1": "ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
-              "value2": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
-            },
-            {
-              "$id": "https://other.com/pemissionname",
-              "what1": "ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
-              "what2": "Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09",
-              "what3": "-"
-            }
-          ]
+          "namespaces":{
+            "namespace": [
+              {
+                "$id": "https://domain.com/pemissionname",
+                "value1": "ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
+                "value2": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
+              },
+              {
+                "$id": "https://other.com/pemissionname",
+                "what1": "ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
+                "what2": "Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
+              }
+            ]
+          }
         }
     
       }
@@ -2558,10 +2574,14 @@ The domain signing proof can authorize namespaces within its own domain and no o
             "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
             "proof": "bdd7cf06e641ee5be2f28bc051201565f05ef15e",
             "expires": 573454,
-            "namespaces": {
+            "namespaces":{
               "namespace": [
-                "https://provider.com/pemissionname",
-                "https://provider.com/pemissionname"
+                {
+                  "$id": "https://provider.com/pemissionname1"
+                },
+                {
+                  "$id": "https://provider.com/pemissionname2"
+                }
               ]
             }
           },
