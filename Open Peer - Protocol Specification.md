@@ -145,7 +145,7 @@ The "peer:" URI scheme
 Syntax
 -------
 
-peer://`<domain>`/contact-id  
+peer://`<domain>`/contact-id
 
 [/`<resource>`][?`<query>`][;protocol=`<protocol>`][;request=`<request>`][#`<fragment>`]
 
@@ -156,8 +156,8 @@ peer://`<domain>`/contact-id
 Examples
 ---------
 
-peer://foo.com/e852191079ea08b654ccf4c2f38a162e3e84ee04  
-peer://example.org/3b0056498dc7cdd6a4d5373ac0860f9738b071da  
+peer://foo.com/e852191079ea08b654ccf4c2f38a162e3e84ee04
+peer://example.org/3b0056498dc7cdd6a4d5373ac0860f9738b071da
 peer://`<domain>`/contact-id
 
 Syntax (future extensions)
@@ -178,8 +178,8 @@ peer://foo.com/id[/`<resource>`][?`<query>`][#`<fragment>`][;protocol=`<protocol
 Example future extensions:
 --------------------------
 
-peer://example.org/3b0056498dc7cdd6a4d5373ac0860f9738b071da/index.php;protocol=peer-http   
-peer://hookflash.com/3b00564d6a4d5373ac0860f9738b071da/;protocol=peer-http;request=get   
+peer://example.org/3b0056498dc7cdd6a4d5373ac0860f9738b071da/index.php;protocol=peer-http
+peer://hookflash.com/3b00564d6a4d5373ac0860f9738b071da/;protocol=peer-http;request=get
 peer://foo.com/e852191079ea08b654ccf4c2f38a162e3e84ee04;request=call
 
 
@@ -188,7 +188,7 @@ The "identity:" URI scheme
 
 Syntax
 -------
-identity:[type:][//`<domain>`/]`<identity-string>`  
+identity:[type:][//`<domain>`/]`<identity-string>`
 
 If a "//" is not present after the "identity:" scheme, then the identity is assumed to be a specialized registered type that must be resolved in a specialized manner. If the "//" is present then the identity is resolved by the specified domain, with an optional username/password access credentials to the identity lookup service.
 
@@ -204,30 +204,30 @@ The URL characters '?' ';' '#' are reserved characters in the URI scheme and sho
 
 Examples
 ---------
-identity:phone:14165551212   
-identity:email:foo@bar.com   
-identity://foo.com/alice.78   
-identity://facebook.com/id3993232   
-identity://bar.com/linkedin.com/zs39923yf  
+identity:phone:14165551212
+identity:email:foo@bar.com
+identity://foo.com/alice.78
+identity://facebook.com/id3993232
+identity://bar.com/linkedin.com/zs39923yf
 
 
 The Makeup of the Public Peer File
 ==================================
 
-A Public Peer File contains information required to locate, connect and establish a secure channel between peers and contains Identities within the same file. The Public Peer File is made up of three sections, appropriately named Section "A", Section "B" and Section "C". Section "A" can be safely transmitted to any third party allowing any third party to know the Peer Contact's "contact ID" as well as its pubic key to prove ownership (only the owner would have the related private key). Section "B" allows for another peer to find the peer and initiate contact. Section "B" can be withheld from any other peer if the peer does not wish itself to be found by that peer. Section "C" is used to include proven identities of the contact. This section can be given or withheld depending how anonymous the peer wishes to be. The entire file is only given to third parties (i.e. Section A+B+C) allowed to communicate directly to the peer containing where the peer wants to be contacted and wants to expose its identities. At minimal, Section "A" is required to establish a secure channel between peers and Section "B" is required to allow a peer to be found by another peer and Section "C" is required to prove public identities of the peer.  
+A Public Peer File contains information required to locate, connect and establish a secure channel between peers and contains Identities within the same file. The Public Peer File is made up of three sections, appropriately named Section "A", Section "B" and Section "C". Section "A" can be safely transmitted to any third party allowing any third party to know the Peer Contact's "contact ID" as well as its pubic key to prove ownership (only the owner would have the related private key). Section "B" allows for another peer to find the peer and initiate contact. Section "B" can be withheld from any other peer if the peer does not wish itself to be found by that peer. Section "C" is used to include proven identities of the contact. This section can be given or withheld depending how anonymous the peer wishes to be. The entire file is only given to third parties (i.e. Section A+B+C) allowed to communicate directly to the peer containing where the peer wants to be contacted and wants to expose its identities. At minimal, Section "A" is required to establish a secure channel between peers and Section "B" is required to allow a peer to be found by another peer and Section "C" is required to prove public identities of the peer.
 
-A Public Peer File should contain the extension of ".peer"  
+A Public Peer File should contain the extension of ".peer"
 
 Section "A" (packaged and signed by identity's private key)
 -----------------------------------------------------------
 
-  * Cipher suite to use for all hash computations and encryptions related to contents of the peer file (note: this does not apply to signed JSON segments which have their own method to describe algorithms and key selection)  
-  * Public peer file creation date  
-  * Public peer file expiry date  
-  * Salt signed by salt service's key  
-  * Extension authorized-peer data  
-  * Peer's public key (in signature) - The key is base 64 encoded version of "SubjectPublicKeyInfo"  
-PKCS #1/X.509 DER encoding (BER decoding) format. This x.509 format is used for all x.509 keys in the system.  
+  * Cipher suite to use for all hash computations and encryptions related to contents of the peer file (note: this does not apply to signed JSON segments which have their own method to describe algorithms and key selection)
+  * Public peer file creation date
+  * Public peer file expiry date
+  * Salt signed by salt service's key
+  * Extension authorized-peer data
+  * Peer's public key (in signature) - The key is base 64 encoded version of "SubjectPublicKeyInfo"
+PKCS #1/X.509 DER encoding (BER decoding) format. This x.509 format is used for all x.509 keys in the system.
 
 Section "B" (packaged and signed by identity's private key)
 -----------------------------------------------------------
@@ -243,28 +243,28 @@ Section "C" (packaged and signed by identity's private key)
   * Any/all asserted public identities
   * Extension authorized-peer data
 
-The public key is used as a way to send the peer privately encrypted data from another source. As long as the other source has the correct public key it is possible to establish direct secure communication by exchanging keys using public/private keys as the encryptions method.  
+The public key is used as a way to send the peer privately encrypted data from another source. As long as the other source has the correct public key it is possible to establish direct secure communication by exchanging keys using public/private keys as the encryptions method.
 
-The salt is used in Section "A" to establish randomness into the files that is not forgeable or controllable by the creator of the file this ensuring that hashes are dispersed based on randomness being present.  
+The salt is used in Section "A" to establish randomness into the files that is not forgeable or controllable by the creator of the file this ensuring that hashes are dispersed based on randomness being present.
 
-Asserted identities are used to prove the owner of the peer file is whom they claim to be.  
+Asserted identities are used to prove the owner of the peer file is whom they claim to be.
 
-Extension data is arbitrary for future extension of the peer file.  
+Extension data is arbitrary for future extension of the peer file.
 
-The peer's contact ID is used to prove that Section "B" and Section "C" correlates properly to section "A" and isn't two or three distinct files being glued together as a forgery.  
+The peer's contact ID is used to prove that Section "B" and Section "C" correlates properly to section "A" and isn't two or three distinct files being glued together as a forgery.
 
 Security Considerations
 -----------------------
 
-The Section "A" bundle must contain salt that has been signed by the salt service whose certificate is still within the window of validity. Further the Section "A" bundle must be signed by a self-signed certificate whose certificate is included in the signature of the bundle. This ensures the integrity of the Section "A" bundle and ensures anyone who has Section "A" knows the public key for the peer.  
+The Section "A" bundle must contain salt that has been signed by the salt service whose certificate is still within the window of validity. Further the Section "A" bundle must be signed by a self-signed certificate whose certificate is included in the signature of the bundle. This ensures the integrity of the Section "A" bundle and ensures anyone who has Section "A" knows the public key for the peer.
 
-Section "B" includes a finder secret that other peers will use to find the peer to which the peer file belongs.  
+Section "B" includes a finder secret that other peers will use to find the peer to which the peer file belongs.
 
-Asserted Identities contained within section "C" can be verified whenever verification is needed. Verification is dependent on the identity assertion type.  
+Asserted Identities contained within section "C" can be verified whenever verification is needed. Verification is dependent on the identity assertion type.
 
-The integrity of Section "B" and Section "C" should be verified by ensuring that the public key contained in Section "A" signed these sections. The URIs in these sections are not verified as it's up to the client generating the URIs to generate resources that are accurate to the network and up to other peers to ensure they are contacting identities they should be contacting.  
+The integrity of Section "B" and Section "C" should be verified by ensuring that the public key contained in Section "A" signed these sections. The URIs in these sections are not verified as it's up to the client generating the URIs to generate resources that are accurate to the network and up to other peers to ensure they are contacting identities they should be contacting.
 
-Only elements contained within the signed sections are ever considered as part of the file. All other elements are erroneous and should be discarded or ignored and when present. In Section "A", erroneous elements outside the protection of a signature should never be used as part of the calculation of the contact ID.  
+Only elements contained within the signed sections are ever considered as part of the file. All other elements are erroneous and should be discarded or ignored and when present. In Section "A", erroneous elements outside the protection of a signature should never be used as part of the calculation of the contact ID.
 
 Example Public Peer File
 -------------------------
@@ -386,11 +386,11 @@ Example Public Peer File
 The Makeup of the Private Peer File
 ===================================
 
-The Private Peer File is never given out to any other peer. However, the peer file can be stored with a trusted service as the contents are encrypted. The contents of the file must be encrypted to prevent unauthorized access to the private key that is the matching pair for the public key in the Public Peer File. This file can be used to prove ownership of the Public Peer File.  
+The Private Peer File is never given out to any other peer. However, the peer file can be stored with a trusted service as the contents are encrypted. The contents of the file must be encrypted to prevent unauthorized access to the private key that is the matching pair for the public key in the Public Peer File. This file can be used to prove ownership of the Public Peer File.
 
-The file does not carry any recommended extension and is managed by the client application that must maintain the security and integrity of the file.  
+The file does not carry any recommended extension and is managed by the client application that must maintain the security and integrity of the file.
 
-The contents of the file are as follows:  
+The contents of the file are as follows:
 
 Section "A"
 -----------
@@ -406,30 +406,30 @@ Section "B" (encrypted using the method described in Section A)
   * Encrypted Peer Contact's full URI (to know how to locate the peer universally), key=hmac(`<private-peer-file-secret>`, "contact:" + base64(`<salt>`)), iv=hash("contact:" + base64(`<salt>`))
   * Encrypted private key - the key is stored in "PrivateKeyInfo" unencrypted RSA encoding using PKCS #8 but then encrypted and base 64 encoded using: key = hmac(`<private-peer-file-secret>`, "privatekey:" + base64(`<salt>`)), iv=hash("privatekey:" + base64(`<salt>`))
   * Encrypted Public Peer File, key = hmac(`<private-peer-file-secret>`, "peer:" + base64(`<salt>`)), iv=hash("peer:" + base64(`<salt>`))
-  * Encrypted private data, key = hmac(`<private-peer-file-secret>`, "data:" + `<salt>`), iv= hash("data:" + base64(`<salt>`))  
+  * Encrypted private data, key = hmac(`<private-peer-file-secret>`, "data:" + `<salt>`), iv= hash("data:" + base64(`<salt>`))
 
-The format of the Private Peer File is defined so it can be stored on server (should a client desire to do so) with only clients that have the correct "private peer file secret" being able to request download of the file without the server knowing the value of the data contained within the file.  
+The format of the Private Peer File is defined so it can be stored on server (should a client desire to do so) with only clients that have the correct "private peer file secret" being able to request download of the file without the server knowing the value of the data contained within the file.
 
-The Peer Contact's URI is used to indicate which Public Peer File the Private Peer File is correlated.  
+The Peer Contact's URI is used to indicate which Public Peer File the Private Peer File is correlated.
 
-The key salts combined with hash input phrases are used to ensure that the "private peer file secret" is not directly used to encrypt more than one piece of data.  
+The key salts combined with hash input phrases are used to ensure that the "private peer file secret" is not directly used to encrypt more than one piece of data.
 
-The "private peer file secret" proof is used so a server can verify a client does have the correct information to request download of the Private Peer File. Only a client that knows the "private peer file secret" would be able to generate the correct key proof in a challenge. The contact ID is combined with the secret to add extra complexity into the secret to ensure no two users have the same stored secret resulting hash should the private peer file is published into a database and two users use the same secret value.  
+The "private peer file secret" proof is used so a server can verify a client does have the correct information to request download of the Private Peer File. Only a client that knows the "private peer file secret" would be able to generate the correct key proof in a challenge. The contact ID is combined with the secret to add extra complexity into the secret to ensure no two users have the same stored secret resulting hash should the private peer file is published into a database and two users use the same secret value.
 
-The encrypted private key is the private key pair matching the public key in the Public Peer File.  
+The encrypted private key is the private key pair matching the public key in the Public Peer File.
 
-The encrypted Public Peer File is a complete encryption of the Public Peer File (i.e. all sections), thus requiring only one file to store both the public and private key.  
+The encrypted Public Peer File is a complete encryption of the Public Peer File (i.e. all sections), thus requiring only one file to store both the public and private key.
 
-The encrypted private data is extension data for use for whatever purposes required by a client.  
+The encrypted private data is extension data for use for whatever purposes required by a client.
 
 Security Considerations
 -----------------------
 
-The contact URI must be the computed hash based on Section "A" of the Public Peer File. The salt must be cryptographically random. Both sections of the private peer file must be signed to ensure the contents of the private peer file have not been modified by another entity and must be verified by the client before the private peer file is used.  
+The contact URI must be the computed hash based on Section "A" of the Public Peer File. The salt must be cryptographically random. Both sections of the private peer file must be signed to ensure the contents of the private peer file have not been modified by another entity and must be verified by the client before the private peer file is used.
 
-All data in this file is considered secure thus all data must be encrypted.  
+All data in this file is considered secure thus all data must be encrypted.
 
-The "private peer file secret" should be a cryptographically random string that is sufficiently long to protect the sensitive contents it encodes and should not derived from a user's password.  
+The "private peer file secret" should be a cryptographically random string that is sufficiently long to protect the sensitive contents it encodes and should not derived from a user's password.
 
 Example Private Peer File
 -------------------------
@@ -473,8 +473,7 @@ Example Private Peer File
         ]
       }
     }
-    
- 
+
 Overall Network Architecture
 ============================
 
@@ -486,19 +485,19 @@ Network Diagram
 Network Components
 ------------------
 
-Bootstrapper - a server that acts as an introductory server to the entire peer network. The Bootstrapper exclusively talks over HTTPS to clients which must have a certificate issued from a trusted certificate authority.  
+Bootstrapper - a server that acts as an introductory server to the entire peer network. The Bootstrapper exclusively talks over HTTPS to clients which must have a certificate issued from a trusted certificate authority.
 
-Salt Service - a server that generates cryptographically strong salt and signs the salt as having come from the server. This service is useful to ensure cryptographically strong random data has been correctly used whenever it is critically important and especially when a server can't trust a client will generate random data that is intentionally or accidently non-cryptographically random. The salt service exclusively talks HTTPS to clients and the certificate authority as discovered from the Bootstrapper service will sign the certificate.  
+Salt Service - a server that generates cryptographically strong salt and signs the salt as having come from the server. This service is useful to ensure cryptographically strong random data has been correctly used whenever it is critically important and especially when a server can't trust a client will generate random data that is intentionally or accidently non-cryptographically random. The salt service exclusively talks HTTPS to clients and the certificate authority as discovered from the Bootstrapper service will sign the certificate.
 
-Identity Service(s) - servers that provide Identity Lookup or Asserted Identities for Identities such as LinkedIn, Facebook or other 3rd party Identities. The weak form of an Asserted Identity allows a third party like Hookflash Inc. to assert an Identity is correct when the Identity Provider does not offer an Identity signing service themselves.  
+Identity Service(s) - servers that provide Identity Lookup or Asserted Identities for Identities such as LinkedIn, Facebook or other 3rd party Identities. The weak form of an Asserted Identity allows a third party like Hookflash Inc. to assert an Identity is correct when the Identity Provider does not offer an Identity signing service themselves.
 
-TURN server - a server which is used to relay information on an 'as needed' basis when the firewall is of a type where relaying is required to penetrate the firewall. The TURN service will talk the standard TURN protocol.  
+TURN server - a server which is used to relay information on an 'as needed' basis when the firewall is of a type where relaying is required to penetrate the firewall. The TURN service will talk the standard TURN protocol.
 
-Finder - a server that keeps information about each Peer Contact's Peer Locations and assists Peers in establishing the initial communication between Peers. The finder may allows a few requests over HTTPS but most request must be directed over Message/RUDP/UDP or Message/SCP protocol. The requests allowed over HTTPS are specifically mentioned with each allowed request.  
+Finder - a server that keeps information about each Peer Contact's Peer Locations and assists Peers in establishing the initial communication between Peers. The finder may allows a few requests over HTTPS but most request must be directed over Message/RUDP/UDP or Message/SCP protocol. The requests allowed over HTTPS are specifically mentioned with each allowed request.
 
-Conference service - this is an example service that could be utilized as a relay point when communicating between peers in a conference scenario that would typically overwhelm a standalone client's CPU or bandwidth, but no protocol has been yet defined for Open Peer.  
+Conference service - this is an example service that could be utilized as a relay point when communicating between peers in a conference scenario that would typically overwhelm a standalone client's CPU or bandwidth, but no protocol has been yet defined for Open Peer.
 
-Peer - a peer is a client that uses the various services in the architecture to help with the establishment of communication to other Peers. Once peers establish and communicate directly with other peers, they should not required to utilize server infrastructure to maintain the communication (with the exception possibly of using a TURN server). Peers use the Message/RUDP/UDP or Message/SCP protocol as their initial connection and control protocol.  
+Peer - a peer is a client that uses the various services in the architecture to help with the establishment of communication to other Peers. Once peers establish and communicate directly with other peers, they should not required to utilize server infrastructure to maintain the communication (with the exception possibly of using a TURN server). Peers use the Message/RUDP/UDP or Message/SCP protocol as their initial connection and control protocol.
 
 Limitations to Scope of Open Peer Specification
 -----------------------------------------------
@@ -512,51 +511,51 @@ RUDP Protocol
 Overall Design Goals
 --------------------
 
-RUDP was designed to allow bi-direction FIFO (First-In-First-Out) congestion controlled streamed data between two peers that is modelled after TCP, except that it is highly friendly to firewalls and utilizes firewall friendly protocols and techniques to connect between peers. The RUDP can be used between peers or from server to server.  
+RUDP was designed to allow bi-direction FIFO (First-In-First-Out) congestion controlled streamed data between two peers that is modelled after TCP, except that it is highly friendly to firewalls and utilizes firewall friendly protocols and techniques to connect between peers. The RUDP can be used between peers or from server to server.
 
-TCP is a great protocol for signalling as it is reliable and messages are always delivered in order to a report party in a FIFO manner. The major problem with TCP is that it is not firewall friendly for peer-to- peer scenarios. TCP works great for peer-to-server where one entity is not located behind a firewall (i.e. the server). However, TCP between peers using today's marketed firewalls is virtually impossible.  
+TCP is a great protocol for signalling as it is reliable and messages are always delivered in order to a report party in a FIFO manner. The major problem with TCP is that it is not firewall friendly for peer-to- peer scenarios. TCP works great for peer-to-server where one entity is not located behind a firewall (i.e. the server). However, TCP between peers using today's marketed firewalls is virtually impossible.
 
-RUDP uses STUN/ICE/TURN as the basis for establishing peer-to-peer connections then uses a UDP packaging technique to deliver application data. Additionally because RUDP is a FIFO based protocol like TCP, it can layer protocols such as TLS directly above its transport with little to no change at all being required (other than pumping the data through an RUDP socket instead of a TCP socket).  
+RUDP uses STUN/ICE/TURN as the basis for establishing peer-to-peer connections then uses a UDP packaging technique to deliver application data. Additionally because RUDP is a FIFO based protocol like TCP, it can layer protocols such as TLS directly above its transport with little to no change at all being required (other than pumping the data through an RUDP socket instead of a TCP socket).
 
-RUDP uses ICE to perform connectivity probes between peers and utilizes a STUN extension for connecting, teardown, and reliable as well as unreliable data acknowledgements.  
+RUDP uses ICE to perform connectivity probes between peers and utilizes a STUN extension for connecting, teardown, and reliable as well as unreliable data acknowledgements.
 
-RUDP supports vector based acknowledgments and XOR bit parities to prevent malicious clients from being able to pretend a download stream was downloading faster than the server is truly capable of delivering.  
+RUDP supports vector based acknowledgments and XOR bit parities to prevent malicious clients from being able to pretend a download stream was downloading faster than the server is truly capable of delivering.
 
-RUDP further supports multiple channels with a single point-to-point connection and multiple connects on a single port between multiple points. This allows for an existing connectivity probe to be reused for sending additional streams of data without performing new connectivity checks.  
+RUDP further supports multiple channels with a single point-to-point connection and multiple connects on a single port between multiple points. This allows for an existing connectivity probe to be reused for sending additional streams of data without performing new connectivity checks.
 
-RUDP does not offer security beyond connectivity security offered with STUN and ICE. However, TLS or other mechanisms can be layered on top of RUDP to provide security and encryption.  
+RUDP does not offer security beyond connectivity security offered with STUN and ICE. However, TLS or other mechanisms can be layered on top of RUDP to provide security and encryption.
 
-RUDP is designed to be firewall friendly with minimal overhead.  
+RUDP is designed to be firewall friendly with minimal overhead.
 
 Comparison to Other Protocols
 -----------------------------
 
 ### DCCP / DTLS
 
-DCCP is a good message based protocol that allows for reliable connecting and tear down and congestion control but offers a lossy data stream. DCCP was not chosen as it was desirable to have a reliable transport protocol between peers. To add security DTLS can be layered on top of DCCP.  
+DCCP is a good message based protocol that allows for reliable connecting and tear down and congestion control but offers a lossy data stream. DCCP was not chosen as it was desirable to have a reliable transport protocol between peers. To add security DTLS can be layered on top of DCCP.
 
-DCCP is not readably available on all platforms (requiring a layering over UDP on major platforms like Windows. To utilize DCCP on windows would require manipulating RAW sockets and implementing the full DCCP protocol from scratch. Alternatively, DCCP would have to run on top of UDP, which is an option but adds overhead.  
+DCCP is not readably available on all platforms (requiring a layering over UDP on major platforms like Windows. To utilize DCCP on windows would require manipulating RAW sockets and implementing the full DCCP protocol from scratch. Alternatively, DCCP would have to run on top of UDP, which is an option but adds overhead.
 
-As such to utilize DCCP would have required a layer as:  
+As such to utilize DCCP would have required a layer as:
 
-[application level reliability layer] -> DTLS -> DCCP (optionally over UDP)  
+[application level reliability layer] -> DTLS -> DCCP (optionally over UDP)
 
-Further using DCCP would still require utilizing extension protocols to perform peer to peer firewall probing in a manner like ICE performs.  
+Further using DCCP would still require utilizing extension protocols to perform peer to peer firewall probing in a manner like ICE performs.
 
-DCCP was not chosen as the lack of data reliability, overhead and work involved to support all the layers was not considered viable.  
+DCCP was not chosen as the lack of data reliability, overhead and work involved to support all the layers was not considered viable.
 
 ### TCP
 
-TCP is very similar to RUDP in capabilities with one exception: the ease to penetrate firewalls between peers. TCP does not offer an ICE like mechanism to perform connectivity probes like ICE and thus was not chosen as an acceptable protocol.  
+TCP is very similar to RUDP in capabilities with one exception: the ease to penetrate firewalls between peers. TCP does not offer an ICE like mechanism to perform connectivity probes like ICE and thus was not chosen as an acceptable protocol.
 
 ### SCP
 
-SCP is an alternative TCP like peer-to-peer communication protocol that messages can be relayed over as an alternative to RUDP protocol should the underlying framework support SCP.  
+SCP is an alternative TCP like peer-to-peer communication protocol that messages can be relayed over as an alternative to RUDP protocol should the underlying framework support SCP.
 
 ### RUDP Protocol Specification
 
     12345678901234567890123456789012345678901234567890123456789012345678901234567890
-        
+    
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -749,10 +748,10 @@ SCP is an alternative TCP like peer-to-peer communication protocol that messages
     
     State  Meaning
     -----  -------
-    0    Received
-    1    Received ECN Marked
-    2    Reserved
-    3    Not Yet Received
+    0      Received
+    1      Received ECN Marked
+    2      Reserved
+    3      Not Yet Received
     
     A "0" vector byte is used at the end of a RLE series for padding to the next
     DWORD alignment (and if interpreted would be seen as "0" packets received).
@@ -1027,7 +1026,7 @@ SCP is an alternative TCP like peer-to-peer communication protocol that messages
     must be listed first. The order of the algorithms is assumed to be the
     preferred order of the requester or responder. The responder must select an
     algorithm within the list offered by the remote party.
-   
+
 
 Open Peer Signalling Protocol
 =============================
@@ -1035,72 +1034,72 @@ Open Peer Signalling Protocol
 Non Encrypted JSON Signalling Protocol
 --------------------------------------
 
-The signalling protocol used for Open Peer is simple JSON based protocol and uses RUDP or SCP as the transport.  
+The signalling protocol used for Open Peer is simple JSON based protocol and uses RUDP or SCP as the transport.
 
-The packaging of an JSON message for deliver to a peer entity is extremely simple when no encryption is used (known as "text/x-open-peer-json-plain"):  
+The packaging of an JSON message for deliver to a peer entity is extremely simple when no encryption is used (known as "text/x-open-peer-json-plain"):
 
   * Message Size [4 bytes in network order] - The length of the raw JSON message about to be received
-  * JSON data - the JSON message data to be receive of exactly the message size specified (no NUL termination is required or expected).  
+  * JSON data - the JSON message data to be receive of exactly the message size specified (no NUL termination is required or expected).
 
 Encrypted JSON Signalling Protocol Using TLS
 --------------------------------------------
 
-Open Peer can utilize standard TLS to connection from a peer to a server. In this mode the messaging is encoded exactly the same except delivered through a TLS pipe over RUDP, also using the RUDP mime type of "text/x-open-peer-json-tls".  
+Open Peer can utilize standard TLS to connection from a peer to a server. In this mode the messaging is encoded exactly the same except delivered through a TLS pipe over RUDP, also using the RUDP mime type of "text/x-open-peer-json-tls".
 
 Encrypted JSON Signalling Protocol Using Messaging and Not Using TLS
 --------------------------------------------------------------------
 
-Open Peer has one important expectation difference from the typical TLS scenario and thus offers an an alternative offering to TLS for signalling called "text/x-open-peer-json-mls", where MLS = Message Layer Security as opposed to TLS which is Transport Layer Security).  
+Open Peer has one important expectation difference from the typical TLS scenario and thus offers an an alternative offering to TLS for signalling called "text/x-open-peer-json-mls", where MLS = Message Layer Security as opposed to TLS which is Transport Layer Security).
 
-TLS is majority used by HTTPS (although not exclusively) under a scenario where an anonymous client without any public/private key connects to a server that has a public/private key whose identity is validated from a trusted authority chain, such as VeriSign or Thawte. In such a situation, TLS requires negotiation to establish a bidirectional channel with known trust chains to verify the servers identity and prevent man-in-the-middle attacks without ever being able to validate the identity of the client (unless prearranged private data is exchanged additionally in the application layer).  
+TLS is majority used by HTTPS (although not exclusively) under a scenario where an anonymous client without any public/private key connects to a server that has a public/private key whose identity is validated from a trusted authority chain, such as VeriSign or Thawte. In such a situation, TLS requires negotiation to establish a bidirectional channel with known trust chains to verify the servers identity and prevent man-in-the-middle attacks without ever being able to validate the identity of the client (unless prearranged private data is exchanged additionally in the application layer).
 
-In the Open Peer case, all peers have a public and private key, without exception, be it peer to peer or peer to server. In all cases, a peer initiating a connection always knows the public key of the designation peer in advance (thus avoiding man-in-the-middle attacks) of the connection itself. Trust is established via the Bootstrapper's introduction to services as well as Identity Providers that provide Asserted Identities.  
+In the Open Peer case, all peers have a public and private key, without exception, be it peer to peer or peer to server. In all cases, a peer initiating a connection always knows the public key of the designation peer in advance (thus avoiding man-in-the-middle attacks) of the connection itself. Trust is established via the Bootstrapper's introduction to services as well as Identity Providers that provide Asserted Identities.
 
-Open Peer connections can take advantage of this situation by utilizing the pre-known public key in the initiating side to simplify the negotiation scenario and offer unidirectional encrypted streams.  
+Open Peer connections can take advantage of this situation by utilizing the pre-known public key in the initiating side to simplify the negotiation scenario and offer unidirectional encrypted streams.
 
-The format for the unidirectional message is as follows:  
+The format for the unidirectional message is as follows:
 
   * Encryption key algorithm selection (16 bits network byte order, upper 8 bits reserved and must be set to "0") - When negotiating, each number represents selected keys / algorithm pair for use by the number chosen but "0" is used to represent a key/algorithm negotiation. Every "0" key causes a reset of all encryption algorithms in progress to substitute with the values specified in the "0" package. Each key / algorithm selected is selected from the supported keys/algorithms offered to the remote party, but can only be select using algorithms the remote party supports. As such, there is one mandated algorithm to ensure compatibility, "http://openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1", where the AES (Rijndael- 128) in CFB mode with a 32 byte key size, 16 byte block size, and a 16 byte feedback size with a SHA1-HMAC.
   * 32 bit - encrypted data bundle size
   * Data bundle, consisting of:
     * JSON message encrypted using the algorithm/key selected
-    * hmac of the data encrypted using the algorithm/key selected  
+    * hmac of the data encrypted using the algorithm/key selected
 
-The advantage of pre-knowing the public key by the sender allows for unidirectional encryption with different keys being used in each direction and allows for encryption to begin in both directions in a single round trip negotiation.  
+The advantage of pre-knowing the public key by the sender allows for unidirectional encryption with different keys being used in each direction and allows for encryption to begin in both directions in a single round trip negotiation.
 
-Message level security is not to be used except for this specific scenario and only when the keys are pre- known by the initiator of the connection and where both parties have public and private keys. Further, this is a message centric encryption and not stream level encryption as offered by TLS. Any received public key and Asserted Identities must be validated at the application layer by exchanging Asserted Identity information in correlation with Public Peer Files.  
+Message level security is not to be used except for this specific scenario and only when the keys are pre- known by the initiator of the connection and where both parties have public and private keys. Further, this is a message centric encryption and not stream level encryption as offered by TLS. Any received public key and Asserted Identities must be validated at the application layer by exchanging Asserted Identity information in correlation with Public Peer Files.
 
-The "0" package is sent in plain text in JSON format and the data bundle has a 0 byte size hmac since the signature as part of the JSON package is used instead.  
+The "0" package is sent in plain text in JSON format and the data bundle has a 0 byte size hmac since the signature as part of the JSON package is used instead.
 
-The "0" package contains the following:  
+The "0" package contains the following:
 
   * Signed keying bundle including:
 
     * Nonce - this nonce should be validated as having only been seen once by the receiving client
-    * Expiry - this package must be verified as valid before the expiry or it's considered invalid 
+    * Expiry - this package must be verified as valid before the expiry or it's considered invalid
     * Algorithms - preference ordered set of algorithms supported by the client
     * List of keys, with each key containing:
       * key ID - this corresponds to the algorithm selection ID of which key to use in any subsequent decryption
       * algorithm - the algorithm to use when decrypting payloads using this key ID
-      * algorithm input data - each algorithm requires its own set of keying information required for decryption, which is contained here. All sensitive data is encrypted using the public key of the remote party  
+      * algorithm input data - each algorithm requires its own set of keying information required for decryption, which is contained here. All sensitive data is encrypted using the public key of the remote party
 
-For the mandatory "aes-cfb-32-16-16-sha1" algorithm, the following algorithm input information is used:  
+For the mandatory "aes-cfb-32-16-16-sha1" algorithm, the following algorithm input information is used:
 
   * key - the 32 byte AES key, base64encode(remote_public_key_encrypt(<32-byte-aes-key>))
-  * iv - the 16 byte AES initialization vector, base64encode(remote_public_key_encrypt(<32-byte-aes-key>))  
-  * hmacSecretKey - the initial secret key input string, base64encode(remote_public_key_encrypt(`<secret-key-string>`))  
+  * iv - the 16 byte AES initialization vector, base64encode(remote_public_key_encrypt(<32-byte-aes-key>))
+  * hmacSecretKey - the initial secret key input string, base64encode(remote_public_key_encrypt(`<secret-key-string>`))
 
-When the mandatory key is used, the AES CFB is initialized with these values and will continue to encrypt payloads using this keying until a new "0" package arrives which would reset the algorithms with new keying information for subsequent messages in the message stream. The hmac is calculated using the following algorithm, hmac(`<secret-key-string>` + ":" + `<sequence-number>`, `<decrypted-message>`)), where the sequence number starts at 1 and increments by 1 each time the same "encryption key algorithm" is used (and resets back to 1 the next time a new "0" package is received). The sequence number is appended to prevent the same message repeated from containing the same hmac hash proof in the result.  
+When the mandatory key is used, the AES CFB is initialized with these values and will continue to encrypt payloads using this keying until a new "0" package arrives which would reset the algorithms with new keying information for subsequent messages in the message stream. The hmac is calculated using the following algorithm, hmac(`<secret-key-string>` + ":" + `<sequence-number>`, `<decrypted-message>`)), where the sequence number starts at 1 and increments by 1 each time the same "encryption key algorithm" is used (and resets back to 1 the next time a new "0" package is received). The sequence number is appended to prevent the same message repeated from containing the same hmac hash proof in the result.
 
-Any sensitive data contained in the "0" package must be encrypted using the public key of the receiving party. The entire package must be signed by the public key of the party sending the "0" package and the receiver must validate this package's signature before it assumes any of the data sent in the package is considered valid.  
+Any sensitive data contained in the "0" package must be encrypted using the public key of the receiving party. The entire package must be signed by the public key of the party sending the "0" package and the receiver must validate this package's signature before it assumes any of the data sent in the package is considered valid.
 
-The party receiving the connection request cannot respond until it knows the corresponding public key of the initiator of the request, which must match and verify the signature used in the initiator's original "0" package. The "0" package must be the first package sent on the wire in either direction. The party receiving the connection request must assume all data received via encrypted messages may not be valid until it can verify the signature in the original "0" package and all subsequent "0" packages. The public key used in the "0" packages must never change throughout the lifetime of the connection.  
+The party receiving the connection request cannot respond until it knows the corresponding public key of the initiator of the request, which must match and verify the signature used in the initiator's original "0" package. The "0" package must be the first package sent on the wire in either direction. The party receiving the connection request must assume all data received via encrypted messages may not be valid until it can verify the signature in the original "0" package and all subsequent "0" packages. The public key used in the "0" packages must never change throughout the lifetime of the connection.
 
-All keying information and salts must be generated using cryptographically random algorithms only.  
+All keying information and salts must be generated using cryptographically random algorithms only.
 
-The algorithms used for encrypting must be limited to the algorithms supported by the remote party, but the mandatory "aes-cfb-32-16-16-sha1" algorithm must always be considered a valid algorithm available in any minimal implementation.  
+The algorithms used for encrypting must be limited to the algorithms supported by the remote party, but the mandatory "aes-cfb-32-16-16-sha1" algorithm must always be considered a valid algorithm available in any minimal implementation.
 
-Example of the "0" package is JSON in place text with the following data in the bundle: 
+Example of the "0" package is JSON in place text with the following data in the bundle:
 
     {
       "keyingBundle": {
@@ -1155,7 +1154,7 @@ Example of the "0" package is JSON in place text with the following data in the 
         }
       }
     }
-   
+
 
 General Request, Reply, Notify and Result Formation Rules
 =========================================================
@@ -1166,43 +1165,43 @@ Open Peer has four types of messages:
   * reply - this is a special case "reply" to a request during the find where the finder returns an immediate result to the request but each peer location can give its own reply with the same ID as the request subsequently
   * notify - this is a special type of request whose result is ignored and not required (and no response is presumed to occur with a notify type)
 
-All request types and results use a simplified JSON format. The messages are sent either over HTTPS/TLS/MLS/Message or over RUDP/UDP or SCP protocols. Alternative protocols are acceptable so long as they maintain the integrity and public/private key aspects of these protocols.  
+All request types and results use a simplified JSON format. The messages are sent either over HTTPS/TLS/MLS/Message or over RUDP/UDP or SCP protocols. Alternative protocols are acceptable so long as they maintain the integrity and public/private key aspects of these protocols.
 
-Every request must include the federated domain which the request is being processed and the application ID associated with the request (the result/reply should use the application ID of the original request). Every request type must include an ID and a handler service and method being invoked (to assist with message handling, processing and routing). The ID must be cryptographically strong and random thus checks to see which data channel the response comes on is not required. Every result message must mirror the request type's ID and include a timestamp to assist with detecting network time problems (whereas the timestamp is optional on request types).  
+Every request must include the federated domain which the request is being processed and the application ID associated with the request (the result/reply should use the application ID of the original request). Every request type must include an ID and a handler service and method being invoked (to assist with message handling, processing and routing). The ID must be cryptographically strong and random thus checks to see which data channel the response comes on is not required. Every result message must mirror the request type's ID and include a timestamp to assist with detecting network time problems (whereas the timestamp is optional on request types).
 
-Even though all requests/responses are written in human readable form in this document, all requests/responses are sent on the wire in their Open Peer canonical form using the algorithm for the canonicalization of JSON signatures as specified in this document. This allows any clients or servers receive JSON requests that have non-compliant JSON parsers/generators to be able to easily validate signatures even if they cannot convert from raw JSON to canonical JSON easily. Further, this ensures the wire format is optimal on the wire since the canonical form is fairly compact (although if compression is applied in a higher layer then the wire savings might become moot).  
+Even though all requests/responses are written in human readable form in this document, all requests/responses are sent on the wire in their Open Peer canonical form using the algorithm for the canonicalization of JSON signatures as specified in this document. This allows any clients or servers receive JSON requests that have non-compliant JSON parsers/generators to be able to easily validate signatures even if they cannot convert from raw JSON to canonical JSON easily. Further, this ensures the wire format is optimal on the wire since the canonical form is fairly compact (although if compression is applied in a higher layer then the wire savings might become moot).
 
-Open Peer JSON signatures are used to verify signatures within the JSON. The canonical form of JSON is as follows (unless otherwise specified within the JSON signature): http://openpeer.org/2012/12/14/jsonsig#rsa-sha1  
+Open Peer JSON signatures are used to verify signatures within the JSON. The canonical form of JSON is as follows (unless otherwise specified within the JSON signature): http://openpeer.org/2012/12/14/jsonsig#rsa-sha1
 
-This algorithm allows only JSON objects to be signed. The digest value is sha1(`<message>`), where the message is the canonical version of the JSON object written to a string. The object must be rendered to a string as if it were a standalone rendered JSON object where the final message is in the format: {"name":{...}}  
+This algorithm allows only JSON objects to be signed. The digest value is sha1(`<message>`), where the message is the canonical version of the JSON object written to a string. The object must be rendered to a string as if it were a standalone rendered JSON object where the final message is in the format: {"name":{...}}
 
-If the rendered object doesn't have a string part in the JSON lexical string:value pairing (as it's a value- only) then the object name is based upon the parent array's/object string in its string:value pair (or the parent's parent as need be). This canonical rendered string requires absolutely no white space between tokens. All strings must be in normalized to UTF-8 format with only these escape sequences used: \" \\ \f \n \r \b  
+If the rendered object doesn't have a string part in the JSON lexical string:value pairing (as it's a value- only) then the object name is based upon the parent array's/object string in its string:value pair (or the parent's parent as need be). This canonical rendered string requires absolutely no white space between tokens. All strings must be in normalized to UTF-8 format with only these escape sequences used: \" \\ \f \n \r \b
 
-Unicode escape sequences are converted to UTF-8 format. Number sequences must not have unnecessary leading or trailing zeros. Numbers are rendered "as is", i.e. in the format they are put inside the original JSON package where the signature is applied.  
+Unicode escape sequences are converted to UTF-8 format. Number sequences must not have unnecessary leading or trailing zeros. Numbers are rendered "as is", i.e. in the format they are put inside the original JSON package where the signature is applied.
 
-Any object's string:value pairing that begin with "$" in the string part are placed in the order they appear in the JSON package where the signature is applied before any other string:value pairs inside the object. Next any object containing a string:value pair who's lexical string name is "#text" is placed after those strings starting with "$". Finally, all remaining string:value pairs follow in the order they appear in the JSON package where the signature is applied.  
+Any object's string:value pairing that begin with "$" in the string part are placed in the order they appear in the JSON package where the signature is applied before any other string:value pairs inside the object. Next any object containing a string:value pair who's lexical string name is "#text" is placed after those strings starting with "$". Finally, all remaining string:value pairs follow in the order they appear in the JSON package where the signature is applied.
 
-The "$", "#text" and 'other' ordering is used to ensure the implementations which wish to process the JSON in XML form can still render back/forth from XML to JSON and still be capable of generating signatures properly. The "$" prefix was chosen specifically because it is a non special variable name in JavaScript where JSON has been most prominently adopted but yet still denotes a special character for the sake of JSON/XML conversions.  
+The "$", "#text" and 'other' ordering is used to ensure the implementations which wish to process the JSON in XML form can still render back/forth from XML to JSON and still be capable of generating signatures properly. The "$" prefix was chosen specifically because it is a non special variable name in JavaScript where JSON has been most prominently adopted but yet still denotes a special character for the sake of JSON/XML conversions.
 
-JSON objects that have member string:value pairs that start with "$" in their string parts are only allowed to contain string, number, true, false or null values. JSON objects that have a member string:value pair with the string part equal to "#text" can only have a string as the corresponding value. This restriction is put into Open Peer to allow for easy JSON/XML conversions.  
+JSON objects that have member string:value pairs that start with "$" in their string parts are only allowed to contain string, number, true, false or null values. JSON objects that have a member string:value pair with the string part equal to "#text" can only have a string as the corresponding value. This restriction is put into Open Peer to allow for easy JSON/XML conversions.
 
-All base64 encoding/decoding routines must use standard/common encoding scheme, without line breaks and with padding used for unused bytes.  
+All base64 encoding/decoding routines must use standard/common encoding scheme, without line breaks and with padding used for unused bytes.
 
-The client may receive an error complaining that a request has expired if the client's clock was set wrong (401). Hence in every result, the epoch of the server will be sent for the client to detect potential clock errors. To reduce issues, the client should use a secure NTP service to set its own clock at some point before initiating contact to a server or another peer.  
+The client may receive an error complaining that a request has expired if the client's clock was set wrong (401). Hence in every result, the epoch of the server will be sent for the client to detect potential clock errors. To reduce issues, the client should use a secure NTP service to set its own clock at some point before initiating contact to a server or another peer.
 
-The client is responsible for disconnecting at all times from the server. In the case of peer to peer, the initiating peer is considered the client role and the receiving peer plays the server role.  
+The client is responsible for disconnecting at all times from the server. In the case of peer to peer, the initiating peer is considered the client role and the receiving peer plays the server role.
 
-There are exceptions to this rule. The server will close a connection without warning based on two inactivity time-outs. The larger timeout is based upon an expiry window when the entity is known or "registered" to the server. The smaller timeout window of inactivity (chosen and unspecified at the discretion of the server) is based on not having received any request or notification on a channel within that defined timeframe. If either of those two timeouts occurs, the server may disconnect which is typically the responsibility of the client. The server may disconnect any client it sees as likely malicious behaviour.  
+There are exceptions to this rule. The server will close a connection without warning based on two inactivity time-outs. The larger timeout is based upon an expiry window when the entity is known or "registered" to the server. The smaller timeout window of inactivity (chosen and unspecified at the discretion of the server) is based on not having received any request or notification on a channel within that defined timeframe. If either of those two timeouts occurs, the server may disconnect which is typically the responsibility of the client. The server may disconnect any client it sees as likely malicious behaviour.
 
-If a client disconnects without sending the unregister request, the server should assume the client disconnected prematurely and will discard any associated sessions.  
+If a client disconnects without sending the unregister request, the server should assume the client disconnected prematurely and will discard any associated sessions.
 
-Other disconnection rules are specified whenever they are exceptions to the rule or the exceptions.  
+Other disconnection rules are specified whenever they are exceptions to the rule or the exceptions.
 
 
 General Result Error Code Reasons
 =================================
 
-Error replies appear as follows:  
+Error replies appear as follows:
 
     {
       "result": {
@@ -1218,9 +1217,9 @@ Error replies appear as follows:
         }
       }
     }
-  
-    
-The reasons codes closely match the HTTP error code specification for familiarity. Error results may contain additional information depending on the error and requirements of the error result.  
+
+
+The reasons codes closely match the HTTP error code specification for familiarity. Error results may contain additional information depending on the error and requirements of the error result.
 
 ### 301 - Moved Permanently
 
@@ -1240,9 +1239,9 @@ The data specified is invalid and fixing any security check issues will not fix 
 
 ### 404 - Not Found
 
-This error is returned if the requested Peer Contact, session or other resource is not found. This error is also returned from any request where the session or Peer Contact was valid but is no longer valid, e.g. situations where requests have been made to sessions which have already been unregistered yet unknown to the connected client due to the nature of asynchronous eventing.  
+This error is returned if the requested Peer Contact, session or other resource is not found. This error is also returned from any request where the session or Peer Contact was valid but is no longer valid, e.g. situations where requests have been made to sessions which have already been unregistered yet unknown to the connected client due to the nature of asynchronous eventing.
 
-A 404 error does not mean the resource never existed or will not exist in the future. The contact may not be registered at this time and that would cause a 404 error even though in the past it may have been registered.  
+A 404 error does not mean the resource never existed or will not exist in the future. The contact may not be registered at this time and that would cause a 404 error even though in the past it may have been registered.
 
 ### 409 - Conflict
 
@@ -1250,7 +1249,7 @@ A conflict has occurred, such as an edit conflict with version numbers.
 
 ### 426 - Upgrade Required
 
-A client has requested a method that is not accessible since an upgrade is required. This will be sent if a client's certificates have expired and attempt to access a method or may be sent if a client is using an out-dated request.  
+A client has requested a method that is not accessible since an upgrade is required. This will be sent if a client's certificates have expired and attempt to access a method or may be sent if a client is using an out-dated request.
 
 ### 480 - Temporarily Unavailable
 
@@ -1260,38 +1259,38 @@ The request may optionally include an expiry when the request can be tried again
 Bootstrapper Service Requests
 =============================
 
-The communication to the Bootstrapper is done over HTTPS exclusively whose HTTPS server certificate was signed by one of the trusted root Internet certification authorities. For security purposes, the Bootstrapper is the introducer to all other services within the network including appropriate security credentials to connect to each network component.  
+The communication to the Bootstrapper is done over HTTPS exclusively whose HTTPS server certificate was signed by one of the trusted root Internet certification authorities. For security purposes, the Bootstrapper is the introducer to all other services within the network including appropriate security credentials to connect to each network component.
 
 Locating the Bootstrapper
 ------------------------
 
 ### Overview
 
-The Bootstrapper is the introductory service into the domain responsible for a Peer Contact and DNS is used to locate the Bootstrapper.  
+The Bootstrapper is the introductory service into the domain responsible for a Peer Contact and DNS is used to locate the Bootstrapper.
 
-A peer contact is written in the following form:  
-peer://domain.com/e433a6f9793567217787e33950211453582cadff  
+A peer contact is written in the following form:
+peer://domain.com/e433a6f9793567217787e33950211453582cadff
 
-And an identity is written in the following form:  
-identity://domain.com/alice  
+And an identity is written in the following form:
+identity://domain.com/alice
 
-In both cases, an HTTPS request is this performed on "domain.com", using the following URL:  
-https://domain.com/.well-known/openpeer-services-get  
+In both cases, an HTTPS request is this performed on "domain.com", using the following URL:
+https://domain.com/.well-known/openpeer-services-get
 
-Clients must confirm the HTTPS certificates comes from the same domain as the original domain request and reject any records that do not.  
+Clients must confirm the HTTPS certificates comes from the same domain as the original domain request and reject any records that do not.
 
 Services Get Request
 --------------------
 
 ### Purpose
 
-This request is required to obtain a list of services available on the peer network as well as establish a hierarchy of certificate trust.  
+This request is required to obtain a list of services available on the peer network as well as establish a hierarchy of certificate trust.
 
-### Inputs  
+### Inputs
 
 None.
 
-### Returns  
+### Returns
 
   * Service ID
   * Service Type
@@ -1300,7 +1299,7 @@ None.
   * List of requests methods, which includes
     * Method name
     * URI
-    * Other request specific information  
+    * Other request specific information
   * Public key information - (optional) used when protocol used is not based on a root certificate authority
 
 ### Security Considerations
@@ -1325,7 +1324,7 @@ The request nor the response should have an ID associated with the request/respo
         "$method": "services-get"
       }
     }
-   
+
     {
       "result": {
         "$domain": "example.com",
@@ -1441,7 +1440,7 @@ The request nor the response should have an ID associated with the request/respo
                   {
                     "name": "identity-lookup-update",
                     "uri": "https://identity.example.com/identity-lookup-update"
-                  }, 
+                  },
                   {
                     "name": "identity-sign",
                     "uri": "https://identity.example.com/identity-sign"
@@ -1502,7 +1501,6 @@ The request nor the response should have an ID associated with the request/respo
       }
     }
 
-
     {
       "result": {
         "$domain": "example.com",
@@ -1534,7 +1532,7 @@ The total number of server entries desired (which the server can choose to ignor
 
 ### Returns
 
-Returns a list of Finders containing the following information for each Finder:  
+Returns a list of Finders containing the following information for each Finder:
 
   * Finder ID - the unique ID that represents this finder in the system
   * Transport
@@ -1549,9 +1547,9 @@ Returns a list of Finders containing the following information for each Finder:
 
 The client must ensure the server has an HTTPS certificate that was issued by a root certificate authority and that the certificate offered by the server is still within the X.509 validity date. The client should check the validity of each finder by verifying each finder was signed by a "Finder" service for the same domain as the requested Bootstrapper. The server does not need to verify a client's intentions.
 
-The finder information can be cached and the client can reconnect to the same finder at will in the future. The finder server is considered transient though and may at any time disappear from offering service.  
+The finder information can be cached and the client can reconnect to the same finder at will in the future. The finder server is considered transient though and may at any time disappear from offering service.
 
-Each Finder should have its own X.509 certificate that it generates upon start-up and reports through whatever secure mechanism to the Bootstrapper Finder Service. This causes each finder to use it's own keying information which is not shared across finders. However, this is not a hard requirement and the Finders may use a common key across all Finders.  
+Each Finder should have its own X.509 certificate that it generates upon start-up and reports through whatever secure mechanism to the Bootstrapper Finder Service. This causes each finder to use it's own keying information which is not shared across finders. However, this is not a hard requirement and the Finders may use a common key across all Finders.
 
 ### Example
 
@@ -1628,7 +1626,7 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
         }
       }
     }
-  
+
 
 Certificates Service Requests
 =============================
@@ -1644,20 +1642,20 @@ This request returns a list of public key X509 certificates used for signing in 
 
 None.
 
-### Returns  
+### Returns
 
-Returns a list of service certificates containing the following information for each certificate:  
+Returns a list of service certificates containing the following information for each certificate:
 
   * Certificate ID
   * Service name
   * Expiry
   * X.509 public key certificate
 
-### Security Considerations  
+### Security Considerations
 
-The client must ensure the server has an HTTPS certificate that was issued by a root certificate authority and that the certificate offered by the server is still within the X.509 validity date. The server does not need to verify a client's intentions. The client should verify that each key was signed correctly from the Bootstrapper service key. This allows the clients to cache the certificate bundles while avoiding potential tampering.  
+The client must ensure the server has an HTTPS certificate that was issued by a root certificate authority and that the certificate offered by the server is still within the X.509 validity date. The server does not need to verify a client's intentions. The client should verify that each key was signed correctly from the Bootstrapper service key. This allows the clients to cache the certificate bundles while avoiding potential tampering.
 
-### Example  
+### Example
 
     {
       "request": {
@@ -1742,14 +1740,14 @@ This request obtains access to a lockbox. Access is granted by way of login proo
     * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":lockbox-access")
     * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
     * Original identity URI
-    * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)  
+    * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
   * Grant
     * ID - a client generated cryptographic unique ID representing the agent's permission to access the lockbox. Once this ID is generated by a client, it should remain stable in subsequent accesses (or a new permission grant will be required). This ID should remain secret to the client application.
   * Lockbox information
     * Lockbox domain - the domain hosting the lockbox
     * Lockbox account ID - (optional, if known) the assigned account ID for the lockbox
-    * Lockbox key "lockbox half" - (optional, if known and only key was just generated), this is server side base-64 encoded XORed portion of the lockbox key that must be combined with the client side portion of the key to create the full lockbox key. If specified the identity access token and proof must be specified.
-    * Lockbox key "hash" - hash of the combined XORed lockbox key. If the lockbox key "lockbox half" is specified then this lockbox hash is reset to this hash specified otherwise this hash can be used to login to the lockbox account (by specifying the original identity with the "identity access token" and "proof" information being optional).
+    * Lockbox key "lockbox half" - (optional, if known), this is server side base-64 encoded XORed portion of the lockbox key that must be combined with the client side portion of the key to create the full lockbox key. If specified the identity access token and proof must be specified.
+    * Lockbox key "hash" - (optional) hash of the combined XORed lockbox key. If this hash is specified then this hash can be used to login to the lockbox account (by specifying the lockbox account ID).
     * Lockbox reset flag - (optional) if specified and true, a new lockbox must be created for the identity specified (and an identity must be specified for access) and this identity must become unassociated with any other lockboxes. If this identity was previously the only associated identity with a previous lockbox then the previous lockbox can be deleted entirely.
 
 ### Returns
@@ -1772,11 +1770,11 @@ This request obtains access to a lockbox. Access is granted by way of login proo
 
 ### Security Considerations
 
-Access to the lockbox does not grant access to the contents of the lockbox. The lockbox key must be obtained through an alternative method.  
+Access to the lockbox does not grant access to the contents of the lockbox. The lockbox key must be obtained through an alternative method.
 
 The server will validate the identity login via the identity service to access the account or validate the client has the correct lockbox key hash to access the account. An identity that has a different provider is considered a different identity. Thus an identity is deemed unique by its identity and its identity provider combined.
 
-If the lockbox key "lockbox half" is specified because it was regenerated then all the information associated to the account is purged. The grants to the various namespaced values still remain valid but the data contained is completely wiped out. The remaining identities that were not used to login during the regeneration need to be marked as needing update since they will have the incorrect lockbox key "identity half".  
+If the lockbox key "lockbox half" is specified because it was regenerated then all the information associated to the account is purged. The grants to the various namespaced values still remain valid but the data contained is completely wiped out. The remaining identities that were not used to login during the regeneration need to be marked as needing update since they will have the incorrect lockbox key "identity half".
 
 ### Example
 
@@ -1860,7 +1858,7 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
         }
       }
     }
-   
+
 Lockbox Access Validate Request
 -------------------------------
 
@@ -1868,20 +1866,20 @@ Lockbox Access Validate Request
 
 This request proves that a lockbox access is valid and can be used to validate a lockbox access is successful by way of a 3rd party.
 
-### Inputs  
+### Inputs
 
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Purpose - reason for validation (each service using this validation should have a unique purpose string)
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":" + `<purpose>`)  
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":" + `<purpose>`)
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret Identity information
 
 ###Returns
 
 Success or failure.
 
-### Security Considerations 
+### Security Considerations
 
 ### Example
 
@@ -1912,8 +1910,8 @@ Success or failure.
         "$timestamp": 439439493
       }
     }
-  
-Lockbox Identities Update Request 
+
+Lockbox Identities Update Request
 ---------------------------------
 
 ### Purpose
@@ -1925,12 +1923,12 @@ This request updates the identities that are allowed to access the lockbox accou
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-identities- update")
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-identities-update")
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
   * List of identities information
     * Disposition - "update" is used to add/update an identity and "remove" removes access to an identity
     * Identity access token - (optional, required if "update" is used), as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - (optional, required if "update" is used), proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access- secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":lockbox-access-update")
+    * Proof of 'identity access secret' - (optional, required if "update" is used), proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":lockbox-access-update")
     * Expiry of the proof for the 'identity access secret' - (optional, required if "update" is used) window in which access secret proof is considered valid
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
@@ -2007,7 +2005,7 @@ If all the identities associated to the lockbox are removed then the lockbox acc
         }
       }
     }
-   
+
 
 Lockbox Namespace Grant Inner Frame
 -----------------------------------
@@ -2024,7 +2022,7 @@ None.
 
 None.
 
-### Security Considerations 
+### Security Considerations
 
 ### Example
 
@@ -2034,18 +2032,20 @@ Lockbox Namespace Grant Window Notification
 
 ### Purpose
 
-This notification is sent from the inner frame to the outer window as a posted message. This allows the inner window to notify the outer window it's ready to start processing requests.  
+This notification is sent from the inner frame to the outer window as a posted message. This allows the inner window to notify the outer window it's ready to start processing requests.
 
 ### Inputs
 
   * Ready
     * true - notify the login window is ready to receive messages
+  * Visibility:
+    * true - notify the login window needs visibility
 
 ### Returns
 
 Success or failure.
 
-### Security Considerations  
+### Security Considerations
 
 ### Example
 
@@ -2058,12 +2058,13 @@ Success or failure.
         "$method": "lockbox-namespace-grant-window",
     
         "browser": {
-          "ready": true
+          "ready": true,
+          "visibility": true
         }
       }
     }
 
-  
+
 Lockbox Namespace Grant Start Notification
 ------------------------------------------
 
@@ -2072,11 +2073,11 @@ Lockbox Namespace Grant Start Notification
 Once the browser window receives notification that it is ready, this request is sent to the inner frame by the outer frame to give the inner frame the needed information to start the grant process.
 
 ### Inputs
-  
+
   * Agent
     * Product - the user agent identification for the product, typically "name/version (os/system)" information)
     * Name - a human readable friendly name for the product
-    * Image - a human visual image for the brand that must be square in shape. 
+    * Image - a human visual image for the brand that must be square in shape.
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
     * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-permission- grant")
@@ -2084,12 +2085,21 @@ Once the browser window receives notification that it is ready, this request is 
   * Grant
     * ID - ID as passed into the lockbox access request
     * List of namespace URLs to be granted to the grant ID
+  * Browser information
+    * Visibility - the browser window is being shown in what state
+      * "visible" - the browser window is visible
+      * "hidden" - the browser window is hidden and cannot be shown
+      * "visible-on-demand" - the browser window is hidden but can be rendered visible via a request posted to the outer frame (note: if rendered inside an application, the application can show the window in a hidden state to start and the browser window can become visible only when the user needs to enter some credentials)
+    * Popup
+      * "allow"- popups windows/new tabs are allowed to be opened
+      * "deny" - popup windows/new tables are not allowed to be opened
+    * Outer frame reload URL - a URL to reload the outer frame should the grant process have to replace the outer frame's window with its own URL. Once the outer frame is reloaded the inner frame page is reloaded as well allowing the inner frame to send the completion request.
 
 ### Returns
 
 None.
 
-### Security Considerations 
+### Security Considerations
 
 ### Example
 
@@ -2123,10 +2133,16 @@ None.
               "https://other.com/pemissionname"
             ]
           }
+        },
+    
+        "browser": {
+          "visibility": "visible-on-demand",
+          "popup": "deny",
+          "outerFrameURL": "https://webapp.com/outerframe?reload=true"
         }
       }
     }
-  
+
 
 Lockbox Namespace Grant Complete Notification
 ---------------------------------------------
@@ -2138,7 +2154,7 @@ This notification is sent from the inner browser window to the outer window as a
 ###Inputs
 
   * Grant
-    * ID - ID as passed into the lockbox grant request 
+    * ID - ID as passed into the lockbox grant request
     * List of namespace URLs granted to the grant ID
 
 ### Returns
@@ -2169,9 +2185,9 @@ If permission was not granted to the namespace then the namespaces array will no
         }
       }
     }
-   
 
-Lockbox Content Get Request 
+
+Lockbox Content Get Request
 ---------------------------
 
 ### Purpose
@@ -2260,9 +2276,9 @@ No value names within the same namespace URL should be identical.
         }
       }
     }
-   
 
-Lockbox Content Set Request 
+
+Lockbox Content Set Request
 ---------------------------
 
 ### Purpose
@@ -2277,7 +2293,7 @@ This request retrieves data contained in the lockbox.
     * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-get")
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
   * Grant
-    * ID - ID as passed into the lockbox grant request 
+    * ID - ID as passed into the lockbox grant request
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored
     * List of values, each value is base 64 encode with the value encrypted with: key = hmac(`<lockbox-key>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv=hash(`<permission-url>` + ":" + `<value-name>`), or a value of "-" to remove a value. The values are merged together with existing values or the values are removed if they contain a value of "-".
@@ -2338,7 +2354,7 @@ No value names within the same permission URL should be identical.
         "$timestamp": 439439493
       }
     }
-   
+
 
 Lockbox Admin Inner Frame
 -------------------------
@@ -2355,7 +2371,7 @@ None.
 
 None.
 
-### Security Considerations 
+### Security Considerations
 
 ### Example
 
@@ -2393,7 +2409,7 @@ Success or failure.
         }
       }
     }
-   
+
 
 Lockbox Admin Start Notification
 --------------------------------
@@ -2419,7 +2435,7 @@ Once the browser window receives notification that it is ready, this request is 
 
 None.
 
-### Security Considerations 
+### Security Considerations
 
 ### Example
 
@@ -2450,7 +2466,7 @@ None.
       }
     }
 
-    
+
 Lockbox Admin Complete Notification
 -----------------------------------
 
@@ -2475,7 +2491,7 @@ This notification is sent from the inner browser window to the outer window as a
         "$method": "lockbox-admin-complete"
       }
     }
-   
+
 
 Lockbox Namespace Preappoved Grant Request
 ------------------------------------------
@@ -2497,7 +2513,7 @@ This request allows a client to automatically request additional grants to names
   * Grant
     * ID - ID as passed into the lockbox access request
   * Authorization bundle
-    * Proof - hmac(`<grant-id>`, "grant-proof:" + `<client-nonce>`) 
+    * Proof - hmac(`<grant-id>`, "grant-proof:" + `<client-nonce>`)
     * Expires - timestamp when the proof bundle expires
     * List of namespace URLs to be granted to the grant ID
     * Signature from authorizing domain
@@ -2574,7 +2590,7 @@ The domain signing proof can authorize namespaces within its own domain and no o
         "$timestamp": 439439493
       }
     }
-    
+
 
 Identity Lookup Service Requests
 ================================
@@ -2595,7 +2611,7 @@ List of providers containing:
   * Identity lookup base URI
   * Separator (default is ",")
   * List of:
-    * Identities separated by "separator" 
+    * Identities separated by "separator"
 
 ### Returns
 
@@ -2605,7 +2621,7 @@ List of resulting identities that resolve in the order requested as follows:
   * Provider - service responsible for this identity
   * Last update timestamp - when the information associated to the identity was last updated
 
-### Security Considerations 
+### Security Considerations
 
 ### Example
 
@@ -2666,7 +2682,7 @@ List of resulting identities that resolve in the order requested as follows:
         }
       }
     }
-  
+
 
 Identity Lookup Request
 -----------------------
@@ -2701,11 +2717,11 @@ List of resulting identities that resolve in the order requested as follows:
   * Public Feed URL - (optional), an RSS style feed representing the public activity for the user
   * Optional list of avatars containing:
     * Avatar name - (optional), name representing subject name of avatar (note: avatars with the same name are considered identical and thus are used to distinguish between varying sizes for the same avatar)
-    * Avatar URL - URLs to download the avatar(s) associated with the identity 
+    * Avatar URL - URLs to download the avatar(s) associated with the identity
     * Avatar pixel width - (optional), pixel width of the avatar image
     * Avatar pixel height - (optional), pixel height of avatar image
 
-### Security Considerations 
+### Security Considerations
 
 ### Example
 
@@ -2806,7 +2822,7 @@ List of resulting identities that resolve in the order requested as follows:
         }
       }
     }
-   
+
 
 Identity Service Requests
 =========================
@@ -2865,11 +2881,11 @@ This notification is allowed to be sent more than once to the outer frame as nee
     
         "browser": {
           "ready": true,
-          "visibility": true,
+          "visibility": true
         }
       }
     }
-    
+
 
 Identity Access Start Notification
 ----------------------------------
@@ -2901,11 +2917,11 @@ None.
 
 ### Security Considerations
 
-If the full URI of the identity is specified, the client should attempt to relogin automatically to the identity (if possible).  
+If the full URI of the identity is specified, the client should attempt to relogin automatically to the identity (if possible).
 
-If the outer fame is being reloaded after haven been replaced, this notification should not be sent again.  
+If the outer fame is being reloaded after haven been replaced, this notification should not be sent again.
 
-Once the inner frame receives this notification it is allowed to replace the outer frame with its own page but it must bring back the outer page so the login process can be completed.  
+Once the inner frame receives this notification it is allowed to replace the outer frame with its own page but it must bring back the outer page so the login process can be completed.
 
 ### Example
 
@@ -2934,7 +2950,7 @@ Once the inner frame receives this notification it is allowed to replace the out
         }
       }
     }
-    
+
 
 Identity Access Complete Notification
 -------------------------------------
@@ -2960,15 +2976,15 @@ This notification is sent from the inner browser window to the outer window as a
 
 ### Security Considerations
 
-The lockbox key should be decrypted locally in the JavaScript using something unavailable in the server, for example the user's password. Other information should be combined to create the encryption/decryption key to ensure two unique users with the same password do not share the same encryption key.  
+The lockbox key should be decrypted locally in the JavaScript using something unavailable in the server, for example the user's password. Other information should be combined to create the encryption/decryption key to ensure two unique users with the same password do not share the same encryption key.
 
-An example formula might look like:  
+An example formula might look like:
 
-lockbox-key = decrypt(`<lockbox-key-encrypted>`, iv), where key= hmac(key_strectch(`<user-password>`), `<user-id>`), iv=hash(`<user-salt>`)  
+lockbox-key = decrypt(`<lockbox-key-encrypted>`, iv), where key= hmac(key_strectch(`<user-password>`), `<user-id>`), iv=hash(`<user-salt>`)
 
-Key stretching should be employed whenever using a weaker user generated non-cryptographically strong password. See: http://en.wikipedia.org/wiki/Key_stretching  
+Key stretching should be employed whenever using a weaker user generated non-cryptographically strong password. See: http://en.wikipedia.org/wiki/Key_stretching
 
-By using information not stored on a server, this ensures that should the server be hacked that the servers do not contain the correct information to decrypt the lockbox key. The downside is that should the password change the encryption key will need to be decrypted with the existing user password then re-encrypted using the new password. Further, if the old password is lost then the lockbox key is also lost.  
+By using information not stored on a server, this ensures that should the server be hacked that the servers do not contain the correct information to decrypt the lockbox key. The downside is that should the password change the encryption key will need to be decrypted with the existing user password then re-encrypted using the new password. Further, if the old password is lost then the lockbox key is also lost.
 
 ### Example
 
@@ -2986,7 +3002,7 @@ By using information not stored on a server, this ensures that should the server
           "accessSecretExpires": 8483943493,
     
           "uri": "identity://domain.com/alice",
-          "provider": "domain.com" 
+          "provider": "domain.com"
         },
     
         "lockbox": {
@@ -2996,7 +3012,7 @@ By using information not stored on a server, this ensures that should the server
         }
       }
     }
-   
+
 
 Identity Access Lockbox Update Request
 --------------------------------------
@@ -3059,7 +3075,7 @@ The lockbox key should be encrypted locally in JavaScript before being sent a se
         "$timestamp": 439439493
       }
     }
-   
+
 
 Identity Access Validate Request
 --------------------------------
@@ -3070,7 +3086,7 @@ This request proves that an identity access is valid and can be used to validate
 
 ### Inputs
 
-  * Client nonce - a onetime use nonce, i.e. cryptographically random string 
+  * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Purpose - reason for validation (each service using this validation should have a unique purpose string)
   * Identity information
     * Identity access token - as returned from the "identity access complete" request
@@ -3117,7 +3133,7 @@ Success or failure.
         "$timestamp": 439439493
       }
     }
-   
+
 
 Identity Lookup Update Request
 ------------------------------
@@ -3178,9 +3194,9 @@ Success or failure.
         "$timestamp": 439439493
       }
     }
-   
 
-Identity Sign Request 
+
+Identity Sign Request
 ---------------------
 
 ### Purpose
@@ -3192,14 +3208,14 @@ This request requests a signed identity a given proof of a successful identity l
   * Original identity
   * Client one time use nonce (cryptographically random string)
   * Identity access token - as returned from the "identity access complete" request
-  * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-sign:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>`)
+    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-sign")
   * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
 
 ### Returns
 
 Signed identity bundle by the identity service.
 
-### Security Considerations 
+### Security Considerations
 
 ### Example
 
@@ -3254,12 +3270,12 @@ Signed identity bundle by the identity service.
         }
       }
     }
-    
+
 
 Peer Service
 ============
 
-Peer Services Get Request 
+Peer Services Get Request
 -------------------------
 
 ### Purpose
@@ -3270,7 +3286,7 @@ This request retrieves gets a list of peer contact services available to the pee
 
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
-    * Lockbox access token - a verifiable token that is linked to the lockbox    
+    * Lockbox access token - a verifiable token that is linked to the lockbox
     * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":peer-services-get")
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
 
@@ -3351,7 +3367,7 @@ List of services available to peer contact services, containing:
         }
       }
     }
-    
+
 
 
 Peer Salt Service Protocol
@@ -3372,10 +3388,10 @@ This request returns random salt as derived from a server and signed to prove au
 
   * Total number of salts, where each salt has
     * Salt id - each salt is given a unique ID within the system
-    * Salt - base 64 encoded cryptographically random binary salt 
-    * Signed by salt service's private key  
+    * Salt - base 64 encoded cryptographically random binary salt
+    * Signed by salt service's private key
 
-Return one or more signed salt blobs for use in the peer files.  
+Return one or more signed salt blobs for use in the peer files.
 
 ### Security Considerations
 
@@ -3442,7 +3458,7 @@ The client should verify signature was generated by the certificate was issued b
         }
       }
     }
-   
+
 
 
 Peer Common Protocol
@@ -3475,21 +3491,21 @@ This method allows a peer to publish a document into the network where it can be
 
 ### Outputs
 
-The document meta information as passed into the publish without the data itself, including an updated lineage should the server replace the lineage for version 1 documents.  
+The document meta information as passed into the publish without the data itself, including an updated lineage should the server replace the lineage for version 1 documents.
 
 ### Security Considerations
 
-The lineage value can only be changed and must be changed after a previous document of the same name has been deleted. The server must verify the lineage is identical to the current lineage for versions other than version 1 chunk 1. For version 1 chunk 1 documents, the server can replace the proposed lineage with its own value that must be used in subsequent updates of the document. The lineage value must increase in value from the previous value when the lineage changes.  
+The lineage value can only be changed and must be changed after a previous document of the same name has been deleted. The server must verify the lineage is identical to the current lineage for versions other than version 1 chunk 1. For version 1 chunk 1 documents, the server can replace the proposed lineage with its own value that must be used in subsequent updates of the document. The lineage value must increase in value from the previous value when the lineage changes.
 
-Clients and servers should consider the document "newer" if it has a greater lineage value regardless if the version number is smaller.  
+Clients and servers should consider the document "newer" if it has a greater lineage value regardless if the version number is smaller.
 
-The server must delete the document at the end of the lifetime.  
+The server must delete the document at the end of the lifetime.
 
-When the client is delivering multiple chunks, the chunks must arrive in sequence. Any other document requests mid update will fail with error code 409 until the entire document has been delivered.  
+When the client is delivering multiple chunks, the chunks must arrive in sequence. Any other document requests mid update will fail with error code 409 until the entire document has been delivered.
 
-If using the json or json-diff scheme, the document chunks are post-pended together into a single document until all chunks are delivered and then processed as a whole. If using binary-base64 then the documents are merged together with white space removed and then decoded to binary when all chunks have arrived.  
+If using the json or json-diff scheme, the document chunks are post-pended together into a single document until all chunks are delivered and then processed as a whole. If using binary-base64 then the documents are merged together with white space removed and then decoded to binary when all chunks have arrived.
 
-The "all" or "some" permissions for relationships that allow a contact to receive the published documents takes precedence over the "none" or implied "deny" if they the listed contact is not contained within the "some" list.  
+The "all" or "some" permissions for relationships that allow a contact to receive the published documents takes precedence over the "none" or implied "deny" if they the listed contact is not contained within the "some" list.
 
 ### Example
 
@@ -3572,9 +3588,9 @@ The "all" or "some" permissions for relationships that allow a contact to receiv
         }
       }
     }
-   
 
-Peer Get Request 
+
+Peer Get Request
 ----------------
 
 ### Purpose
@@ -3597,17 +3613,17 @@ Previously published document split into chunks when appropriate.
 
 ### Security Considerations
 
-The server must ensure the document is published to the contact that is requesting the document otherwise the server must return a 403 Forbidden.  
+The server must ensure the document is published to the contact that is requesting the document otherwise the server must return a 403 Forbidden.
 
-The server can return any version and lineage greater than the cached version. If the latest version is equal to the cached version, the document result will contain the document meta information without the data.  
+The server can return any version and lineage greater than the cached version. If the latest version is equal to the cached version, the document result will contain the document meta information without the data.
 
-The server will return any version number it choses equal or greater to the request version number but must adhere to the "json-diff" mechanism and give only the differences between the versions or "json" to give the latest version only without performing the differences.  
+The server will return any version number it choses equal or greater to the request version number but must adhere to the "json-diff" mechanism and give only the differences between the versions or "json" to give the latest version only without performing the differences.
 
-The server will ignore the chunking denominator for chunk requested for the "1/1" chunk and require the denominator to be a value it expects instead for all other chunks requested.  
+The server will ignore the chunking denominator for chunk requested for the "1/1" chunk and require the denominator to be a value it expects instead for all other chunks requested.
 
-If using the "json" or "json-diff" scheme, the document chunks are post-pended together into a single document until all chunks are delivered and then processed as a whole. If using binary-base64 then the documents are merged together with white space removed and then decoded to binary when all chunks have arrived.  
+If using the "json" or "json-diff" scheme, the document chunks are post-pended together into a single document until all chunks are delivered and then processed as a whole. If using binary-base64 then the documents are merged together with white space removed and then decoded to binary when all chunks have arrived.
 
-The "publish to relationships" section is only returned if the contact requesting the document is the publisher of the document.  
+The "publish to relationships" section is only returned if the contact requesting the document is the publisher of the document.
 
 ### Example
 
@@ -3672,9 +3688,9 @@ The "publish to relationships" section is only returned if the contact requestin
         }
       }
     }
-    
 
-Peer Delete Request 
+
+Peer Delete Request
 -------------------
 
 ### Purpose
@@ -3694,7 +3710,7 @@ Success or failure.
 
 ### Security Considerations
 
-The contact owner of the document is the only entity allowed to delete the document.  
+The contact owner of the document is the only entity allowed to delete the document.
 
 If the document version or lineage is specified then the document version and lineage must match the last published version or the request is rejected with a 409 Conflict error.
 
@@ -3725,7 +3741,7 @@ If the document version or lineage is specified then the document version and li
         "$timestamp": 13494934
       }
     }
-    
+
 
 Peer Subscribe Request
 ----------------------
@@ -3817,9 +3833,9 @@ The server only allows subscriptions where permissions allow.
         }
       }
     }
-   
 
-Peer Publish Notify 
+
+Peer Publish Notify
 -------------------
 
 ### Purpose
@@ -3844,9 +3860,9 @@ None.
 
 ### Security Considerations
 
-If a client wants to download a document about which notification was received, a client should attempt to use the documents from their cache rather than asking fetching the document again if the version of the document has already been fetched.  
+If a client wants to download a document about which notification was received, a client should attempt to use the documents from their cache rather than asking fetching the document again if the version of the document has already been fetched.
 
-Clients should consider documents with newer lineage to be "newer" regardless of the version number. Documents of the same lineage are considered newer if they have the version number is greater.  
+Clients should consider documents with newer lineage to be "newer" regardless of the version number. Documents of the same lineage are considered newer if they have the version number is greater.
 
 ### Example
 
@@ -3884,7 +3900,7 @@ Clients should consider documents with newer lineage to be "newer" regardless of
         "$timestamp": 13494934
       }
     }
-   
+
 
 Peer Finder Protocol
 ====================
@@ -3898,18 +3914,18 @@ Obtain a session token that represents the peer on the finder server so continuo
 
 ### Inputs
 
-  * One time use session proof bundle, consisting of 
+  * One time use session proof bundle, consisting of
     * Session ID
     * Finder ID - where this request is to be processed
     * Peer contact making the request
     * Client nonce - cryptographically random one time use key
     * Expiry for the one time use token
-    * User agent connecting, e.g. "application/major.minor[.build] (information)" 
+    * User agent connecting, e.g. "application/major.minor[.build] (information)"
     * Public peer file
     * Signed by peer private key
   * Location details
     * Location ID
-    * Device ID 
+    * Device ID
     * IP
     * User agent
     * OS
@@ -3918,15 +3934,15 @@ Obtain a session token that represents the peer on the finder server so continuo
 
 ### Outputs
 
-  * Expiry epoch (when next a keep alive must be sent by) 
+  * Expiry epoch (when next a keep alive must be sent by)
 
 ### Security Considerations
 
-The server must validate that the token bundle has not expired.  
+The server must validate that the token bundle has not expired.
 
-The server must verify that the request has been signed by the peer's private peer file. The contact id specified in the bundle must match the calculated contact ID based on the included public peer file Section "A". The one time key is used to prevent replay attacks to the server by ensuring the registration can only be used once on the server.  
+The server must verify that the request has been signed by the peer's private peer file. The contact id specified in the bundle must match the calculated contact ID based on the included public peer file Section "A". The one time key is used to prevent replay attacks to the server by ensuring the registration can only be used once on the server.
 
-If a Section-B of the public peer file is not present, the peer does not wish to be found in the network.  
+If a Section-B of the public peer file is not present, the peer does not wish to be found in the network.
 
 ### Example
 
@@ -3994,7 +4010,7 @@ If a Section-B of the public peer file is not present, the peer does not wish to
     
       }
     }
-    
+
 
 Session Delete Request
 ----------------------
@@ -4006,17 +4022,17 @@ This request destroys an established session gracefully.
 ### Inputs
 
   * Locations - (optional), if specified without any sub location ID elements, then all locations including this will be unregistered (i.e. a complete system wide unregister), if the location element is missing then the current location associated with the session is unregistered
-    * Location ID - (optional), for each location to unregister 
+    * Location ID - (optional), for each location to unregister
 
 ### Outputs
 
-  * The list of locations which were in fact unregistered, each listed by location ID 
+  * The list of locations which were in fact unregistered, each listed by location ID
 
 ### Security Considerations
 
-The client must have an established session to issue this request.  
+The client must have an established session to issue this request.
 
-If the client is done with the current session it may immediately disconnect after receiving the response. 
+If the client is done with the current session it may immediately disconnect after receiving the response.
 
 ### Example
 
@@ -4054,9 +4070,9 @@ If the client is done with the current session it may immediately disconnect aft
         }
       }
     }
-    
 
-Session Keep-Alive Request 
+
+Session Keep-Alive Request
 --------------------------
 
 ### Purpose
@@ -4069,11 +4085,11 @@ None.
 
 ### Outputs
 
-  * Expiry epoch (when next a keep alive must be sent by) 
+  * Expiry epoch (when next a keep alive must be sent by)
 
 ### Security Considerations 
 
-The client must have an established session to issue this request.  
+The client must have an established session to issue this request.
 
 Since the client and server are the only entities that know the session ID, the session can only be kept alive between machines without additional security. The Session Keep-Alive Request must arrive on the same Internet connection as the initial Session Create Request.
 
@@ -4101,9 +4117,9 @@ Since the client and server are the only entities that know the session ID, the 
         "expires": 483949923
       }
     }
-   
 
-Peer Location Find Request (single point to single point) 
+
+Peer Location Find Request (single point to single point)
 ---------------------------------------------------------
 
 ### Request Flow
@@ -4133,13 +4149,13 @@ This is the request to find a peer that includes the proof of permission to cont
 
 ### Security Considerations
 
-The server must verify the server find secret proof is correct according to the information provided in the public peer file of the registered peer being contacted. At this point the one time key should be verified that it has only been seen this one time.  
+The server must verify the server find secret proof is correct according to the information provided in the public peer file of the registered peer being contacted. At this point the one time key should be verified that it has only been seen this one time.
 
-The "peer secret encrypted" is encrypted using the public key of the peer being contacted. Any information encrypted using this key can only be considered valid to/from the requesting peer only if the signature on the proof bundle has been validated by the peer being contacted. Otherwise, it's possible a compromised server could have compromised the "peer secret encrypted" by substituting another encrypted key in its place.  
+The "peer secret encrypted" is encrypted using the public key of the peer being contacted. Any information encrypted using this key can only be considered valid to/from the requesting peer only if the signature on the proof bundle has been validated by the peer being contacted. Otherwise, it's possible a compromised server could have compromised the "peer secret encrypted" by substituting another encrypted key in its place.
 
-Since the peer being contact doesn't necessarily know the public key of the requesting peer in advanced, the information that is encrypted must be limited to the candidate passwords returned, which at worse can cause the peer being contacted to connect with a malicious peer. However, once the "Peer Identify Request" completes, the contacted peer can validate the requesting peer's find proof bundle at that time.  
+Since the peer being contact doesn't necessarily know the public key of the requesting peer in advanced, the information that is encrypted must be limited to the candidate passwords returned, which at worse can cause the peer being contacted to connect with a malicious peer. However, once the "Peer Identify Request" completes, the contacted peer can validate the requesting peer's find proof bundle at that time.
 
-The peer being contacted will use the "peer secret encrypted" to decrypt the requesting peer's candidate's "password encrypted" and encrypt candidate's passwords in return but cannot assume any channel formed is in fact going to the correct peer until verified.  
+The peer being contacted will use the "peer secret encrypted" to decrypt the requesting peer's candidate's "password encrypted" and encrypt candidate's passwords in return but cannot assume any channel formed is in fact going to the correct peer until verified.
 
 ### Example
 
@@ -4214,7 +4230,7 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
         }
       }
     }
-    
+
 
 Peer Location Find Result (B)
 -----------------------------
@@ -4265,7 +4281,6 @@ Since the request was successfully issued, the information contained in the deta
         }
       }
     }
-    
 
 
 Peer Location Find Request (C)
@@ -4282,9 +4297,9 @@ This is the forwarded request to the finder responsible for the contacted peer.
 
 ### Security Considerations
 
-The server attaches a route message to know which peer connection to send any reply back. The route identifier for the peer connection should be cryptographically random.  
+The server attaches a route message to know which peer connection to send any reply back. The route identifier for the peer connection should be cryptographically random.
 
-In theory, a malicious peer later responding the Peer Location Find Request could change the route in the Peer Location Find Reply and cause the message to erroneously be delivered to the wrong peer attached to a finder. However, even if the malicious peer managed to misdirect to the wrong peer the reply would get dropped since request never matched any request previously sent out by that peer. The worst-case scenario is a malicious client could waste the bandwidth and processing power of another finder. Since the only way to possibly know this route in advance is by the malicious peer having established communication with targeted peer previously, the offending malicious peer already could waste the processing power and bandwidth of the targeted peer by sending bogus Peer Location Find Requests. Hence adding protection against this attack does not achieve any lessening in vulnerability.  
+In theory, a malicious peer later responding the Peer Location Find Request could change the route in the Peer Location Find Reply and cause the message to erroneously be delivered to the wrong peer attached to a finder. However, even if the malicious peer managed to misdirect to the wrong peer the reply would get dropped since request never matched any request previously sent out by that peer. The worst-case scenario is a malicious client could waste the bandwidth and processing power of another finder. Since the only way to possibly know this route in advance is by the malicious peer having established communication with targeted peer previously, the offending malicious peer already could waste the processing power and bandwidth of the targeted peer by sending bogus Peer Location Find Requests. Hence adding protection against this attack does not achieve any lessening in vulnerability.
 
 ### Example
 
@@ -4305,7 +4320,7 @@ In theory, a malicious peer later responding the Peer Location Find Request coul
         }
       }
     }
-   
+
 
 Peer Location Find Request (D)
 ------------------------------
@@ -4321,13 +4336,13 @@ This is the forwarded request to the contacted peer.
 
 ### Security Consideration
 
-The peer finder will add the route where it received the Peer Location Find Request from before sending it to the peer receiving the request. Thus when the reply comes in the reply will be directed back alone the path it was sent.  
+The peer finder will add the route where it received the Peer Location Find Request from before sending it to the peer receiving the request. Thus when the reply comes in the reply will be directed back alone the path it was sent.
 
-A malicious peer in theory could change the route in the Peer Location Find Reply to another peer finder on the way back by inserting a misdirected route thus wasting the peer finder's bandwidth and CPU (if this happen the Peer Location Find Reply would eventually get dropped thus is not a security whole).  
+A malicious peer in theory could change the route in the Peer Location Find Reply to another peer finder on the way back by inserting a misdirected route thus wasting the peer finder's bandwidth and CPU (if this happen the Peer Location Find Reply would eventually get dropped thus is not a security whole).
 
-Protecting against this attack is not worthwhile since a malicious peer could waste the peer's bandwidth and CPU by sending requests to the attacked peer finder directly.  
+Protecting against this attack is not worthwhile since a malicious peer could waste the peer's bandwidth and CPU by sending requests to the attacked peer finder directly.
 
-A peer finder should keep track of the request to response ratio (i.e. the number of Peer Location Find Requests sent to a peer versus the number of Peer Location Find Replies received from a peer) within windows in which requests were sent. If Peer Location Find Replies are received outside the normal boundaries or outside the window of Peer Location Find Requests, this could be a peer attempting to attack another peer finder using a its peer finder as a proxy by sending bogus Peer Location Find Replies that never had requests.  
+A peer finder should keep track of the request to response ratio (i.e. the number of Peer Location Find Requests sent to a peer versus the number of Peer Location Find Replies received from a peer) within windows in which requests were sent. If Peer Location Find Replies are received outside the normal boundaries or outside the window of Peer Location Find Requests, this could be a peer attempting to attack another peer finder using a its peer finder as a proxy by sending bogus Peer Location Find Replies that never had requests.
 
 ### Example
 
@@ -4351,7 +4366,7 @@ A peer finder should keep track of the request to response ratio (i.e. the numbe
         }
       }
     }
-    
+
 
 Peer Location Find Reply (E)
 ----------------------------
@@ -4368,7 +4383,7 @@ This is the reply from the contacted peer to the contacting peer.
     * Candidate transport
     * Candidate IP
     * Candidate port
-    * Candidate username fragment 
+    * Candidate username fragment
     * Candidate password encrypted
     * Candidate priority
   * Signed by replying peer
@@ -4376,11 +4391,11 @@ This is the reply from the contacted peer to the contacting peer.
 
 ### Security Considerations
 
-The contacted peer will decrypt the "peer secret encrypted" using its private key and use the "peer secret" to encrypt its candidate passwords in the reply. Since these usernames and passwords are used exclusively for the sake of discovering contactable addresses between peers in an ICE fashion, the worse a compromised finder could do would be to misdirect a peer to contact a wrong address. Since a malicious finder could already misdirect peers there is no additional protection provided by securing these credentials further.  
+The contacted peer will decrypt the "peer secret encrypted" using its private key and use the "peer secret" to encrypt its candidate passwords in the reply. Since these usernames and passwords are used exclusively for the sake of discovering contactable addresses between peers in an ICE fashion, the worse a compromised finder could do would be to misdirect a peer to contact a wrong address. Since a malicious finder could already misdirect peers there is no additional protection provided by securing these credentials further.
 
-In theory a compromised finder could respond to the Peer Location Find Request attempting to direct the original requesting peer initiating a connection to malicious host. However, since the compromised finder cannot know the "peer secret", the misdirection attempt will fail.  
+In theory a compromised finder could respond to the Peer Location Find Request attempting to direct the original requesting peer initiating a connection to malicious host. However, since the compromised finder cannot know the "peer secret", the misdirection attempt will fail.
 
-However, a compromised finder could misdirect the contacted peer by substituting the request's "peer secret" and candidates with its own candidates. While the channel will be opened to the misdirected peer, the peer will fail to communicate as the original requesting peer must prove itself by issuing the "Peer Identity Request".  
+However, a compromised finder could misdirect the contacted peer by substituting the request's "peer secret" and candidates with its own candidates. While the channel will be opened to the misdirected peer, the peer will fail to communicate as the original requesting peer must prove itself by issuing the "Peer Identity Request".
 
 ### Example
 
@@ -4446,7 +4461,7 @@ However, a compromised finder could misdirect the contacted peer by substituting
         }
       }
     }
-    
+
 
 Peer Location Find Reply (F)
 ----------------------------
@@ -4484,7 +4499,7 @@ This is an internal communication from peer finder to peer finder. The receiving
         }
       }
     }
-    
+
 
 Peer Location Find Reply (G)
 ----------------------------
@@ -4518,18 +4533,18 @@ The client will receive location candidates that it believes will belong to the 
         }
       }
     }
-    
 
-Peer Location Find Request (single point to multipoint when challenged) 
+
+Peer Location Find Request (single point to multipoint when challenged)
 -----------------------------------------------------------------------
 
 ### Request Flow
 
 ![Peer Location Find Request Flow](PeerLocationFindRequestFlow2.png)
 
-The request is identical to "single point to single point" except the request would fork to the two Finders responsible for the two different locations of "bob@bar.com". While above shows one request fork completing before the other request fork begins, in reality the requests would fork simultaneously. Given that another location exists for "bob@bar.com", the request start out identical but the routes would diverge and the resulting reply would be complete different.  
+The request is identical to "single point to single point" except the request would fork to the two Finders responsible for the two different locations of "bob@bar.com". While above shows one request fork completing before the other request fork begins, in reality the requests would fork simultaneously. Given that another location exists for "bob@bar.com", the request start out identical but the routes would diverge and the resulting reply would be complete different.
 
-For the sake of simplicity, Peer Location Find Request/Reply A-H are not repeated.  
+For the sake of simplicity, Peer Location Find Request/Reply A-H are not repeated.
 
 Peer Location Find Request (H)
 ------------------------------
@@ -4566,7 +4581,7 @@ Same as Peer Location Find Request (C)
         }
       }
     }
-   
+
 
 Peer Location Find Request (I)
 ------------------------------
@@ -4606,7 +4621,7 @@ Same as Peer Location Find Request (D)
         }
       }
     }
-    
+
 
 Peer Location Find Reply (J)
 ----------------------------
@@ -4691,7 +4706,7 @@ Same as Peer Location Find Reply (E)
       }
     }
 
-    
+
 Peer Location Find Reply (K)
 ----------------------------
 
@@ -4728,7 +4743,7 @@ Same as Peer Location Find Reply (F)
         }
       }
     }
-   
+
 
 Peer Location Find Reply (L)
 ----------------------------
@@ -4761,7 +4776,7 @@ Same as Peer Location Find Reply (G)
     
       }
     }
-    
+
 
 Peer To Peer Protocol
 =====================
@@ -4789,13 +4804,13 @@ This request notifies the contacted peer of the original requesting peer's ident
 
 ### Security Considerations
 
-The requesting peer must send this request over a secure channel. The public certificate of the secure channel must match the contacted peer's certificate otherwise contact has been initiated to the wrong peer and the connection must be terminated immediately by the requesting peer.  
+The requesting peer must send this request over a secure channel. The public certificate of the secure channel must match the contacted peer's certificate otherwise contact has been initiated to the wrong peer and the connection must be terminated immediately by the requesting peer.
 
-The requesting peer must choose an expiry window long enough as reasonable for the contacted peer to verify that it wants to allow the initiating peer to connect but no longer. The window must allow for the time to fetch contact information about the peer and verify the identities of the peer from a 3rd party as well as potential access rights. Without this window, if the Peer Identify Request was accidently sent to the wrong contacted peer (which happens to be malicious) by the requesting peer, the malicious contacted peer could connect with the real receiving peer and replay the Peer Identify Request message. However, as long as the requesting peer verifies the receiving peer's public certificate matches what is expected then this replay attack should not be possible unless the contacted peer's private key has already been compromised.  
+The requesting peer must choose an expiry window long enough as reasonable for the contacted peer to verify that it wants to allow the initiating peer to connect but no longer. The window must allow for the time to fetch contact information about the peer and verify the identities of the peer from a 3rd party as well as potential access rights. Without this window, if the Peer Identify Request was accidently sent to the wrong contacted peer (which happens to be malicious) by the requesting peer, the malicious contacted peer could connect with the real receiving peer and replay the Peer Identify Request message. However, as long as the requesting peer verifies the receiving peer's public certificate matches what is expected then this replay attack should not be possible unless the contacted peer's private key has already been compromised.
 
-The contacted peer must verify this is the first request it receives from the requesting peer. The contacted peer may disallow anonymous connections and require a verifiable connection ID. The contacted peer must verify the find secret matches the find secret in its own Section "B" of its public peer file (to insure this was not a replay of a request sent to a different peer file).  
+The contacted peer must verify this is the first request it receives from the requesting peer. The contacted peer may disallow anonymous connections and require a verifiable connection ID. The contacted peer must verify the find secret matches the find secret in its own Section "B" of its public peer file (to insure this was not a replay of a request sent to a different peer file).
 
-The contacted peer must verify the request has not expired and should verify the one time key has not been used before. The signature on the bundle must be verified to ensure the requesting peer signed it.  
+The contacted peer must verify the request has not expired and should verify the one time key has not been used before. The signature on the bundle must be verified to ensure the requesting peer signed it.
 
 ### Example
 
@@ -4814,7 +4829,7 @@ The contacted peer must verify the request has not expired and should verify the
     
             "findSecret": "YjAwOWE2YmU4OWNlOTdkY2QxNzY1NDA5MGYy",
     
-            "location": { 
+            "location": {
               "$id": "5c5fdfab4bbf8cc8345555172914b9733b2034a4"
               "contact": "peer://domain.com/db9e3a737c690e7cdcfbacc29e4a54dfa5356b63",
               "details": {
@@ -4868,9 +4883,9 @@ The contacted peer must verify the request has not expired and should verify the
         }
       }
     }
-    
 
-Peer Keep-Alive Request 
+
+Peer Keep-Alive Request
 -----------------------
 
 ### Purpose
@@ -4883,7 +4898,7 @@ None.
 
 ### Outputs
 
-  * Expiry epoch (when next a keep alive must be sent by) 
+  * Expiry epoch (when next a keep alive must be sent by)
 
 ### Security Considerations
 
@@ -4909,7 +4924,7 @@ The client must have an established peer session to issue this request.
         "expires": 483949923
       }
     }
-    
+
 
 Document Specifications
 =======================
