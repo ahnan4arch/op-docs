@@ -145,42 +145,44 @@ The "peer:" URI scheme
 Syntax
 -------
 
-peer://`<domain>`/contact-id
+`peer://<domain>/<contact-id>`
 
-[/`<resource>`][?`<query>`][;protocol=`<protocol>`][;request=`<request>`][#`<fragment>`]
+Where:
 
-`<domain>` - the domain service where the Bootstrapped Network is introduced, e.g. "foo.com" or "bar.com".
-
-`<contact-id>` - the hash result of the section A of the Public Peer File
+  * `<domain>` - the domain service where the Bootstrapped Network is introduced, e.g. "foo.com" or "bar.com".
+  
+  * `<contact-id>` - the hash result of the section A of the Public Peer File
 
 Examples
 ---------
 
-peer://foo.com/e852191079ea08b654ccf4c2f38a162e3e84ee04
-peer://example.org/3b0056498dc7cdd6a4d5373ac0860f9738b071da
-peer://`<domain>`/contact-id
+    peer://foo.com/e852191079ea08b654ccf4c2f38a162e3e84ee04
+    peer://example.org/3b0056498dc7cdd6a4d5373ac0860f9738b071da
+    peer://<domain>/contact-id
 
 Syntax (future extensions)
 ---------------------------
 
-peer://foo.com/id[/`<resource>`][?`<query>`][#`<fragment>`][;protocol=`<protocol>`][;request=`<request>`]
+`peer://foo.com/id[/<resource>][?<query>][#<fragment>][;protocol=<protocol>][;request=<request>]`
 
-`<resource>` - and optional resource within the peer that is being requested.
+Where:
 
-`<query>` - an optional component which identifies non-hierarchical information about a resource.
+  * `<resource>` - and optional resource within the peer that is being requested.
 
-`<protocol>` - the default value of "peer-dialog" is presumed, other extensions like "peer-http" are possible and might be presumed depending on the "lookup-type" requested
+  * `<query>` - an optional component which identifies non-hierarchical information about a resource.
 
-`<request>` - this allows control over the action required which this URI is requested, e.g. "call" might be used to establish an audio/video call to the peer or "get" might be used (or even assumed) in combination with a protocol type of "peer-http" to indicate performing an HTTP request over Open Peer.
+  * `<protocol>` - the default value of "peer-dialog" is presumed, other extensions like "peer-http" are possible and might be presumed depending on the "lookup-type" requested
 
-`<fragment>` - an optional component which identifies direction towards a secondary resource.
+  * `<request>` - this allows control over the action required which this URI is requested, e.g. "call" might be used to establish an audio/video call to the peer or "get" might be used (or even assumed) in combination with a protocol type of "peer-http" to indicate performing an HTTP request over Open Peer.
+
+  * `<fragment>` - an optional component which identifies direction towards a secondary resource.
 
 Example future extensions:
 --------------------------
 
-peer://example.org/3b0056498dc7cdd6a4d5373ac0860f9738b071da/index.php;protocol=peer-http
-peer://hookflash.com/3b00564d6a4d5373ac0860f9738b071da/;protocol=peer-http;request=get
-peer://foo.com/e852191079ea08b654ccf4c2f38a162e3e84ee04;request=call
+    peer://example.org/3b0056498dc7cdd6a4d5373ac0860f9738b071da/index.php;protocol=peer-http
+    peer://hookflash.com/3b00564d6a4d5373ac0860f9738b071da/;protocol=peer-http;request=get
+    peer://foo.com/e852191079ea08b654ccf4c2f38a162e3e84ee04;request=call
 
 
 The "identity:" URI scheme
