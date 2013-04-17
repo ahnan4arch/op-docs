@@ -2405,6 +2405,8 @@ This notification is sent from the inner frame to the outer window as a posted m
 
   * Ready
     * true - notify the login window is ready to receive messages
+  * Visibility:
+    * true - notify the login window needs visibility
 
 ### Returns
 
@@ -2423,7 +2425,8 @@ Success or failure.
         "$method": "lockbox-admin-window",
     
         "browser": {
-          "ready": true
+          "ready": true,
+          "visibility": true
         }
       }
     }
@@ -2448,6 +2451,15 @@ Once the browser window receives notification that it is ready, this request is 
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
   * Grant
     * ID - ID as passed into the lockbox access request
+  * Browser information
+    * Visibility - the browser window is being shown in what state
+      * "visible" - the browser window is visible
+      * "hidden" - the browser window is hidden and cannot be shown
+      * "visible-on-demand" - the browser window is hidden but can be rendered visible via a request posted to the outer frame (note: if rendered inside an application, the application can show the window in a hidden state to start and the browser window can become visible only when the user needs to enter some credentials)
+    * Popup
+      * "allow"- popups windows/new tabs are allowed to be opened
+      * "deny" - popup windows/new tables are not allowed to be opened
+    * Outer frame reload URL - a URL to reload the outer frame should the grant process have to replace the outer frame's window with its own URL. Once the outer frame is reloaded the inner frame page is reloaded as well allowing the inner frame to send the completion request.
 
 ### Returns
 
@@ -2480,6 +2492,12 @@ None.
     
         "grant": {
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543"
+        }
+    
+        "browser": {
+          "visibility": "visible-on-demand",
+          "popup": "deny",
+          "outerFrameURL": "https://webapp.com/outerframe?reload=true"
         }
       }
     }
