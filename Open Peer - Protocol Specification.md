@@ -1766,7 +1766,6 @@ This request obtains access to a lockbox. Access is granted by way of login proo
     * ID - ID as passed into the request
     * List of namespace URLs previously granted to the grant ID
   * List of identities attached to the lockbox
-    * Disposition - (optional) if the "update" disposition is specified then this identity needs its lockbox key "identity half" updated as it is out of date
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
 
@@ -2348,7 +2347,8 @@ No value names within the same permission URL should be identical.
               {
                 "$id": "https://domain.com/pemissionname",
                 "value1": "ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
-                "value2": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
+                "value2": "-",
+                "value3": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk",
               },
               {
                 "$id": "https://other.com/pemissionname",
