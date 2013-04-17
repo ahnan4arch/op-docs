@@ -190,27 +190,31 @@ The "identity:" URI scheme
 
 Syntax
 -------
-identity:[type:][//`<domain>`/]`<identity-string>`
 
-If a "//" is not present after the "identity:" scheme, then the identity is assumed to be a specialized registered type that must be resolved in a specialized manner. If the "//" is present then the identity is resolved by the specified domain, with an optional username/password access credentials to the identity lookup service.
+`identity:[type:][//<domain>/]<identity-string>`
 
-`<username>` - the username used for basic auth to the identity lookup service
+If a `//` is not present after the `identity:` scheme, then the identity is assumed to be a specialized registered type that must be resolved in a specialized manner. If the `//` is present then the identity is resolved by the specified domain, with an optional username/password access credentials to the identity lookup service.
 
-`<password>` - the password used for basic auth to the identity lookup service
+Where:
 
-`<domain>` - the domain service where the identity is resolved, e.g. "foo.com" or "bar.com".
+  * `<username>` - the username used for basic auth to the identity lookup service
 
-`<identity-string>` - the string that represents the persona of the identity but the interpretation is specific to a particular domain.
+  * `<password>` - the password used for basic auth to the identity lookup service
+
+  * `<domain>` - the domain service where the identity is resolved, e.g. "foo.com" or "bar.com".
+
+  * `<identity-string>` - the string that represents the persona of the identity but the interpretation is specific to a particular domain.
 
 The URL characters '?' ';' '#' are reserved characters in the URI scheme and should never be used within an identity.
 
 Examples
 ---------
-identity:phone:14165551212
-identity:email:foo@bar.com
-identity://foo.com/alice.78
-identity://facebook.com/id3993232
-identity://bar.com/linkedin.com/zs39923yf
+
+    identity:phone:14165551212
+    identity:email:foo@bar.com
+    identity://foo.com/alice.78
+    identity://facebook.com/id3993232
+    identity://bar.com/linkedin.com/zs39923yf
 
 
 The Makeup of the Public Peer File
@@ -228,8 +232,7 @@ Section "A" (packaged and signed by identity's private key)
   * Public peer file expiry date
   * Salt signed by salt service's key
   * Extension authorized-peer data
-  * Peer's public key (in signature) - The key is base 64 encoded version of "SubjectPublicKeyInfo"
-PKCS #1/X.509 DER encoding (BER decoding) format. This x.509 format is used for all x.509 keys in the system.
+  * Peer's public key (in signature) - The key is base 64 encoded version of "SubjectPublicKeyInfo" PKCS #1/X.509 DER encoding (BER decoding) format. This x.509 format is used for all x.509 keys in the system.
 
 Section "B" (packaged and signed by identity's private key)
 -----------------------------------------------------------
@@ -1162,6 +1165,7 @@ General Request, Reply, Notify and Result Formation Rules
 =========================================================
 
 Open Peer has four types of messages:
+
   * request - the request types requires a "result" as a response to the request whose ID matches the request.
   * result - a result is in response to a request whose ID must match the request
   * reply - this is a special case "reply" to a request during the find where the finder returns an immediate result to the request but each peer location can give its own reply with the same ID as the request subsequently
