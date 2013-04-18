@@ -446,7 +446,7 @@ Example Private Peer File
               "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
               "cipher": "sha256/aes256",
               "salt": "YzY4NWUxMGU4M2ZjNzVkZWQzZTljYWMyNzUzZDAwNGM4NzE5Yjg1",
-              "secretProof": "NDlkZWI0MzFhYmUxOWQzNWJkNDkzMWZhMzFmMw=="
+              "secretProof": "2ee79fea96b0c3d021aed9b26d309481cc14e492"
             },
             "signature": {
               "reference": "#A",
@@ -456,7 +456,7 @@ Example Private Peer File
               "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
             }
           },
-              {
+          {
             "section": {
               "$id": "B",
               "encryptedContact": "cGVlcjo...NDNiZDQ0MzkwZGFiYzMyOTE5MmEzOTJiZWYx",
