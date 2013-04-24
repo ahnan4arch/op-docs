@@ -1204,6 +1204,25 @@ If a client disconnects without sending the unregister request, the server shoul
 Other disconnection rules are specified whenever they are exceptions to the rule or the exceptions.
 
 
+Browser Considerations
+----------------------
+
+When making requests from a browser it is typical for these to be cross-origin. The browser enforces security policies when making cross-origin requests that limit which server may be called for certain types of requests. The W3C [Cross-Origin Resource Sharing](http://www.w3.org/TR/cors/) specification implemented by modern browsers can be used to configure these policies.
+
+For a server to support Open Peer cross-origin requests it must:
+
+  * Respond to HTTP `OPTIONS` requests with the following headers (empty body):
+
+        Access-Control-Allow-Origin: *
+        Access-Control-Allow-Headers: Content-Type
+        Access-Control-Allow-Methods: POST, GET, OPTIONS
+
+  * Respond to `POST` requests with the following header:
+
+        Access-Control-Allow-Credentials: true
+        Access-Control-Allow-Origin: *
+
+
 General Result Error Code Reasons
 =================================
 
