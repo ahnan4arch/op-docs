@@ -70,6 +70,12 @@
 
 		function load() {
 
+			// Redirect to append tariling `/` if missing.
+			if (!/\/$/.test(window.location.pathname)) {
+				window.location.replace(window.location.protocol + "//" + window.location.host + window.location.pathname + "/" + (window.location.hash || ""));
+				return;
+			}
+
 			function tocLoaded() {
 				$("#toc LI").each(function() {
 					var li = $(this);
