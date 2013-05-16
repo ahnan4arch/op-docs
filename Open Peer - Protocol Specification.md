@@ -1583,7 +1583,7 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
       "request": {
         "$domain": "example.com",
         "$appid": "xyz123",
-        "$handler": "bootstrapper-finder",
+        "$handler": "bootstrapped-finders",
         "$method": "finders-get",
         "$id": "abd23",
     
@@ -1595,7 +1595,7 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
       "result": {
         "$domain": "example.com",
         "$appid": "xyz123",
-        "$handler": "bootstrapper-finder",
+        "$handler": "bootstrapped-finders",
         "$method": "finders-get",
         "$id": "abc123",
         "$timestamp": 439439493,
