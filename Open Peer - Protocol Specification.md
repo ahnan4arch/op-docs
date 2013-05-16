@@ -1560,8 +1560,9 @@ The total number of server entries desired (which the server can choose to ignor
 Returns a list of Finders containing the following information for each Finder:
 
   * Finder ID - the unique ID that represents this finder in the system
-  * Transport
-  * SRV record [or pre-resolved comma separated IP:port pair locations] - SRV lookup type is _finder._udp.domain.com
+  * Array of protocols supported, with each defining:
+    * Transport - a string describing the type of transport supported
+    * SRV record [or pre-resolved comma separated IP:port pair locations] - for example for "rudp/udp" SRV lookup type is _finder._udp.domain.com
   * Public key for the finder - Can be either the full X.509 certificate or a key name lookup for certificates returned from the certificate server
   * Weight / priority - default values for SRV like weight/priority when SRV entry is pre-resolved IP:port pairs
   * Geographic region ID - (optional) each server belongs to a logical geographic region (clients can organize servers into geographic regions for fail over reasons)
@@ -1604,8 +1605,18 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
             {
               "finder": {
                 "$id": "4bf7fff50ef9bb07428af6294ae41434da175538",
-                "transport": "rudp/udp",
-                "srv": "finders.example.com",
+                "protocols": {
+                  "protocol": [
+                    {
+                      "transport": "rudp/udp",
+                      "srv": "finders.example.com"
+                    },
+                    {
+                      "transport": "secure-websocket/tcp",
+                      "srv": "finders.example.com"
+                    }
+                  ]
+                },
                 "key": { "x509Data": "MIIDCCA0+gA...lVN" },
                 "priority": 1,
                 "weight": 1,
@@ -1628,8 +1639,18 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
             {
               "finder": {
                 "$id": "a7f0c5df6d118ee2a16309bc8110bce009f7e318",
-                "transport": "rudp/udp",
-                "srv": "100.200.100.1:4032,5.6.7.8:4032",
+                "protocols": {
+                  "protocol": [
+                    {
+                       "transport": "rudp/udp",
+                       "srv": "100.200.100.1:4032,5.6.7.8:4032"
+                    },
+                    {
+                       "transport": "framed/tcp",
+                       "srv": "100.200.100.1:4099,5.6.7.8:4099"
+                    }
+                  ]
+                },
                 "key": { "x509Data": "MIID5A0+gA...lVN" },
                 "priority": 10,
                 "weight": 0,
@@ -1827,7 +1848,7 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
         "agent": {
           "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
           "name": "hookflash",
-          "image": "https://hookflash.com/brandsquare.png",
+          "image": "https://hookflash.com/brandsquare.png"
         },
     
         "lockbox": {
@@ -1984,8 +2005,8 @@ If all the identities associated to the lockbox are removed then the lockbox acc
         "lockbox": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934,
-        }
+          "accessSecretProofExpires": 43843298934
+        },
     
         "identities": {
          "identity": [
@@ -2017,7 +2038,7 @@ If all the identities associated to the lockbox are removed then the lockbox acc
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-identities-update",
-        "$timestamp": 439439493
+        "$timestamp": 439439493,
     
         "identities": {
          "identity": [
@@ -2055,12 +2076,12 @@ None.
 ### Example
 
 
-Lockbox Namespace Grant Window Notification
--------------------------------------------
+Lockbox Namespace Grant Window Request
+--------------------------------------
 
 ### Purpose
 
-This notification is sent from the inner frame to the outer window as a posted message. This allows the inner window to notify the outer window it's ready to start processing requests.
+This request notification is sent from the inner frame to the outer window as a posted message. This allows the inner window to notify the outer window it's ready to start processing requests.
 
 ### Inputs
 
@@ -2078,7 +2099,7 @@ Success or failure.
 ### Example
 
     {
-      "notify": {
+      "request": {
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
@@ -2092,6 +2113,16 @@ Success or failure.
       }
     }
 
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "lockbox",
+        "$method": "lockbox-namespace-grant-window",
+        "$timestamp": 439439493
+      }
+    }
 
 Lockbox Namespace Grant Start Notification
 ------------------------------------------
@@ -2142,15 +2173,15 @@ None.
         "agent": {
           "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
           "name": "hookflash",
-          "image": "https://hookflash.com/brandsquare.png",
+          "image": "https://hookflash.com/brandsquare.png"
         },
     
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934,
-        }
+          "accessSecretProofExpires": 43843298934
+        },
     
         "grant": {
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
@@ -2266,8 +2297,8 @@ No value names within the same namespace URL should be identical.
         "lockbox": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934,
-        }
+          "accessSecretProofExpires": 43843298934
+        },
     
         "grant": {
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
@@ -2302,12 +2333,12 @@ No value names within the same namespace URL should be identical.
           "namespaces":{
             "namespace": [
               {
-                "$id": "https://domain.com/pemissionname"
+                "$id": "https://domain.com/pemissionname",
                 "value1": "ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
                 "value2": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
               },
               {
-                "$id": "https://other.com/pemissionname"
+                "$id": "https://other.com/pemissionname",
                 "what1": "ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
                 "what2": "Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
               }
@@ -2359,8 +2390,8 @@ No value names within the same permission URL should be identical.
         "lockbox": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934,
-        }
+          "accessSecretProofExpires": 43843298934
+        },
     
         "grant": {
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
@@ -2371,7 +2402,7 @@ No value names within the same permission URL should be identical.
                 "$id": "https://domain.com/pemissionname",
                 "value1": "ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
                 "value2": "-",
-                "value3": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk",
+                "value3": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
               },
               {
                 "$id": "https://other.com/pemissionname",
@@ -2417,12 +2448,12 @@ None.
 ### Example
 
 
-Lockbox Admin Window Notification
----------------------------------
+Lockbox Admin Window Request
+----------------------------
 
 ### Purpose
 
-This notification is sent from the inner frame to the outer window as a posted message. This allows the inner window to notify the outer window it's ready to start processing requests.
+This request notification is sent from the inner frame to the outer window as a posted message. This allows the inner window to notify the outer window it's ready to start processing requests.
 
 ### Inputs
 
@@ -2440,7 +2471,7 @@ Success or failure.
 ### Example
 
     {
-      "notify": {
+      "request": {
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
@@ -2454,6 +2485,16 @@ Success or failure.
       }
     }
 
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "lockbox",
+        "$method": "lockbox-admin-window",
+        "$timestamp": 439439493
+      }
+    }
 
 Lockbox Admin Start Notification
 --------------------------------
@@ -2503,19 +2544,19 @@ None.
         "agent": {
           "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
           "name": "hookflash",
-          "image": "https://hookflash.com/brandsquare.png",
+          "image": "https://hookflash.com/brandsquare.png"
         },
     
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934,
-        }
+          "accessSecretProofExpires": 43843298934
+        },
     
         "grant": {
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543"
-        }
+        },
     
         "browser": {
           "visibility": "visible-on-demand",
@@ -2598,15 +2639,15 @@ The domain signing proof can authorize namespaces within its own domain and no o
         "agent": {
           "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
           "name": "hookflash",
-          "image": "https://hookflash.com/brandsquare.png",
+          "image": "https://hookflash.com/brandsquare.png"
         },
     
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934,
-        }
+          "accessSecretProofExpires": 43843298934
+        },
     
         "grant": {
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543"
@@ -2910,12 +2951,12 @@ None.
 ### Example
 
 
-Identity Access Window Notification
------------------------------------
+Identity Access Window Request
+------------------------------
 
 ### Purpose
 
-This notification is sent from the inner frame to the outer frame as a posted message. This allows the inner window to notify the outer browser window that visibility is needed and/or if it's ready to start processing requests. Upon loading the inner frame must send to the outer frame that it is ready to start processing messaging.
+This request notification is sent from the inner frame to the outer frame as a posted message. This allows the inner window to notify the outer browser window that visibility is needed and/or if it's ready to start processing requests. Upon loading the inner frame must send to the outer frame that it is ready to start processing messaging.
 
 ### Inputs
 
@@ -2935,7 +2976,7 @@ This notification is allowed to be sent more than once to the outer frame as nee
 ### Example
 
     {
-      "notify": {
+      "request": {
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
@@ -2949,6 +2990,15 @@ This notification is allowed to be sent more than once to the outer frame as nee
       }
     }
 
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$method": "identity-access-window",
+        "$timestamp": 439439493
+      }
+    }
 
 Identity Access Start Notification
 ----------------------------------
@@ -2999,7 +3049,7 @@ Once the inner frame receives this notification it is allowed to replace the out
         "agent": {
           "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
           "name": "hookflash",
-          "image": "https://hookflash.com/brandsquare.png",
+          "image": "https://hookflash.com/brandsquare.png"
         },
     
         "identity": {
@@ -3238,7 +3288,7 @@ Success or failure.
           "accessSecretProofExpires": 43843298934,
     
           "uri": "identity://domain.com/alice",
-          "provider": "domain.com"
+          "provider": "domain.com",
     
           "stableID": "0acc990c7b6e7d5cb9a3183d432e37776fb182bf",
           "peer": {...},
@@ -3406,7 +3456,7 @@ List of services available to peer contact services, containing:
               "methods": {
                 "method": {
                   "name": "turn",
-                  "uri": "service.com"
+                  "uri": "service.com",
                   "username": "id39392",
                   "password": "bdaaba26fa8ccac7807a786156b1f0fc87b2e28a"
                 }
@@ -3420,7 +3470,7 @@ List of services available to peer contact services, containing:
               "methods": {
                 "method": {
                   "name": "stun",
-                  "uri": "service.com"
+                  "uri": "service.com",
                   "username": "id39392",
                   "password": "bdaaba26fa8ccac7807a786156b1f0fc87b2e28a"
                 }
@@ -4068,7 +4118,7 @@ If a Section-B of the public peer file is not present, the peer does not wish to
         "$method": "session-create",
         "$timestamp": 13494934,
     
-        "server": "hooflash/1.0 (centos)"
+        "server": "hooflash/1.0 (centos)",
         "expires": 483949923
     
       }
@@ -4893,7 +4943,7 @@ The contacted peer must verify the request has not expired and should verify the
             "findSecret": "YjAwOWE2YmU4OWNlOTdkY2QxNzY1NDA5MGYy",
     
             "location": {
-              "$id": "5c5fdfab4bbf8cc8345555172914b9733b2034a4"
+              "$id": "5c5fdfab4bbf8cc8345555172914b9733b2034a4",
               "contact": "peer://domain.com/db9e3a737c690e7cdcfbacc29e4a54dfa5356b63",
               "details": {
                 "device": { "$id": "105f38b84d01e6d4bc60d1123c62c957" },
@@ -4902,7 +4952,7 @@ The contacted peer must verify the request has not expired and should verify the
                 "os": "iOS v4.3.5",
                 "system": "iPad v2",
                 "host": "foobar"
-              },
+              }
             },
             "peer": {
               "sectionBundle": {
