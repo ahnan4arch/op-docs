@@ -3014,6 +3014,7 @@ Once the browser window receives notification that it is ready, this request is 
     * Name - a human readable friendly name for the product
     * Image - a human visual image for the brand that must be square in shape.
   * Base identity URI - base URI for identity (or full identity if known in advance)
+  * Identity relogin key (optional) - a key to automatically relogin to an identity service when possible without prompting the user for a password and the meaning of the key is specific to the identity provider (the key is self-contained and includes all the information it needs to relogin but may not be capable of performing the relogin in which case the user will go through the normal login process)
   * Browser information
     * Visibility - the browser window is being shown in what state
       * "visible" - the browser window is visible
@@ -3031,6 +3032,8 @@ None.
 ### Security Considerations
 
 If the full URI of the identity is specified, the client should attempt to relogin automatically to the identity (if possible).
+
+The identity relogin key is specific to the provider. This key must be only stored in an encrypted fashion if it is stored somewhere (e.g. inside the lockbox). This key is optional and not required to be supported but should be used to fascillitate the easy relogin to the identity service on other devices. This key should have a long lifetime but the lifetime is not known by the client application as a rechallenge can be issued by the identity service at any time without warning.
 
 If the outer fame is being reloaded after haven been replaced, this notification should not be sent again.
 
@@ -3053,7 +3056,8 @@ Once the inner frame receives this notification it is allowed to replace the out
         },
     
         "identity": {
-          "base": "identity://provider.com/"
+          "base": "identity://provider.com/",
+          "reloginKey": "d2922f33a804c5f164a55210fe193327de7b2449-5007999b7734560b2c23fe81171af3e3-4c216c23"
         },
     
         "browser": {
@@ -3115,7 +3119,8 @@ By using information not stored on a server, this ensures that should the server
           "accessSecretExpires": 8483943493,
     
           "uri": "identity://domain.com/alice",
-          "provider": "domain.com"
+          "provider": "domain.com",
+          "reloginKey": "d2922f33a804c5f164a55210fe193327de7b2449-5007999b7734560b2c23fe81171af3e3-4c216c23"
         },
     
         "lockbox": {
