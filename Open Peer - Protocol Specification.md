@@ -1818,6 +1818,8 @@ This request obtains access to a lockbox. Access is granted by way of login proo
   * Grant
     * ID - ID as passed into the request
     * List of namespace URLs previously granted to the grant ID
+      * namespace URL
+      * last update of namespace timestamp
   * List of identities attached to the lockbox
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
@@ -1894,10 +1896,12 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
           "namespaces":{
             "namespace": [
               {
-                "$id": "https://domain.com/pemissionname"
+                "$id": "https://domain.com/pemissionname",
+                "$updated": "5484883"
               },
               {
-                "$id": "https://other.com/pemissionname"
+                "$id": "https://other.com/pemissionname",
+                "$updated": "5848843"
               }
             ]
           }
@@ -2254,10 +2258,12 @@ If permission was not granted to the namespace then the namespaces array will no
           "namespaces":{
             "namespace": [
               {
-                "$id": "https://domain.com/pemissionname"
+                "$id": "https://domain.com/pemissionname",
+                "$updated": "5848843"
               },
               {
-                "$id": "https://other.com/pemissionname"
+                "$id": "https://other.com/pemissionname",
+                "$updated": "5848845"
               }
             ]
           }
@@ -2346,11 +2352,13 @@ No value names within the same namespace URL should be identical.
             "namespace": [
               {
                 "$id": "https://domain.com/pemissionname",
+                "$updated": "5848843",
                 "value1": "ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
                 "value2": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
               },
               {
                 "$id": "https://other.com/pemissionname",
+                "$updated": "5848845",
                 "what1": "ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
                 "what2": "Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
               }
