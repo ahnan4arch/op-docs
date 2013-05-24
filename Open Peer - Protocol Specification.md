@@ -1463,10 +1463,6 @@ The request nor the response should have an ID associated with the request/respo
                     "uri": "https://identity.example.com/identity-access-validate"
                   },
                   {
-                    "name": "identity-access-lockbox-update",
-                    "uri": "https://identity.example.com/identity-access-lockbox-update"
-                  },
-                  {
                     "name": "identity-lookup-update",
                     "uri": "https://identity.example.com/identity-lookup-update"
                   },
