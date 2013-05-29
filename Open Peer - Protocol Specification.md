@@ -2280,7 +2280,7 @@ This request retrieves data contained in the lockbox.
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-get")
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-content-get")
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
   * Grant
     * ID - ID as passed into the lockbox grant request
@@ -2378,7 +2378,7 @@ This request retrieves data contained in the lockbox.
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-get")
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-content-set")
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
   * Grant
     * ID - ID as passed into the lockbox grant request
