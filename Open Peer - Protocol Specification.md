@@ -4550,7 +4550,7 @@ However, a compromised finder could misdirect the contacted peer by substituting
     
         "findProofBundle" : {
           "findProof": {
-            "requestfindProofBundleDigestValue": "ZDUzMjU1ZDA2YTE...NjIxYzVhN2JjNA==",
+            "requestFindProofBundleDigestValue": "ZDUzMjU1ZDA2YTE...NjIxYzVhN2JjNA==",
             "location": {
               "$id": "1f77425b06b33bfc1d9932a0716f3f2c92ec0e5",
               "contact": "peer://domain.com/541244886de66987ba30cf8d19544b7a12754042",
@@ -4794,7 +4794,7 @@ Same as Peer Location Find Reply (E)
         "findProofBundle" : {
           "findProof": {
             "$id": "d53255d06a17778b88501f570301e7621c5a7bc4",
-            "requestfindProofBundleDigestValue": "ZDUzMjU1ZDA2YTE...NjIxYzVhN2JjNA==",
+            "requestFindProofBundleDigestValue": "ZDUzMjU1ZDA2YTE...NjIxYzVhN2JjNA==",
             "location": {
               "$id": "d0866fe404867a94949771bfd606f68c3c3c5bd1",
               "contact": "peer://domain.com/541244886de66987ba30cf8d19544b7a12754042",
