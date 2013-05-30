@@ -2100,8 +2100,8 @@ None.
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "lockbox-admin-start",
+        "$handler": "namespace-grant",
+        "$method": "namespace-grant-admin-start",
     
         "agent": {
           "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
@@ -2194,21 +2194,14 @@ The domain signing proof can authorize namespaces within its own domain and no o
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "lockbox-namespace-preapproved-grant",
+        "$handler": "namespace-grant",
+        "$method": "namespace-grant-preapproved-grant",
     
         "agent": {
           "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
           "name": "hookflash",
           "image": "https://hookflash.com/brandsquare.png",
           "url": "https://hookflash.com/agentinfo/"
-        },
-    
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
-        "lockbox": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
         },
     
         "grant": {
