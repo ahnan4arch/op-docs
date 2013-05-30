@@ -1230,6 +1230,7 @@ Error replies appear as follows:
 
     {
       "result": {
+        "$handler": "handler",
         "$method": "method",
         "$timestamp": 439439493,
         "$id": "abc123",
@@ -1396,6 +1397,31 @@ The request nor the response should have an ID associated with the request/respo
             },
             {
               "$id": "d0b528b3f8e66455d154b1deac1e357e",
+              "type": "namespace-grant",
+              "version": "1.0",
+              "methods": {
+                "method": [
+                  {
+                    "name": "namespace-grant-inner-frame",
+                    "uri": "https://grant.example.com/namespace-grant-inner-frame"
+                  },
+                  {
+                    "name": "namespace-grant-admin-inner-frame",
+                    "uri": "https://grant.example.com/namespace-grant-admin-inner-frame"
+                  },
+                  {
+                    "name": "namespace-grant-preapproved-grant",
+                    "uri": "https://grant.example.com/namespace-grant-preapproved-grant"
+                  },
+                  {
+                    "name": "namespace-grant-validate",
+                    "uri": "https://grant.example.com/namespace-grant-validate"
+                  }
+                ]
+              }
+            },
+            {
+              "$id": "d0b528b3f8e66455d154b1deac1e357e",
               "type": "identity-lockbox",
               "version": "1.0",
               "methods": {
@@ -1409,24 +1435,12 @@ The request nor the response should have an ID associated with the request/respo
                     "uri": "https://lockbox.example.com/lockbox-identities-update"
                   },
                   {
-                    "name": "lockbox-namespace-grant-inner-frame",
-                    "uri": "https://lockbox.example.com/lockbox-namespace-grant-inner-frame"
-                  },
-                  {
                     "name": "lockbox-content-get",
                     "uri": "https://lockbox.example.com/lockbox-content-get"
                   },
                   {
                     "name": "lockbox-content-set",
                     "uri": "https://lockbox.example.com/lockbox-content-set"
-                  },
-                  {
-                    "name": "lockbox-admin-inner-frame",
-                    "uri": "https://lockbox.example.com/lockbox-admin-inner-frame"
-                  },
-                  {
-                    "name": "lockbox-namespace-preapproved-grant",
-                    "uri": "https://lockbox.example.com/lockbox-namespace-preapproved-grant"
                   }
                 ]
               }
@@ -1768,6 +1782,575 @@ The client must ensure the server has an HTTPS certificate that was issued by a 
       }
     }
 
+
+Namespace Grant Service Requests
+================================
+
+Namespace Grant Inner Frame
+---------------------------
+
+### Purpose
+
+This inner frame is loaded from the outer application frame. The inner frame holds the namespace grant page for the namespace grant service. The inner/outer frames send information to/from each other via JavaScript posted messages. The inner page can display the namespace grant page, allowing the user to grant permission to the application requesting access to the namespaces. The outer and inner page are rendered inside a browser window and contains sufficient display size to allow the user to see what information is being granted.
+
+### Inputs
+
+None.
+
+### Returns
+
+None.
+
+### Security Considerations
+
+### Example
+
+
+Namespace Grant Window Request
+------------------------------
+
+### Purpose
+
+This request notification is sent from the inner frame to the outer window as a posted message. This allows the inner window to notify the outer window it's ready to start processing requests.
+
+### Inputs
+
+  * Ready
+    * true - notify the login window is ready to receive messages
+  * Visibility:
+    * true - notify the login window needs visibility
+
+### Returns
+
+Success or failure.
+
+### Security Considerations
+
+### Example
+
+    {
+      "request": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "namespace-grant",
+        "$method": "namespace-grant-window",
+    
+        "browser": {
+          "ready": true,
+          "visibility": true
+        }
+      }
+    }
+
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "namespace-grant",
+        "$method": "namespace-grant-window",
+        "$timestamp": 439439493
+      }
+    }
+
+Namespace Grant Start Notification
+----------------------------------
+
+### Purpose
+
+Once the browser window receives notification that it is ready, this request is sent to the inner frame by the outer frame to give the inner frame the needed information to start the grant process.
+
+### Inputs
+
+  * Agent
+    * Product - the user agent identification for the product, typically "name/version (os/system)" information)
+    * Name - a human readable friendly name for the product
+    * Image - a human visual image for the brand that must be square in shape.
+    * Agent URL - a web page that can be rendered in a browser to obtain more information about the agent
+  * Grant
+    * ID - ID as passed into the lockbox access request
+    * secret - the secret that goes with the grant ID
+    * List of namespace URLs to be granted to the grant ID
+  * Browser information
+    * Visibility - the browser window is being shown in what state
+      * "visible" - the browser window is visible
+      * "hidden" - the browser window is hidden and cannot be shown
+      * "visible-on-demand" - the browser window is hidden but can be rendered visible via a request posted to the outer frame (note: if rendered inside an application, the application can show the window in a hidden state to start and the browser window can become visible only when the user needs to enter some credentials)
+    * Popup
+      * "allow"- popups windows/new tabs are allowed to be opened
+      * "deny" - popup windows/new tables are not allowed to be opened
+    * Outer frame reload URL - a URL to reload the outer frame should the grant process have to replace the outer frame's window with its own URL. Once the outer frame is reloaded the inner frame page is reloaded as well allowing the inner frame to send the completion request.
+
+### Returns
+
+None.
+
+### Security Considerations
+
+If this is the first time the grant service has seen the grant ID the service assumes the grant secret is correct. If the grant ID is being reused then the service will verify the grant secret matches the previous grant secret.
+
+### Example
+
+    {
+      "notify": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "namespace-grant",
+        "$method": "namespace-grant-start",
+    
+        "agent": {
+          "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
+          "name": "hookflash",
+          "image": "https://hookflash.com/brandsquare.png",
+          "url": "https://hookflash.com/agentinfo/"
+        },
+    
+        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "lockbox": {
+          "accessToken": "a913c2c3314ce71aee554986204a349b",
+          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+          "accessSecretProofExpires": 43843298934
+        },
+    
+        "grant": {
+          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
+          "secret": "2339391c1974a7660f034c26c673840891a3368b",
+    
+          "namespaces":{
+            "namespace": [
+              {
+                "$id": "https://domain.com/pemissionname"
+              },
+              {
+                "$id": "https://other.com/pemissionname"
+              }
+            ]
+          }
+        },
+    
+        "browser": {
+          "visibility": "visible-on-demand",
+          "popup": "deny",
+          "outerFrameURL": "https://webapp.com/outerframe?reload=true"
+        }
+      }
+    }
+
+
+Namespace Grant Complete Notification
+-------------------------------------
+
+### Purpose
+
+This notification is sent from the inner browser window to the outer window as a posted message to indicate that the grant process has completed.
+
+###Inputs
+
+  * Grant
+    * ID - ID as passed into the lockbox grant request
+    * expires - when the grant ID will expire from the system
+    * List of namespace URLs granted to the grant ID
+
+### Returns
+
+### Security Considerations
+
+If permission was not granted to the namespace then the namespaces array will not contain any newly requested grants (but will contain any previously granted namespaces, if any).
+
+Each time the grant ID is used, the expires window is extended longer. Thus the client only needs to rerequest permissions for namespaces for the grant ID to cause an extention of the expiry timeframe.
+
+### Example
+
+    {
+      "notify": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "namespace-grant",
+        "$method": "namespace-grant-complete",
+    
+        "grant": {
+          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
+          "expires": 54438344343,
+    
+          "namespaces":{
+            "namespace": [
+              {
+                "$id": "https://domain.com/pemissionname",
+                "$updated": 5848843
+              },
+              {
+                "$id": "https://other.com/pemissionname",
+                "$updated": 5848845
+              }
+            ]
+          }
+        }
+      }
+    }
+
+
+Namespace Grant Admin Inner Frame
+---------------------------------
+
+### Purpose
+
+This inner frame is loaded from the outer application frame. The inner frame holds the administration page for the lockbox. The inner/outer frames send information to/from each other via JavaScript posted messages. The inner page can display the lockbox's admin page, allowing the user to control access namespaces. The outer and inner page are rendered inside a browser window and contains sufficient display size to allow the user to administer the lockbox.
+
+### Inputs
+
+None.
+
+### Returns
+
+None.
+
+### Security Considerations
+
+### Example
+
+
+Namespace Grant Admin Window Request
+------------------------------------
+
+### Purpose
+
+This request notification is sent from the inner frame to the outer window as a posted message. This allows the inner window to notify the outer window it's ready to start processing requests.
+
+### Inputs
+
+  * Ready
+    * true - notify the login window is ready to receive messages
+  * Visibility:
+    * true - notify the login window needs visibility
+
+### Returns
+
+Success or failure.
+
+### Security Considerations
+
+### Example
+
+    {
+      "request": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "namespace-grant",
+        "$method": "namespace-grant-admin-window",
+    
+        "browser": {
+          "ready": true,
+          "visibility": true
+        }
+      }
+    }
+
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "namespace-grant",
+        "$method": "namespace-grant-admin-window",
+        "$timestamp": 439439493
+      }
+    }
+
+Namespace Grant Admin Start Notification
+----------------------------------------
+
+### Purpose
+
+Once the browser window receives notification that it is ready, this request is sent to the inner frame by the outer frame to give the inner frame the needed information to start the administration.
+
+### Inputs
+
+  * Agent
+    * Product - the user agent identification for the product, typically "name/version (os/system)" information)
+    * Name - a human readable friendly name for the product
+    * Image - a human visual image for the brand that must be square in shape.
+    * Agent URL - a web page that can be rendered in a browser to obtain more information about the agent
+  * Grant
+    * ID - ID as passed into the lockbox access request
+    * secret - the secret that goes with the grant ID
+* Browser information
+    * Visibility - the browser window is being shown in what state
+      * "visible" - the browser window is visible
+      * "hidden" - the browser window is hidden and cannot be shown
+      * "visible-on-demand" - the browser window is hidden but can be rendered visible via a request posted to the outer frame (note: if rendered inside an application, the application can show the window in a hidden state to start and the browser window can become visible only when the user needs to enter some credentials)
+    * Popup
+      * "allow"- popups windows/new tabs are allowed to be opened
+      * "deny" - popup windows/new tables are not allowed to be opened
+    * Outer frame reload URL - a URL to reload the outer frame should the grant process have to replace the outer frame's window with its own URL. Once the outer frame is reloaded the inner frame page is reloaded as well allowing the inner frame to send the completion request.
+
+### Returns
+
+None.
+
+### Security Considerations
+
+### Example
+
+    {
+      "notify": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "lockbox",
+        "$method": "lockbox-admin-start",
+    
+        "agent": {
+          "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
+          "name": "hookflash",
+          "image": "https://hookflash.com/brandsquare.png",
+          "url": "https://hookflash.com/agentinfo/"
+        },
+    
+        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "lockbox": {
+          "accessToken": "a913c2c3314ce71aee554986204a349b",
+          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+          "accessSecretProofExpires": 43843298934
+        },
+    
+        "grant": {
+          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
+          "secret": "2339391c1974a7660f034c26c673840891a3368b"
+        },
+    
+        "browser": {
+          "visibility": "visible-on-demand",
+          "popup": "deny",
+          "outerFrameURL": "https://webapp.com/outerframe?reload=true"
+        }
+      }
+    }
+
+
+Namespace Grant Admin Complete Notification
+-------------------------------------------
+
+### Purpose
+
+This notification is sent from the inner browser window to the outer window as a posted message to indicate that the administration process has completed.
+
+### Inputs
+
+### Returns
+
+### Security Considerations
+
+### Example
+
+    {
+      "notify": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "namespace-grant",
+        "$method": "namespace-grant-admin-complete"
+      }
+    }
+
+
+Namespace Grant Preappoved Grant Request
+----------------------------------------
+
+### Purpose
+
+This request allows a client to automatically request additional grants to namespaces from a pre-authorized source.
+
+### Inputs:
+
+  * Agent
+    * Product - the user agent identification for the product, typically "name/version (os/system)" information)
+    * Name - a human readable friendly name for the product
+    * Image - a human visual image for the brand that must be square in shape.
+    * Agent URL - a web page that can be rendered in a browser to obtain more information about the agent
+  * Grant
+    * ID - ID as passed into the lockbox access request
+  * Authorization bundle
+    * Proof - hmac(`<grant-id>`, "grant-proof:" + `<client-nonce>`)
+    * Expires - timestamp when the proof bundle expires
+    * List of namespace URLs to be granted to the grant ID
+    * Signature from authorizing domain
+
+### Returns
+
+Success or failure.
+
+### Security Considerations
+
+The domain signing proof can authorize namespaces within its own domain and no others unless the lockbox has special disposition for domain to authorize other namespaces.
+
+### Example
+
+    {
+      "request": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "lockbox",
+        "$method": "lockbox-namespace-preapproved-grant",
+    
+        "agent": {
+          "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
+          "name": "hookflash",
+          "image": "https://hookflash.com/brandsquare.png",
+          "url": "https://hookflash.com/agentinfo/"
+        },
+    
+        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "lockbox": {
+          "accessToken": "a913c2c3314ce71aee554986204a349b",
+          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+          "accessSecretProofExpires": 43843298934
+        },
+    
+        "grant": {
+          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543"
+        },
+    
+        "authorizationBundle": {
+          "authorization": {
+            "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
+            "proof": "bdd7cf06e641ee5be2f28bc051201565f05ef15e",
+            "expires": 573454,
+            "namespaces":{
+              "namespace": [
+                {
+                  "$id": "https://provider.com/pemissionname1"
+                },
+                {
+                  "$id": "https://provider.com/pemissionname2"
+                }
+              ]
+            }
+          },
+          "signature": {
+            "reference": "#b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
+            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "digestValue": "IUe324k...oV5/A8Q38Gj45i4jddX=",
+            "digestSigned": "MDAwMDAw...MGJ5dGVzLiBQbGVhc2UsIGQ=",
+            "key": {
+              "$id": "b7ef37...4a0d58628d3",
+              "domain": "provider.com",
+              "service": "identity"
+            }
+          }
+        }
+      }
+    }
+
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "lockbox",
+        "$method": "lockbox-namespace-preapproved-grant",
+        "$timestamp": 439439493
+      }
+    }
+
+
+Namespace Grant Validate Request
+--------------------------------
+
+### Purpose
+
+This request proves that an application grant ID has access to particular namespaces.
+
+### Inputs
+
+  * Client nonce - a onetime use nonce, i.e. cryptographically random string
+  * Purpose - reason for validation (each service using this validation should have a unique purpose string)
+  * Grant
+    * ID - a client generated cryptographic unique ID representing the agent's permission to access the lockbox. Once this ID is generated by a client, it should remain stable in subsequent accesses (or a new permission grant will be required). This ID should remain secret to the client application.
+    * secret proof - proof the user has access to the grant ID - proof = hmac(hash(`<grant-secret>`), "namespace-grant-validate:" + `<grant-id>` + ":" `<client-nonce>` + ":" + `<grant-proof-expires>` + ":" + `<purpose>`)
+    * expires - timestamp of when the grant proof will expire
+    * subscription URL - a URL the server will hit to notify when revocation changes to this grant ID occur (performed on a best effort basis)
+    * List of namespace URLs the namespace grant service must validate is correct
+      * namespace URL
+
+### Returns
+
+  * Grant
+    * ID - ID as passed into the request
+    * List of namespace URLs previously granted to the grant ID (if any)
+      * namespace URL
+      * last update of namespace timestamp
+
+### Security Considerations
+
+### Example
+
+    {
+      "request": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "namespace-grant",
+        "$method": "namespace-grant-validate",
+    
+        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "purpose": "whatever",
+        "grant": {
+          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
+          "secretProof": "db66e1effc01bffd79272c33c7e4258c92dcd1b3",
+          "expires": 349439439,
+    
+          "namespaces": {
+            "namespace": [
+              {
+                "$id": "https://domain.com/pemissionname"
+              },
+              {
+                "$id": "https://other.com/pemissionname"
+              }
+            ]
+          }
+        }
+      }
+    }
+
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "namespace-grant",
+        "$method": "namespace-grant-validate",
+        "$timestamp": 439439493,
+    
+        "grant": {
+          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
+          "secretProof": "db66e1effc01bffd79272c33c7e4258c92dcd1b3",
+          "expires": 349439439,
+    
+          "namespaces": {
+            "namespace": [
+              {
+                "$id": "https://domain.com/pemissionname"
+              },
+              {
+                "$id": "https://other.com/pemissionname"
+              }
+            ]
+          }
+        }
+    
+      }
+    }
+
+
+
+
+
 Identity Lockbox Service Requests
 =================================
 
@@ -1789,6 +2372,11 @@ This request obtains access to a lockbox. Access is granted by way of login proo
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
   * Grant
     * ID - a client generated cryptographic unique ID representing the agent's permission to access the lockbox. Once this ID is generated by a client, it should remain stable in subsequent accesses (or a new permission grant will be required). This ID should remain secret to the client application.
+    * secret proof - proof the user has access to the grant ID - proof = hmac(hash(`<grant-secret>`), "namespace-grant-validate:" + `<grant-id>` + ":" `<client-nonce>` + ":" + `<grant-proof-expires>` + ":lockbox-access")
+    * expires - timestamp of when the grant proof will expire
+    * domain - the domaing of the namespace grant service
+    * List of namespace URLs where access is requested
+      * namespace URL
   * Agent
     * Product - the user agent identification for the product, typically "name/version (os/system)" information)
     * Name - a human readable friendly name for the product
@@ -1822,7 +2410,7 @@ This request obtains access to a lockbox. Access is granted by way of login proo
 
 ### Security Considerations
 
-Access to the lockbox does not grant access to the contents of the lockbox. The lockbox key must be obtained through an alternative method.
+Access to the lockbox does not grant access to the contents of the lockbox. The lockbox key must be obtained through an alternative method. Upon seeing namespaces used in conjunction with a grant ID where the namespace has not previously been granted, the lockbox will contact the granting service and verify the grant has access to those namespaces.
 
 The server will validate the identity login via the identity service to access the account or validate the client has the correct lockbox key hash to access the account. An identity that has a different provider is considered a different identity. Thus an identity is deemed unique by its identity and its identity provider combined.
 
@@ -1849,7 +2437,21 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
         },
     
         "grant": {
-          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543"
+          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
+          "secretProof": "db66e1effc01bffd79272c33c7e4258c92dcd1b3",
+          "expires": 349439439,
+          "domain": "grant.com",
+    
+          "namespaces": {
+            "namespace": [
+              {
+                "$id": "https://domain.com/pemissionname"
+              },
+              {
+                "$id": "https://other.com/pemissionname"
+              }
+            ]
+          }
         },
     
         "agent": {
@@ -1889,15 +2491,15 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
         "grant": {
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
     
-          "namespaces":{
+          "namespaces": {
             "namespace": [
               {
                 "$id": "https://domain.com/pemissionname",
-                "$updated": "5484883"
+                "$updated": 5484883
               },
               {
                 "$id": "https://other.com/pemissionname",
-                "$updated": "5848843"
+                "$updated": 5848843
               }
             ]
           }
@@ -1934,7 +2536,7 @@ This request proves that a lockbox access is valid and can be used to validate a
     * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":" + `<purpose>`)
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret Identity information
 
-###Returns
+### Returns
 
 Success or failure.
 
@@ -1965,6 +2567,7 @@ Success or failure.
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
+        "$handler": "lockbox",
         "$method": "identity-access-validate",
         "$timestamp": 439439493
       }
@@ -2066,208 +2669,6 @@ If all the identities associated to the lockbox are removed then the lockbox acc
     }
 
 
-Lockbox Namespace Grant Inner Frame
------------------------------------
-
-### Purpose
-
-This inner frame is loaded from the outer application frame. The inner frame holds the namespace grant page for the lockbox. The inner/outer frames send information to/from each other via JavaScript posted messages. The inner page can display the lockbox's namespace page, allowing the user to grant permission to the application requesting access to the namespaces. The outer and inner page are rendered inside a browser window and contains sufficient display size to allow the user to see what information is being granted.
-
-### Inputs
-
-None.
-
-### Returns
-
-None.
-
-### Security Considerations
-
-### Example
-
-
-Lockbox Namespace Grant Window Request
---------------------------------------
-
-### Purpose
-
-This request notification is sent from the inner frame to the outer window as a posted message. This allows the inner window to notify the outer window it's ready to start processing requests.
-
-### Inputs
-
-  * Ready
-    * true - notify the login window is ready to receive messages
-  * Visibility:
-    * true - notify the login window needs visibility
-
-### Returns
-
-Success or failure.
-
-### Security Considerations
-
-### Example
-
-    {
-      "request": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "lockbox-namespace-grant-window",
-    
-        "browser": {
-          "ready": true,
-          "visibility": true
-        }
-      }
-    }
-
-    {
-      "result": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "lockbox-namespace-grant-window",
-        "$timestamp": 439439493
-      }
-    }
-
-Lockbox Namespace Grant Start Notification
-------------------------------------------
-
-### Purpose
-
-Once the browser window receives notification that it is ready, this request is sent to the inner frame by the outer frame to give the inner frame the needed information to start the grant process.
-
-### Inputs
-
-  * Agent
-    * Product - the user agent identification for the product, typically "name/version (os/system)" information)
-    * Name - a human readable friendly name for the product
-    * Image - a human visual image for the brand that must be square in shape.
-    * Agent URL - a web page that can be rendered in a browser to obtain more information about the agent
-  * Lockbox information
-    * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-permission-grant")
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
-  * Grant
-    * ID - ID as passed into the lockbox access request
-    * List of namespace URLs to be granted to the grant ID
-  * Browser information
-    * Visibility - the browser window is being shown in what state
-      * "visible" - the browser window is visible
-      * "hidden" - the browser window is hidden and cannot be shown
-      * "visible-on-demand" - the browser window is hidden but can be rendered visible via a request posted to the outer frame (note: if rendered inside an application, the application can show the window in a hidden state to start and the browser window can become visible only when the user needs to enter some credentials)
-    * Popup
-      * "allow"- popups windows/new tabs are allowed to be opened
-      * "deny" - popup windows/new tables are not allowed to be opened
-    * Outer frame reload URL - a URL to reload the outer frame should the grant process have to replace the outer frame's window with its own URL. Once the outer frame is reloaded the inner frame page is reloaded as well allowing the inner frame to send the completion request.
-
-### Returns
-
-None.
-
-### Security Considerations
-
-### Example
-
-    {
-      "notify": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "lockbox-namespace-grant-start",
-    
-        "agent": {
-          "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
-          "name": "hookflash",
-          "image": "https://hookflash.com/brandsquare.png",
-          "url": "https://hookflash.com/agentinfo/"
-        },
-    
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
-        "lockbox": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
-        },
-    
-        "grant": {
-          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
-    
-          "namespaces":{
-            "namespace": [
-              {
-                "$id": "https://domain.com/pemissionname"
-              },
-              {
-                "$id": "https://other.com/pemissionname"
-              }
-            ]
-          }
-        },
-    
-        "browser": {
-          "visibility": "visible-on-demand",
-          "popup": "deny",
-          "outerFrameURL": "https://webapp.com/outerframe?reload=true"
-        }
-      }
-    }
-
-
-Lockbox Namespace Grant Complete Notification
----------------------------------------------
-
-### Purpose
-
-This notification is sent from the inner browser window to the outer window as a posted message to indicate that the grant process has completed.
-
-###Inputs
-
-  * Grant
-    * ID - ID as passed into the lockbox grant request
-    * List of namespace URLs granted to the grant ID
-
-### Returns
-
-### Security Considerations
-
-If permission was not granted to the namespace then the namespaces array will not contain any newly requested grants (but will contain any previously granted namespaces, if any).
-
-### Example
-
-    {
-      "notify": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "lockbox-namespace-grant-complete",
-    
-        "grant": {
-          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
-    
-          "namespaces":{
-            "namespace": [
-              {
-                "$id": "https://domain.com/pemissionname",
-                "$updated": "5848843"
-              },
-              {
-                "$id": "https://other.com/pemissionname",
-                "$updated": "5848845"
-              }
-            ]
-          }
-        }
-      }
-    }
-
-
 Lockbox Content Get Request
 ---------------------------
 
@@ -2348,13 +2749,13 @@ No value names within the same namespace URL should be identical.
             "namespace": [
               {
                 "$id": "https://domain.com/pemissionname",
-                "$updated": "5848843",
+                "$updated": 5848843,
                 "value1": "ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
                 "value2": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
               },
               {
                 "$id": "https://other.com/pemissionname",
-                "$updated": "5848845",
+                "$updated": 5848845,
                 "what1": "ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
                 "what2": "Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
               }
@@ -2444,276 +2845,6 @@ No value names within the same permission URL should be identical.
     }
 
 
-Lockbox Admin Inner Frame
--------------------------
-
-### Purpose
-
-This inner frame is loaded from the outer application frame. The inner frame holds the administration page for the lockbox. The inner/outer frames send information to/from each other via JavaScript posted messages. The inner page can display the lockbox's admin page, allowing the user to control access namespaces. The outer and inner page are rendered inside a browser window and contains sufficient display size to allow the user to administer the lockbox.
-
-### Inputs
-
-None.
-
-### Returns
-
-None.
-
-### Security Considerations
-
-### Example
-
-
-Lockbox Admin Window Request
-----------------------------
-
-### Purpose
-
-This request notification is sent from the inner frame to the outer window as a posted message. This allows the inner window to notify the outer window it's ready to start processing requests.
-
-### Inputs
-
-  * Ready
-    * true - notify the login window is ready to receive messages
-  * Visibility:
-    * true - notify the login window needs visibility
-
-### Returns
-
-Success or failure.
-
-### Security Considerations
-
-### Example
-
-    {
-      "request": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "lockbox-admin-window",
-    
-        "browser": {
-          "ready": true,
-          "visibility": true
-        }
-      }
-    }
-
-    {
-      "result": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "lockbox-admin-window",
-        "$timestamp": 439439493
-      }
-    }
-
-Lockbox Admin Start Notification
---------------------------------
-
-### Purpose
-
-Once the browser window receives notification that it is ready, this request is sent to the inner frame by the outer frame to give the inner frame the needed information to start the administration.
-
-### Inputs
-
-  * Agent
-    * Product - the user agent identification for the product, typically "name/version (os/system)" information)
-    * Name - a human readable friendly name for the product
-    * Image - a human visual image for the brand that must be square in shape.
-    * Agent URL - a web page that can be rendered in a browser to obtain more information about the agent
-  * Lockbox information
-    * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-admin")
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
-  * Grant
-    * ID - ID as passed into the lockbox access request
-  * Browser information
-    * Visibility - the browser window is being shown in what state
-      * "visible" - the browser window is visible
-      * "hidden" - the browser window is hidden and cannot be shown
-      * "visible-on-demand" - the browser window is hidden but can be rendered visible via a request posted to the outer frame (note: if rendered inside an application, the application can show the window in a hidden state to start and the browser window can become visible only when the user needs to enter some credentials)
-    * Popup
-      * "allow"- popups windows/new tabs are allowed to be opened
-      * "deny" - popup windows/new tables are not allowed to be opened
-    * Outer frame reload URL - a URL to reload the outer frame should the grant process have to replace the outer frame's window with its own URL. Once the outer frame is reloaded the inner frame page is reloaded as well allowing the inner frame to send the completion request.
-
-### Returns
-
-None.
-
-### Security Considerations
-
-### Example
-
-    {
-      "notify": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "lockbox-admin-start",
-    
-        "agent": {
-          "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
-          "name": "hookflash",
-          "image": "https://hookflash.com/brandsquare.png",
-          "url": "https://hookflash.com/agentinfo/"
-        },
-    
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
-        "lockbox": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
-        },
-    
-        "grant": {
-          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543"
-        },
-    
-        "browser": {
-          "visibility": "visible-on-demand",
-          "popup": "deny",
-          "outerFrameURL": "https://webapp.com/outerframe?reload=true"
-        }
-      }
-    }
-
-
-Lockbox Admin Complete Notification
------------------------------------
-
-### Purpose
-
-This notification is sent from the inner browser window to the outer window as a posted message to indicate that the administration process has completed.
-
-### Inputs
-
-### Returns
-
-### Security Considerations
-
-### Example
-
-    {
-      "notify": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "lockbox-admin-complete"
-      }
-    }
-
-
-Lockbox Namespace Preappoved Grant Request
-------------------------------------------
-
-### Purpose
-
-This request allows a client to automatically request additional grants to namespaces from a pre- authorized source.
-
-### Inputs:
-
-  * Agent
-    * Product - the user agent identification for the product, typically "name/version (os/system)" information)
-    * Name - a human readable friendly name for the product
-    * Image - a human visual image for the brand that must be square in shape.
-    * Agent URL - a web page that can be rendered in a browser to obtain more information about the agent
-  * Lockbox information
-    * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-namespace-preapproval-grant")
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
-  * Grant
-    * ID - ID as passed into the lockbox access request
-  * Authorization bundle
-    * Proof - hmac(`<grant-id>`, "grant-proof:" + `<client-nonce>`)
-    * Expires - timestamp when the proof bundle expires
-    * List of namespace URLs to be granted to the grant ID
-    * Signature from authorizing domain
-
-### Returns
-
-Success or failure.
-
-### Security Considerations
-
-The domain signing proof can authorize namespaces within its own domain and no others unless the lockbox has special disposition for domain to authorize other namespaces.
-
-### Example
-
-    {
-      "request": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "lockbox-namespace-preapproved-grant",
-    
-        "agent": {
-          "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
-          "name": "hookflash",
-          "image": "https://hookflash.com/brandsquare.png",
-          "url": "https://hookflash.com/agentinfo/"
-        },
-    
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
-        "lockbox": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
-        },
-    
-        "grant": {
-          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543"
-        },
-    
-        "authorizationBundle": {
-          "authorization": {
-            "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
-            "proof": "bdd7cf06e641ee5be2f28bc051201565f05ef15e",
-            "expires": 573454,
-            "namespaces":{
-              "namespace": [
-                {
-                  "$id": "https://provider.com/pemissionname1"
-                },
-                {
-                  "$id": "https://provider.com/pemissionname2"
-                }
-              ]
-            }
-          },
-          "signature": {
-            "reference": "#b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
-            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
-            "digestValue": "IUe324k...oV5/A8Q38Gj45i4jddX=",
-            "digestSigned": "MDAwMDAw...MGJ5dGVzLiBQbGVhc2UsIGQ=",
-            "key": {
-              "$id": "b7ef37...4a0d58628d3",
-              "domain": "provider.com",
-              "service": "identity"
-            }
-          }
-        }
-      }
-    }
-
-    {
-      "result": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "lockbox-namespace-preapproved-grant",
-        "$timestamp": 439439493
-      }
-    }
 
 
 Identity Lookup Service Requests
@@ -3015,6 +3146,7 @@ This notification is allowed to be sent more than once to the outer frame as nee
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
+        "$handler": "identity",
         "$method": "identity-access-window",
         "$timestamp": 439439493
       }
@@ -3211,6 +3343,7 @@ The lockbox key should be encrypted locally in JavaScript before being sent a se
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
+        "$handler": "identity",
         "$method": "identity-access-lockbox-update",
         "$timestamp": 439439493
       }
@@ -3269,6 +3402,7 @@ Success or failure.
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
+        "$handler": "identity",
         "$method": "identity-access-validate",
         "$timestamp": 439439493
       }
@@ -3292,7 +3426,7 @@ This request proves that an identity login is valid and can be used to validate 
   * Public peer file- the public peer file associated with the contact ID
   * Priority / weight - SRV like priority and weighting system to gauge which identity discovered to be associated to the same peer contact have highest priority
 
-###Returns
+### Returns
 
 Success or failure.
 
@@ -3330,6 +3464,7 @@ Success or failure.
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
+        "$handler": "identity",
         "$method": "identity-lookup-update",
         "$timestamp": 439439493
       }
@@ -3553,6 +3688,8 @@ The client should verify signature was generated by the certificate was issued b
 
     {
       "result": {
+        "$domain": "example.com",
+        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-salt",
         "$method": "signed-salt-get",
