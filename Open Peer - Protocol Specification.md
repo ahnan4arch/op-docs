@@ -2274,9 +2274,9 @@ This request proves that an application grant ID has access to particular namesp
 
   * Grant
     * ID - ID as passed into the request
-    * List of namespace URLs previously granted to the grant ID (if any)
+    * expires - when the grant ID will expire from the system
+    * List of namespace URLs previously granted to the grant ID (if any, and only those from the list requested to be validated)
       * namespace URL
-      * last update of namespace timestamp
 
 ### Security Considerations
 
@@ -2323,7 +2323,6 @@ This request proves that an application grant ID has access to particular namesp
     
         "grant": {
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
-          "secretProof": "db66e1effc01bffd79272c33c7e4258c92dcd1b3",
           "expires": 349439439,
     
           "namespaces": {
