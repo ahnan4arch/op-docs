@@ -223,7 +223,7 @@ The information returned from update of a previously returned identity must take
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "rolodex",
-        "$method": "rolodex-access",
+        "$method": "rolodex-update",
     
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
         "rolodex": {
@@ -244,7 +244,7 @@ The information returned from update of a previously returned identity must take
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "rolodex",
-        "$method": "rolodex-access",
+        "$method": "rolodex-update",
         "$timestamp": 439439493,
     
         "rolodex": {
