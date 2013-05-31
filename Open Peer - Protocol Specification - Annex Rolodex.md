@@ -112,6 +112,7 @@ This request is sent by the client application to get access to the rolodex serv
   * Rolodex information
     * rolodex access key - a key to access the rolodex service
     * rolodex access secret - a secret for use to access the rolodex service
+    * rolodex access secret expires - when the access secret will expire and no longer be valid
     * update next - the timestamp when the next update can/should be issued (but not before)
 
 ### Security Considerations
@@ -163,6 +164,7 @@ The rolodex service must validate the grant ID with the grant service and must v
         "rolodex": {
           "accessToken": "91c4d836e216139f6fe4d417ca19afe78bab87d2",
           "accessSecret": "943ec6e93c71591d3ee43464059b25ecd6312a07",
+          "accessSecretExpires": 5848443,
           "updateNext": 54433434
         }
       }
