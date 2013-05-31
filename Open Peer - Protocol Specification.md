@@ -1907,13 +1907,6 @@ If this is the first time the grant service has seen the grant ID the service as
           "url": "https://hookflash.com/agentinfo/"
         },
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
-        "lockbox": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
-        },
-    
         "grant": {
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
           "secret": "2339391c1974a7660f034c26c673840891a3368b",
