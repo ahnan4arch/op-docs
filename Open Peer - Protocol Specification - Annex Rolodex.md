@@ -41,7 +41,13 @@ This request is sent from the outerframe to the inner frame to fetch identity cr
 
 ### Inputs
 
-None.
+  * Client one time use nonce (cryptographically random string)
+  * Identity information
+    * Identity URI - the full identity URI of the logged in user
+    * Identity provider - identity provider providing identity service
+    * Identity access token - as returned from the "identity access complete" request
+    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":rolodex-credentials-get")
+    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
 
 ### Returns
 
@@ -61,7 +67,17 @@ The exact meaning of the rolodex server token is arbitrary between the identity 
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
-        "$method": "identity-access-rolodex-credentials-get"
+        "$method": "identity-access-rolodex-credentials-get",
+    
+        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "identity": {
+          "accessToken": "a913c2c3314ce71aee554986204a349b",
+          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+          "accessSecretProofExpires": 43843298934,
+    
+          "uri": "identity://domain.com/alice",
+          "provider": "domain.com"
+        },
       }
     }
 
@@ -170,12 +186,12 @@ The rolodex service must validate the grant ID with the grant service and must v
       }
     }
 
-Rolodex Update Request
-----------------------
+Rolodex Contacts Get Request
+----------------------------
 
 ### Purpose
 
-This request is sent by the client application to get access to the rolodex service.
+This request is sent by the client application to get updates to the contact list.
 
 ### Inputs
 
@@ -227,7 +243,7 @@ If the result is an error result with error code "424" i.e. "Failed Rolodex Toke
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "rolodex",
-        "$method": "rolodex-update",
+        "$method": "rolodex-contacts-get",
     
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
         "rolodex": {
@@ -248,7 +264,7 @@ If the result is an error result with error code "424" i.e. "Failed Rolodex Toke
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "rolodex",
-        "$method": "rolodex-update",
+        "$method": "rolodex-contacts-get",
         "$timestamp": 439439493,
     
         "rolodex": {
