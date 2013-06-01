@@ -1911,7 +1911,7 @@ If this is the first time the grant service has seen the grant ID the service as
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
           "secret": "2339391c1974a7660f034c26c673840891a3368b",
     
-          "namespaces":{
+          "namespaces": {
             "namespace": [
               {
                 "$id": "https://domain.com/pemissionname"
@@ -2669,8 +2669,6 @@ This request retrieves data contained in the lockbox.
     * Lockbox access token - a verifiable token that is linked to the lockbox
     * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-content-get")
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
-  * Grant
-    * ID - ID as passed into the lockbox grant request
   * Content list of data elements containing:
     * Namespace URL - the amespace URL is the ID where the data is stored
 
@@ -2701,19 +2699,15 @@ No value names within the same namespace URL should be identical.
           "accessSecretProofExpires": 43843298934
         },
     
-        "grant": {
-          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
-    
-          "namespaces":{
-            "namespace": [
-              {
-                "$id": "https://domain.com/pemissionname"
-              },
-              {
-                "$id": "https://other.com/pemissionname"
-              }
-            ]
-          }
+        "namespaces": {
+          "namespace": [
+            {
+              "$id": "https://domain.com/pemissionname"
+            },
+            {
+              "$id": "https://other.com/pemissionname"
+            }
+          ]
         }
     
       }
@@ -2728,25 +2722,21 @@ No value names within the same namespace URL should be identical.
         "$method": "lockbox-content-get",
         "$timestamp": 439439493,
     
-        "grant": {
-          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
-    
-          "namespaces":{
-            "namespace": [
-              {
-                "$id": "https://domain.com/pemissionname",
-                "$updated": 5848843,
-                "value1": "ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
-                "value2": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
-              },
-              {
-                "$id": "https://other.com/pemissionname",
-                "$updated": 5848845,
-                "what1": "ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
-                "what2": "Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
-              }
-            ]
-          }
+        "namespaces": {
+          "namespace": [
+            {
+              "$id": "https://domain.com/pemissionname",
+              "$updated": 5848843,
+              "value1": "ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
+              "value2": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
+            },
+            {
+              "$id": "https://other.com/pemissionname",
+              "$updated": 5848845,
+              "what1": "ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
+              "what2": "Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
+            }
+          ]
         }
     
       }
@@ -2767,8 +2757,6 @@ This request retrieves data contained in the lockbox.
     * Lockbox access token - a verifiable token that is linked to the lockbox
     * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-content-set")
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
-  * Grant
-    * ID - ID as passed into the lockbox grant request
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored
     * List of values, each value is base 64 encode with the value encrypted with: key = hmac(`<lockbox-key>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv=hash(`<permission-url>` + ":" + `<value-name>`), or a value of "-" to remove a value. The values are merged together with existing values or the values are removed if they contain a value of "-".
@@ -2796,24 +2784,20 @@ No value names within the same permission URL should be identical.
           "accessSecretProofExpires": 43843298934
         },
     
-        "grant": {
-          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
-    
-          "namespaces":{
-            "namespace": [
-              {
-                "$id": "https://domain.com/pemissionname",
-                "value1": "ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
-                "value2": "-",
-                "value3": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
-              },
-              {
-                "$id": "https://other.com/pemissionname",
-                "what1": "ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
-                "what2": "Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
-              }
-            ]
-          }
+        "namespaces":{
+          "namespace": [
+            {
+              "$id": "https://domain.com/pemissionname",
+              "value1": "ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
+              "value2": "-",
+              "value3": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
+            },
+            {
+              "$id": "https://other.com/pemissionname",
+              "what1": "ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
+              "what2": "Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
+            }
+          ]
         }
     
       }
