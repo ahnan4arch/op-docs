@@ -45,7 +45,7 @@ None.
 
 ### Returns
 
-  * Rolodex server token - the access token to be used with the rolodex service
+  * Rolodex server token - the access token to be used with the rolodex service. The server must ensure the token has a sufficient validity timeframe left for the rolodex service before returning to the client.
 
 ### Security Considerations
 
@@ -216,6 +216,8 @@ The rolodex can control the rate in which identities are returned to the client 
 The rolodex will not know the state of the identity with regards to its association to a peer file or a lockbox. The "Identity Lookup Service" must be used to obtain that type of information and must be considered more authoritative over the information obtained from the rolodex service.
 
 The information returned from update of a previously returned identity must take priority over previous information for the same identity.
+
+If the result is an error result with error code "424" i.e. "Failed Rolodex Token Dependency" then the rolodex access token must be refreshed via the identity service.
 
 ### Example
 
