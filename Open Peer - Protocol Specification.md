@@ -2257,6 +2257,9 @@ This request proves that an application grant ID has access to particular namesp
 
 ### Returns
 
+  * Grant
+    * ID - as passed into the grant validate request
+    * expires - when the grant ID will expire from the system
   * List of namespace URLs previously granted to the grant ID (if any, and only those from the list requested to be validated)
     * namespace URL
 
@@ -2302,6 +2305,11 @@ This request proves that an application grant ID has access to particular namesp
         "$handler": "namespace-grant",
         "$method": "namespace-grant-validate",
         "$timestamp": 439439493,
+    
+        "grant": {
+          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
+          "expires": 349439439
+        },
     
         "namespaces": {
           "namespace": [
