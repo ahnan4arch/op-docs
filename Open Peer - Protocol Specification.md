@@ -2361,8 +2361,8 @@ This request obtains access to a lockbox. Access is granted by way of login proo
     * secret proof - proof the user has access to the grant ID - proof = hmac(hash(`<grant-secret>`), "namespace-grant-validate:" + `<grant-id>` + ":" `<client-nonce>` + ":" + `<grant-proof-expires>` + ":lockbox-access")
     * expires - timestamp of when the grant proof will expire
     * domain - the domaing of the namespace grant service
-    * List of namespace URLs where access is requested
-      * namespace URL
+  * List of namespace URLs where access is requested
+    * namespace URL
   * Agent
     * Product - the user agent identification for the product, typically "name/version (os/system)" information)
     * Name - a human readable friendly name for the product
@@ -2385,11 +2385,6 @@ This request obtains access to a lockbox. Access is granted by way of login proo
     * Lockbox domain - the domain hosting the lockbox
     * Lockbox key "lockbox half" - this is server side base-64 encoded XORed portion of the lockbox key that must be combined with the client side portion of the key to create the full lockbox key.
     * Lockbox key "hash" - hash of the combined XORed lockbox key as previously passed in.
-  * Grant
-    * ID - ID as passed into the request
-    * List of namespace URLs previously granted to the grant ID
-      * namespace URL
-      * last update of namespace timestamp
   * List of identities attached to the lockbox
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
@@ -2426,18 +2421,18 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
           "secretProof": "db66e1effc01bffd79272c33c7e4258c92dcd1b3",
           "expires": 349439439,
-          "domain": "grant.com",
+          "domain": "grant.com"
+        },
     
-          "namespaces": {
-            "namespace": [
-              {
-                "$id": "https://domain.com/pemissionname"
-              },
-              {
-                "$id": "https://other.com/pemissionname"
-              }
-            ]
-          }
+        "namespaces": {
+          "namespace": [
+            {
+              "$id": "https://domain.com/pemissionname"
+            },
+            {
+              "$id": "https://other.com/pemissionname"
+            }
+          ]
         },
     
         "agent": {
@@ -2474,23 +2469,6 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
           "keyLockboxHalf": "Wm1SellXWmtabVJoWm1wcmFuSmlhMnB5WW1WbWEycHlaV3ByY21ZPQ=="
         },
     
-        "grant": {
-          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
-    
-          "namespaces": {
-            "namespace": [
-              {
-                "$id": "https://domain.com/pemissionname",
-                "$updated": 5484883
-              },
-              {
-                "$id": "https://other.com/pemissionname",
-                "$updated": 5848843
-              }
-            ]
-          }
-        },
-    
         "identities": {
          "identity": [
             {
@@ -2503,59 +2481,6 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
             }
           ]
         }
-      }
-    }
-
-Lockbox Access Validate Request
--------------------------------
-
-### Purpose
-
-This request proves that a lockbox access is valid and can be used to validate a lockbox access is successful by way of a 3rd party.
-
-### Inputs
-
-  * Client nonce - a onetime use nonce, i.e. cryptographically random string
-  * Purpose - reason for validation (each service using this validation should have a unique purpose string)
-  * Lockbox information
-    * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":" + `<purpose>`)
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret Identity information
-
-### Returns
-
-Success or failure.
-
-### Security Considerations
-
-### Example
-
-    {
-      "request": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "lockbox-access-validate",
-    
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
-        "purpose": "whatever",
-        "lockbox": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
-        }
-      }
-    }
-
-    {
-      "result": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "identity-access-validate",
-        "$timestamp": 439439493
       }
     }
 
@@ -2814,8 +2739,58 @@ No value names within the same permission URL should be identical.
       }
     }
 
+Lockbox Access Validate Request
+-------------------------------
 
+### Purpose
 
+This request proves that a lockbox access is valid and can be used to validate a lockbox access is successful by way of a 3rd party.
+
+### Inputs
+
+  * Client nonce - a onetime use nonce, i.e. cryptographically random string
+  * Purpose - reason for validation (each service using this validation should have a unique purpose string)
+  * Lockbox information
+    * Lockbox access token - a verifiable token that is linked to the lockbox
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":" + `<purpose>`)
+    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret Identity information
+
+### Returns
+
+Success or failure.
+
+### Security Considerations
+
+### Example
+
+    {
+      "request": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "lockbox",
+        "$method": "lockbox-access-validate",
+    
+        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "purpose": "whatever",
+        "lockbox": {
+          "accessToken": "a913c2c3314ce71aee554986204a349b",
+          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+          "accessSecretProofExpires": 43843298934
+        }
+      }
+    }
+
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "lockbox",
+        "$method": "identity-access-validate",
+        "$timestamp": 439439493
+      }
+    }
 
 Identity Lookup Service Requests
 ================================
