@@ -2325,10 +2325,6 @@ This request proves that an application grant ID has access to particular namesp
       }
     }
 
-
-
-
-
 Identity Lockbox Service Requests
 =================================
 
@@ -3233,8 +3229,10 @@ This request is sent from the outer browser window to the inner window as a post
 
 ### Inputs
 
+  * Client one time use nonce (cryptographically random string)
   * Identity information
-    * Client one time use nonce (cryptographically random string)
+    * Identity URI - the full identity URI of the logged in user
+    * Identity provider - identity provider providing identity service
     * Identity access token - as returned from the "identity access complete" request
     * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":lockbox-update")
     * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
@@ -3265,7 +3263,7 @@ The lockbox key should be encrypted locally in JavaScript before being sent a se
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
           "accessSecretProofExpires": 43843298934,
-    
+       
           "uri": "identity://domain.com/alice",
           "provider": "domain.com"
         },
