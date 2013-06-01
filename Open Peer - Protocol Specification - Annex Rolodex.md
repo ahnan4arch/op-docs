@@ -77,7 +77,8 @@ The exact meaning of the rolodex server token is arbitrary between the identity 
     
           "uri": "identity://domain.com/alice",
           "provider": "domain.com"
-        },
+        }
+    
       }
     }
 
@@ -118,10 +119,12 @@ This request is sent by the client application to get access to the rolodex serv
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
   * Rolodex information
     * server token - given by the identity service that only has meaning to the rolodex service
-    * refresh - request the contact list be refreshed immediately
     * version - (optional) a version string as previously returned from the rolodex update representing the delta information last obtained from the rolodex service (only specify if previously known)
+    * refresh - request the contact list be refreshed immediately
   * Grant information
     * grant ID - the grant ID that has been given namespace access to the rolodex namespace, i.e. "https://openpeer.org/permission/rolodex"
+    * secret proof - proof the user has access to the grant ID - proof = hmac(hash(`<grant-secret>`), "namespace-grant-validate:" + `<grant-id>` + ":" `<client-nonce>` + ":" + `<grant-proof-expires>` + ":rolodex-access")
+    * expires - timestamp of when the grant proof will expire
 
 ### Returns
 
@@ -157,13 +160,15 @@ The rolodex service must validate the grant ID with the grant service and must v
     
         "rolodex": {
            "serverToken": "b3ff46bae8cacd1e572ee5e158bcb04ed9297f20-9619e3bc-4cd41c9c64ab2ed2a03b45ace82c546d",
-           "refresh": false,
-           "version": "4341443-54343a"
+           "version": "4341443-54343a",
+           "refresh": false
          },
     
-         "grant": {
-           "$id": "e8eed01c9fc288bf35b54d8c78081663ff921d74"
-         }
+        "grant": {
+          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
+          "secretProof": "db66e1effc01bffd79272c33c7e4258c92dcd1b3",
+          "expires": 349439439
+        }
     
       }
     }
@@ -199,10 +204,10 @@ This request is sent by the client application to get updates to the contact lis
   * rolodex information
     * server token - given by the identity service that only has meaning to the rolodex service
     * rolodex access token - as returned from the "rolodex access" request
-    * Proof of 'rolodex access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<rolodex-access-secret>`, "rolodex-access-validate:" + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<rolodex-access-token>` + ":rolodex-update")
+    * Proof of 'rolodex access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<rolodex-access-secret>`, "rolodex-access-validate:" + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<rolodex-access-token>` + ":rolodex-contacts-get")
     * Expiry of the proof for the 'rolodex access secret' - a window in which access secret proof is considered valid
-    * refresh - request the contact list be refreshed immediately
     * version - a version string as previously returned from the rolodex update request representing the delta information last obtained from the rolodex service
+    * refresh - request the contact list be refreshed immediately
   * Grant information
     * grant ID - the grant ID that has been given namespace access to the rolodex namespace, i.e. "https://openpeer.org/permission/rolodex"
 
@@ -251,8 +256,8 @@ If the result is an error result with error code "424" i.e. "Failed Rolodex Toke
            "accessToken": "a913c2c3314ce71aee554986204a349b",
            "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
            "accessSecretProofExpires": 43843298934,
-           "refresh": false,
-           "version": "4341443-54343a"
+           "version": "4341443-54343a",
+           "refresh": false
          }
     
       }
