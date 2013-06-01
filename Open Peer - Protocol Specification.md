@@ -2476,6 +2476,59 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
       }
     }
 
+Lockbox Access Validate Request
+-------------------------------
+
+### Purpose
+
+This request proves that a lockbox access is valid and can be used to validate a lockbox access is successful by way of a 3rd party.
+
+### Inputs
+
+  * Client nonce - a onetime use nonce, i.e. cryptographically random string
+  * Purpose - reason for validation (each service using this validation should have a unique purpose string)
+  * Lockbox information
+    * Lockbox access token - a verifiable token that is linked to the lockbox
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":" + `<purpose>`)
+    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret Identity information
+
+### Returns
+
+Success or failure.
+
+### Security Considerations
+
+### Example
+
+    {
+      "request": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "lockbox",
+        "$method": "lockbox-access-validate",
+    
+        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "purpose": "whatever",
+        "lockbox": {
+          "accessToken": "a913c2c3314ce71aee554986204a349b",
+          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+          "accessSecretProofExpires": 43843298934
+        }
+      }
+    }
+
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "lockbox",
+        "$method": "identity-access-validate",
+        "$timestamp": 439439493
+      }
+    }
+
 Lockbox Identities Update Request
 ---------------------------------
 
@@ -2727,59 +2780,6 @@ No value names within the same permission URL should be identical.
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "lockbox-content-get",
-        "$timestamp": 439439493
-      }
-    }
-
-Lockbox Access Validate Request
--------------------------------
-
-### Purpose
-
-This request proves that a lockbox access is valid and can be used to validate a lockbox access is successful by way of a 3rd party.
-
-### Inputs
-
-  * Client nonce - a onetime use nonce, i.e. cryptographically random string
-  * Purpose - reason for validation (each service using this validation should have a unique purpose string)
-  * Lockbox information
-    * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":" + `<purpose>`)
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret Identity information
-
-### Returns
-
-Success or failure.
-
-### Security Considerations
-
-### Example
-
-    {
-      "request": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "lockbox-access-validate",
-    
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
-        "purpose": "whatever",
-        "lockbox": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
-        }
-      }
-    }
-
-    {
-      "result": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "identity-access-validate",
         "$timestamp": 439439493
       }
     }
