@@ -2344,11 +2344,6 @@ This request obtains access to a lockbox. Access is granted by way of login proo
     * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
-  * Agent
-    * Product - the user agent identification for the product, typically "name/version (os/system)" information)
-    * Name - a human readable friendly name for the product
-    * Image - a human visual image for the brand that must be square in shape.
-    * Agent URL - a web page that can be rendered in a browser to obtain more information about the agent
   * Lockbox information
     * Lockbox domain - the domain hosting the lockbox
     * Lockbox account ID - (optional, if known) the assigned account ID for the lockbox
@@ -2403,13 +2398,6 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
     
           "uri": "identity://domain.com/alice",
           "provider": "domain.com"
-        },
-    
-        "agent": {
-          "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
-          "name": "hookflash",
-          "image": "https://hookflash.com/brandsquare.png",
-          "url": "https://hookflash.com/agentinfo/"
         },
     
         "lockbox": {
