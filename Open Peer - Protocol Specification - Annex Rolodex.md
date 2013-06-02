@@ -167,7 +167,7 @@ The rolodex service must validate the grant ID with the grant service and must v
         "grant": {
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
           "secretProof": "db66e1effc01bffd79272c33c7e4258c92dcd1b3",
-          "expires": 349439439
+          "secretProofExpires": 349439439
         }
     
       }

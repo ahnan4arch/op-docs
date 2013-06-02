@@ -2280,7 +2280,7 @@ This request proves that an application grant ID has access to particular namesp
         "grant": {
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
           "secretProof": "db66e1effc01bffd79272c33c7e4258c92dcd1b3",
-          "expires": 349439439
+          "secretProofExpires": 349439439
         },
     
         "namespaces": {
@@ -2409,7 +2409,7 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
         "grant": {
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
           "secretProof": "db66e1effc01bffd79272c33c7e4258c92dcd1b3",
-          "expires": 349439439,
+          "secretProofExpires": 349439439,
           "domain": "grant.com"
         },
     
