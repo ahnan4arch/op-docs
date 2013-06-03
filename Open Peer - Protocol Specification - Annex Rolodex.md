@@ -123,8 +123,6 @@ This request is sent by the client application to get access to the rolodex serv
     * refresh - request the contact list be refreshed immediately
   * Grant information
     * grant ID - the grant ID that has been given namespace access to the rolodex namespace, i.e. "https://openpeer.org/permission/rolodex"
-    * secret proof - proof the user has access to the grant ID - proof = hmac(hash(`<grant-secret>`), "namespace-grant-validate:" + `<grant-id>` + ":" `<client-nonce>` + ":" + `<grant-proof-expires>` + ":rolodex-access")
-    * expires - timestamp of when the grant proof will expire
 
 ### Returns
 
@@ -133,6 +131,12 @@ This request is sent by the client application to get access to the rolodex serv
     * rolodex access secret - a secret for use to access the rolodex service
     * rolodex access secret expires - when the access secret will expire and no longer be valid
     * update next - the timestamp when the next update can/should be issued (but not before)
+  * Grant service challenge (optional, if challenge is required)
+    * ID - a challenge ID that the server generated which the client application will have to authorize
+    * Name - a human readable name for the service requesting the challenge
+    * Image - a brandable image representing the service requesting the challenge
+    * URL - a browser renderable page the user can go to obtain more information about this service requesting the challenge
+    * Domains - a list of domains the service will accept trusted signatures as proof
 
 ### Security Considerations
 
@@ -165,9 +169,7 @@ The rolodex service must validate the grant ID with the grant service and must v
          },
     
         "grant": {
-          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543",
-          "secretProof": "db66e1effc01bffd79272c33c7e4258c92dcd1b3",
-          "secretProofExpires": 349439439
+          "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543"
         }
     
       }
@@ -187,7 +189,103 @@ The rolodex service must validate the grant ID with the grant service and must v
           "accessSecret": "943ec6e93c71591d3ee43464059b25ecd6312a07",
           "accessSecretExpires": 5848443,
           "updateNext": 54433434
+        },
+    
+        "grantServiceChallenge": {
+          "$id": "20651257fecbe8436cea6bfd3277fec1223ebd63",
+          "name": "Provider Rolodex Service",
+          "image": "https://provider.com/rolodex/rolodex.png",
+          "url": "https://provider.com/rolodex/",
+          "domains": "trust.com,trust2.com"
         }
+    
+      }
+    }
+
+Lockbox Namespace Grant Challenge Validate Request
+--------------------------------------------------
+
+### Purpose
+
+This request proves that the grant ID challenge is proven valid by way of the namespace grant service.
+
+### Inputs
+
+  * Client nonce - a onetime use nonce, i.e. cryptographically random string
+  * rolodex information
+    * server token - given by the identity service that only has meaning to the rolodex service
+    * rolodex access token - as returned from the "rolodex access" request
+    * Proof of 'rolodex access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<rolodex-access-secret>`, "rolodex-access-validate:" + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<rolodex-access-token>` + ":rolodex-namespace-grant-challenge-validate")
+    * Expiry of the proof for the 'rolodex access secret' - a window in which access secret proof is considered valid
+  * Grant service challenge as issued by the lockbox service bundled with signature as returned from the namespace grant service
+
+### Returns
+
+Success or failure.
+
+### Security Considerations
+
+The rolodex service will validate that the proof bundle is correct and if the challenge ID is suitably proven for the grant ID previously specified. Once correctly proven, the rolodex will allow the grant ID access permissions for the rolodex for the namespaces specified.
+
+### Example
+
+    {
+      "request": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "rolodex",
+        "$method": "rolodex-namespace-grant-challenge-validate",
+    
+        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "rolodex": {
+           "serverToken": "b3ff46bae8cacd1e572ee5e158bcb04ed9297f20-9619e3bc-4cd41c9c64ab2ed2a03b45ace82c546d",
+           "accessToken": "a913c2c3314ce71aee554986204a349b",
+           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+           "accessSecretProofExpires": 43843298934
+         },
+    
+        "grantServiceChallengeBundle:" {
+          "grantServiceChallenge": {
+            "$id": "20651257fecbe8436cea6bfd3277fec1223ebd63",
+            "name": "Provider Lockbox Service",
+            "image": "https://provider.com/lockbox/lockbox.png",
+            "url": "https://provider.com/lockbox/",
+    
+            "namespaces": {
+              "namespace": [
+                {
+                  "$id": "https://domain.com/pemissionname"
+                },
+                {
+                  "$id": "https://other.com/pemissionname"
+                }
+              ]
+            }
+          },
+          "signature": {
+            "reference": "#20651257fecbe8436cea6bfd3277fec1223ebd63",
+            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "digestValue": "IUe324k...oV5/A8Q38Gj45i4jddX=",
+            "digestSigned": "MDAwMDAw...MGJ5dGVzLiBQbGVhc2UsIGQ=",
+            "key": {
+              "$id": "b7ef37...4a0d58628d3",
+              "domain": "provider.com",
+              "service": "namespace-grant"
+            }
+          }
+        }
+      }
+    }
+
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "rolodex",
+        "$method": "rolodex-namespace-grant-challenge-validate",
+        "$timestamp": 439439493
       }
     }
 

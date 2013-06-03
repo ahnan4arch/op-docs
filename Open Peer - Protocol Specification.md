@@ -2098,7 +2098,7 @@ This request obtains access to a lockbox. Access is granted by way of login proo
     * Lockbox domain - the domain hosting the lockbox
     * Lockbox key "lockbox half" - this is server side base-64 encoded XORed portion of the lockbox key that must be combined with the client side portion of the key to create the full lockbox key.
     * Lockbox key "hash" - hash of the combined XORed lockbox key as previously passed in.
-  * Grant service challenge
+  * Grant service challenge (optional, if challenge is required)
     * ID - a challenge ID that the server generated which the client application will have to authorize
     * Name - a human readable name for the service requesting the challenge
     * Image - a brandable image representing the service requesting the challenge
@@ -2202,90 +2202,6 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
       }
     }
 
-Lockbox Namespace Grant Challenge Validate Request
---------------------------------------------------
-
-### Purpose
-
-This request proves that the grant ID challenge is proven valid by way of the namespace grant service.
-
-### Inputs
-
-  * Client nonce - a onetime use nonce, i.e. cryptographically random string
-  * Lockbox information
-    * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-namespace-grant-challenge-validate")
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret Identity information
-
-### Returns
-
-Success or failure.
-
-### Security Considerations
-
-The lockbox service will validate that the proof bundle is correct and if the challenge ID is suitably proven for the grant ID previously specified. Once correctly proven, the lockbox will allow the grant ID access to those namespaces for the lockbox account specified.
-
-### Example
-
-    {
-      "request": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "lockbox-access-validate",
-    
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
-        "lockbox": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
-        },
-    
-        "grantServiceChallengeBundle:" {
-          "grantServiceChallenge": {
-            "$id": "20651257fecbe8436cea6bfd3277fec1223ebd63",
-            "name": "Provider Lockbox Service",
-            "image": "https://provider.com/lockbox/lockbox.png",
-            "url": "https://provider.com/lockbox/",
-    
-            "namespaces": {
-              "namespace": [
-                {
-                  "$id": "https://domain.com/pemissionname"
-                },
-                {
-                  "$id": "https://other.com/pemissionname"
-                }
-              ]
-            }
-          },
-          "signature": {
-            "reference": "#20651257fecbe8436cea6bfd3277fec1223ebd63",
-            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
-            "digestValue": "IUe324k...oV5/A8Q38Gj45i4jddX=",
-            "digestSigned": "MDAwMDAw...MGJ5dGVzLiBQbGVhc2UsIGQ=",
-            "key": {
-              "$id": "b7ef37...4a0d58628d3",
-              "domain": "provider.com",
-              "service": "namespace-grant"
-            }
-          }
-        }
-      }
-    }
-
-    {
-      "result": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "lockbox",
-        "$method": "identity-access-validate",
-        "$timestamp": 439439493
-      }
-    }
-
 Lockbox Access Validate Request
 -------------------------------
 
@@ -2335,6 +2251,91 @@ Success or failure.
         "$id": "abd23",
         "$handler": "lockbox",
         "$method": "identity-access-validate",
+        "$timestamp": 439439493
+      }
+    }
+
+Lockbox Namespace Grant Challenge Validate Request
+--------------------------------------------------
+
+### Purpose
+
+This request proves that the grant ID challenge is proven valid by way of the namespace grant service.
+
+### Inputs
+
+  * Client nonce - a onetime use nonce, i.e. cryptographically random string
+  * Lockbox information
+    * Lockbox access token - a verifiable token that is linked to the lockbox
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-namespace-grant-challenge-validate")
+    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret Identity information
+  * Grant service challenge as issued by the lockbox service bundled with signature as returned from the namespace grant service
+
+### Returns
+
+Success or failure.
+
+### Security Considerations
+
+The lockbox service will validate that the proof bundle is correct and if the challenge ID is suitably proven for the grant ID previously specified. Once correctly proven, the lockbox will allow the grant ID access to those namespaces for the lockbox account specified.
+
+### Example
+
+    {
+      "request": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "lockbox",
+        "$method": "lockbox-namespace-grant-challenge-validate",
+    
+        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "lockbox": {
+          "accessToken": "a913c2c3314ce71aee554986204a349b",
+          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+          "accessSecretProofExpires": 43843298934
+        },
+    
+        "grantServiceChallengeBundle:" {
+          "grantServiceChallenge": {
+            "$id": "20651257fecbe8436cea6bfd3277fec1223ebd63",
+            "name": "Provider Lockbox Service",
+            "image": "https://provider.com/lockbox/lockbox.png",
+            "url": "https://provider.com/lockbox/",
+    
+            "namespaces": {
+              "namespace": [
+                {
+                  "$id": "https://domain.com/pemissionname"
+                },
+                {
+                  "$id": "https://other.com/pemissionname"
+                }
+              ]
+            }
+          },
+          "signature": {
+            "reference": "#20651257fecbe8436cea6bfd3277fec1223ebd63",
+            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "digestValue": "IUe324k...oV5/A8Q38Gj45i4jddX=",
+            "digestSigned": "MDAwMDAw...MGJ5dGVzLiBQbGVhc2UsIGQ=",
+            "key": {
+              "$id": "b7ef37...4a0d58628d3",
+              "domain": "provider.com",
+              "service": "namespace-grant"
+            }
+          }
+        }
+      }
+    }
+
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "lockbox",
+        "$method": "lockbox-namespace-grant-challenge-validate",
         "$timestamp": 439439493
       }
     }
