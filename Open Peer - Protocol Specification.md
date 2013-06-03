@@ -1907,9 +1907,9 @@ None.
           "url": "https://hookflash.com/agentinfo/"
         },
     
-        "grantServiceChallenges": {
+        "namespaceGrantChallenges": {
     
-           "grantServiceChallenge": [
+           "namespaceGrantChallenge": [
              {
               "$id": "20651257fecbe8436cea6bfd3277fec1223ebd63",
               "name": "Provider Lockbox Service",
@@ -1989,11 +1989,11 @@ The resulting proof bundles will only contain challenges that have been approved
         "$handler": "namespace-grant",
         "$method": "namespace-grant-complete",
     
-        "grantServiceChallengeBundles": {
+        "namespaceGranthallengeBundles": {
     
-          "grantServiceChallengeBundle:" [
+          "namespaceGrantChallengeBundle:" [
             {
-              "grantServiceChallenge": {
+              "namespaceGrantChallenge": {
                 "$id": "20651257fecbe8436cea6bfd3277fec1223ebd63",
                 "name": "Provider Lockbox Service",
                 "image": "https://provider.com/lockbox/lockbox.png",
@@ -2023,7 +2023,7 @@ The resulting proof bundles will only contain challenges that have been approved
               }
             },
             { 
-              "grantServiceChallenge": {
+              "namespaceGrantChallenge": {
                 "$id": "1bbca957f2cb2802480b81c16b1f76176b762340",
                 "name": "Provider Identity Service",
                 "image": "https://provider.com/identity/identity.png",
@@ -2191,7 +2191,7 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
           "keyLockboxHalf": "Wm1SellXWmtabVJoWm1wcmFuSmlhMnB5WW1WbWEycHlaV3ByY21ZPQ=="
         },
     
-        "grantServiceChallenge": {
+        "namespaceGrantChallenge": {
           "$id": "20651257fecbe8436cea6bfd3277fec1223ebd63",
           "name": "Provider Lockbox Service",
           "image": "https://provider.com/lockbox/lockbox.png",
@@ -2308,8 +2308,8 @@ The lockbox service will validate that the proof bundle is correct and if the ch
           "accessSecretProofExpires": 43843298934
         },
     
-        "grantServiceChallengeBundle:" {
-          "grantServiceChallenge": {
+        "namespaceGrantChallengeBundle:" {
+          "namespaceGrantChallenge": {
             "$id": "20651257fecbe8436cea6bfd3277fec1223ebd63",
             "name": "Provider Lockbox Service",
             "image": "https://provider.com/lockbox/lockbox.png",

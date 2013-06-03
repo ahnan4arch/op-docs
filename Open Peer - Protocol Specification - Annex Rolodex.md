@@ -199,7 +199,7 @@ Upon seeing an unknown grant ID used in conjunction with a the identity where pr
           "updateNext": 54433434
         },
     
-        "grantServiceChallenge": {
+        "namespaceGrantChallenge": {
           "$id": "20651257fecbe8436cea6bfd3277fec1223ebd63",
           "name": "Provider Rolodex Service",
           "image": "https://provider.com/rolodex/rolodex.png",
@@ -253,8 +253,8 @@ The rolodex service will validate that the proof bundle is correct and if the ch
            "accessSecretProofExpires": 43843298934
          },
     
-        "grantServiceChallengeBundle:" {
-          "grantServiceChallenge": {
+        "namespaceGrantChallengeBundle:" {
+          "namespaceGrantChallenge": {
             "$id": "20651257fecbe8436cea6bfd3277fec1223ebd63",
             "name": "Provider Rolodex Service",
             "image": "https://provider.com/rolodex/rolodex.png",
