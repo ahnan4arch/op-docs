@@ -131,16 +131,17 @@ This request is sent by the client application to get access to the rolodex serv
     * rolodex access secret - a secret for use to access the rolodex service
     * rolodex access secret expires - when the access secret will expire and no longer be valid
     * update next - the timestamp when the next update can/should be issued (but not before)
+  * Agent
+    * Product - the user agent identification for the product, typically "name/version (os/system)" information)
+    * Name - a human readable friendly name for the product
+    * Image - a human visual image for the brand that must be square in shape.
+    * Agent URL - a web page that can be rendered in a browser to obtain more information about the agent
   * Grant service challenge (optional, if challenge is required)
     * ID - a challenge ID that the server generated which the client application will have to authorize
-    * Name - a human readable name for the service requesting the challenge
-    * Image - a brandable image representing the service requesting the challenge
-    * URL - a browser renderable page the user can go to obtain more information about this service requesting the challenge
-    * Domains - a list of domains the service will accept trusted signatures as proof
 
 ### Security Considerations
 
-The rolodex service must validate the grant ID with the grant service and must validate the identity access with the identity service.
+Upon seeing an unknown grant ID used in conjunction with a the identity where proof of the rolodex namespace grant permission has not been granted, the rolodex will issue a grant service challenge to verify the grant has access to the rolodex namespace.
 
 ### Example
 
@@ -167,6 +168,13 @@ The rolodex service must validate the grant ID with the grant service and must v
            "version": "4341443-54343a",
            "refresh": false
          },
+    
+        "agent": {
+          "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
+          "name": "hookflash",
+          "image": "https://hookflash.com/brandsquare.png",
+          "url": "https://hookflash.com/agentinfo/"
+        },
     
         "grant": {
           "$id": "de0c8c10d692bc91c1a551f57a50d2f97ef67543"
