@@ -1989,7 +1989,7 @@ The resulting proof bundles will only contain challenges that have been approved
         "$handler": "namespace-grant",
         "$method": "namespace-grant-complete",
     
-        "grantServiceChallengeProofBundles": {
+        "grantServiceChallengeBundles": {
     
           "grantServiceChallengeBundle:" [
             {
