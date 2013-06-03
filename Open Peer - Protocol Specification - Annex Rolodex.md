@@ -202,7 +202,7 @@ The rolodex service must validate the grant ID with the grant service and must v
       }
     }
 
-Lockbox Namespace Grant Challenge Validate Request
+Rolodex Namespace Grant Challenge Validate Request
 --------------------------------------------------
 
 ### Purpose
@@ -217,7 +217,7 @@ This request proves that the grant ID challenge is proven valid by way of the na
     * rolodex access token - as returned from the "rolodex access" request
     * Proof of 'rolodex access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<rolodex-access-secret>`, "rolodex-access-validate:" + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<rolodex-access-token>` + ":rolodex-namespace-grant-challenge-validate")
     * Expiry of the proof for the 'rolodex access secret' - a window in which access secret proof is considered valid
-  * Grant service challenge as issued by the lockbox service bundled with signature as returned from the namespace grant service
+  * Grant service challenge as issued by the rolodex service bundled with signature as returned from the namespace grant service
 
 ### Returns
 
@@ -248,9 +248,9 @@ The rolodex service will validate that the proof bundle is correct and if the ch
         "grantServiceChallengeBundle:" {
           "grantServiceChallenge": {
             "$id": "20651257fecbe8436cea6bfd3277fec1223ebd63",
-            "name": "Provider Lockbox Service",
-            "image": "https://provider.com/lockbox/lockbox.png",
-            "url": "https://provider.com/lockbox/",
+            "name": "Provider Rolodex Service",
+            "image": "https://provider.com/rolodex/rolodex.png",
+            "url": "https://provider.com/rolodex/",
     
             "namespaces": {
               "namespace": [
