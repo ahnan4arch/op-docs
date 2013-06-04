@@ -5,6 +5,7 @@ const EXPRESS = require("express");
 const HBS = require("hbs");
 const MARKED = require("marked");
 const REQUEST = require("request");
+const WAITFOR = require("waitfor");
 
 const PORT = 8080;
 const MODE = "view";
@@ -21,31 +22,48 @@ exports.main = function(callback) {
         // @see https://help.github.com/articles/post-receive-hooks
         // Use: http://docs.openpeer.org/github-post-commit
         app.post(/^\/github-post-commit$/, function(req, res, next) {
-            REQUEST("https://raw.github.com/openpeer/op-docs/master/Open%20Peer%20-%20Protocol%20Specification.md", function (error, response, body) {
+            function finalize(err) {
                 if (err) {
                     console.error("[github-post-commit]", err.stack);
-                } else
-                if (response.statusCode !== 200) {
-                    console.error("[github-post-commit]", "response.statusCode: " + response.statusCode);
-                } else {
-                    try {
-                        var path = PATH.join(__dirname, "../Open Peer - Protocol Specification.md");
-                        // Sanity check to ensure new file size is within 10% of existing file size.
-                        var size = FS.statSync(path).size;
-                        var change = Math.floor(((Math.abs(size-body.length)/size)*100) + 1);
-                        if (change > 10) {
-                            throw new Error("Skip update. File size change " + change + "% for '" + path + "' > 10%");
-                        }
-                        console.log("[github-post-commit]", "Update '" + path + "' with <= " + change + "% change.");
-                        FS.writeFileSync(path, body);
-                    } catch(err) {
-                        console.error("[github-post-commit]", err.stack);
-                    }
-                    res.writeHead(200, {
-                        "Content-Type": "text/html"
-                    });
-                    return res.end("OK");
                 }
+                res.writeHead(200, {
+                    "Content-Type": "text/html"
+                });
+                return res.end("OK");
+            }
+            return exports.getDocs(function(err, docs) {
+                if (err) return finalize(err);
+                var waitfor = WAITFOR.parallel(finalize);
+                for (var id in docs) {
+                    waitfor(docs[id], function(doc, done) {
+                        var url = "https://raw.github.com/openpeer/op-docs/master/" + encodeURIComponent(doc.filename);
+                        console.log("[github-post-commit]", "Requesting '" + url + "'");
+                        return REQUEST(url, function (error, response, body) {
+                            if (err) {
+                                return done(err);
+                            } else
+                            if (response.statusCode !== 200) {
+                                return done(new Error("Got status code '" + response.statusCode + "' while fetching '" + url + "'"));
+                            }
+                            console.log("[github-post-commit]", "Got response for '" + url + "'");
+                            try {
+                                var path = PATH.join(__dirname, "..", doc.filename);
+                                // Sanity check to ensure new file size is within 10% of existing file size.
+                                var size = FS.statSync(path).size;
+                                var change = Math.floor(((Math.abs(size-body.length)/size)*100) + 1);
+                                if (change > 10) {
+                                    throw new Error("Skip update. File size change " + change + "% for '" + path + "' > 10%");
+                                }
+                                console.log("[github-post-commit]", "Update '" + path + "' with <= " + change + "% change.");
+                                FS.writeFileSync(path, body);
+                                return done(null);
+                            } catch(err) {
+                                return done(err);
+                            }
+                        });
+                    });
+                }
+                waitfor();
             });
         });
 
