@@ -1236,10 +1236,8 @@ Error replies appear as follows:
         "$id": "abc123",
     
         "error": {
-          "reason": {
-            "$id": 404,
-            "#text": "Not Found"
-          }
+          "$id": 404,
+          "#text": "Not Found"
         }
       }
     }
