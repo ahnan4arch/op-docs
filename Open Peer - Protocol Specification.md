@@ -2107,6 +2107,9 @@ This request obtains access to a lockbox. Access is granted by way of login proo
     * Image - a brandable image representing the service requesting the challenge
     * URL - a browser renderable page the user can go to obtain more information about this service requesting the challenge
     * Domains - a list of domains the service will accept trusted signatures as proof
+  * Content list of data elements containing:
+    * Namespace URL - the namespace URL is the ID where the data is stored, access was requested and access was previously granted
+    * Updated - timestamp (or version number) of when entries in the namespace were last updated
   * List of identities attached to the lockbox
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
@@ -2195,6 +2198,19 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
           "image": "https://provider.com/lockbox/lockbox.png",
           "url": "https://provider.com/lockbox/",
           "domains": "trust.com,trust2.com"
+        },
+    
+        "namespaces": {
+          "namespace": [
+            {
+              "$id": "https://domain.com/pemissionname",
+              "$updated": 4432324
+            },
+            {
+              "$id": "https://other.com/pemissionname",
+              "$updated": 4432324
+            }
+          ]
         },
     
         "identities": {
@@ -2461,12 +2477,13 @@ This request retrieves data contained in the lockbox.
     * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-content-get")
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
   * Content list of data elements containing:
-    * Namespace URL - the amespace URL is the ID where the data is stored
+    * Namespace URL - the namespace URL is the ID where the data is stored
 
 ### Returns
 
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored
+    * Updated - timestamp (or version number) of when entries in the namespace were last updated
     * List of values, each value is base 64 encode with the value encrypted with: key = hmac(`<lockbox-key>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv=hash(`<permission-url>` + ":" + `<value-name>`)
 
 ### Security Considerations
