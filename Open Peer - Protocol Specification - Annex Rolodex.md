@@ -119,8 +119,6 @@ This request is sent by the client application to get access to the rolodex serv
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
   * Rolodex information
     * server token - given by the identity service that only has meaning to the rolodex service
-    * version - (optional) a version string as previously returned from the rolodex update representing the delta information last obtained from the rolodex service (only specify if previously known)
-    * refresh - request the contact list be refreshed immediately
   * Grant information
     * grant ID - the grant ID that has been given namespace access to the rolodex namespace, i.e. "https://openpeer.org/permission/rolodex"
 
@@ -164,9 +162,7 @@ Upon seeing an unknown grant ID used in conjunction with a the identity where pr
         },
     
         "rolodex": {
-           "serverToken": "b3ff46bae8cacd1e572ee5e158bcb04ed9297f20-9619e3bc-4cd41c9c64ab2ed2a03b45ace82c546d",
-           "version": "4341443-54343a",
-           "refresh": false
+           "serverToken": "b3ff46bae8cacd1e572ee5e158bcb04ed9297f20-9619e3bc-4cd41c9c64ab2ed2a03b45ace82c546d"
          },
     
         "agent": {
@@ -379,7 +375,7 @@ If the result is an error result with error code "424" i.e. "Failed Rolodex Toke
         "$timestamp": 439439493,
     
         "rolodex": {
-          "updateNext": 54433434
+          "updateNext": 54433434,
            "version": "4341443-54343a"
          },
     
