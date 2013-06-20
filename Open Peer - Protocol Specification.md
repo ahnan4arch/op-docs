@@ -2129,7 +2129,7 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
         "$domain": "domain.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "lockbox",
+        "$handler": "identity-lockbox",
         "$method": "lockbox-access",
     
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
@@ -2178,7 +2178,7 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "lockbox",
+        "$handler": "identity-lockbox",
         "$method": "lockbox-access",
         "$timestamp": 439439493,
     
@@ -2257,7 +2257,7 @@ Success or failure.
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "lockbox",
+        "$handler": "identity-lockbox",
         "$method": "lockbox-access-validate",
     
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
@@ -2275,7 +2275,7 @@ Success or failure.
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "lockbox",
+        "$handler": "identity-lockbox",
         "$method": "identity-access-validate",
         "$timestamp": 439439493
       }
@@ -2312,7 +2312,7 @@ The lockbox service will validate that the proof bundle is correct and if the ch
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "lockbox",
+        "$handler": "identity-lockbox",
         "$method": "lockbox-namespace-grant-challenge-validate",
     
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
@@ -2360,7 +2360,7 @@ The lockbox service will validate that the proof bundle is correct and if the ch
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "lockbox",
+        "$handler": "identity-lockbox",
         "$method": "lockbox-namespace-grant-challenge-validate",
         "$timestamp": 439439493
       }
@@ -2404,7 +2404,7 @@ If all the identities associated to the lockbox are removed then the lockbox acc
         "$domain": "domain.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "lockbox",
+        "$handler": "identity-lockbox",
         "$method": "lockbox-identities-update",
     
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
@@ -2442,7 +2442,7 @@ If all the identities associated to the lockbox are removed then the lockbox acc
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "lockbox",
+        "$handler": "identity-lockbox",
         "$method": "lockbox-identities-update",
         "$timestamp": 439439493,
     
@@ -2497,7 +2497,7 @@ No value names within the same namespace URL should be identical.
         "$domain": "domain.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "lockbox",
+        "$handler": "identity-lockbox",
         "$method": "lockbox-content-get",
     
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
@@ -2526,7 +2526,7 @@ No value names within the same namespace URL should be identical.
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "lockbox",
+        "$handler": "identity-lockbox",
         "$method": "lockbox-content-get",
         "$timestamp": 439439493,
     
@@ -2582,7 +2582,7 @@ No value names within the same permission URL should be identical.
         "$domain": "domain.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "lockbox",
+        "$handler": "identity-lockbox",
         "$method": "lockbox-content-set",
     
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
@@ -2616,7 +2616,7 @@ No value names within the same permission URL should be identical.
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "lockbox",
+        "$handler": "identity-lockbox",
         "$method": "lockbox-content-get",
         "$timestamp": 439439493
       }
