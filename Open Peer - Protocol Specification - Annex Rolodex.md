@@ -334,6 +334,8 @@ This request is sent by the client application to get updates to the contact lis
 
 ### Security Considerations
 
+If the rolodex is unable to statisy the version string because it's either illegal or no longer available, the return result with be a 409 Conflict error. Upon receiving such an error, a client should reissue the request to fetch contacts without a version string an purge it's contacts from the rolodex provider in favour of newly downloaded contacts.
+
 The rolodex can control the rate in which identities are returned to the client application by giving contacts over time and letting the client application refetch new contacts only when the next suggested update should occur. The version string allows the rolodex to return the delta information for contacts from the last update point to ensure clients do not have to fetch contacts needlessly.
 
 The rolodex will not know the state of the identity with regards to its association to a peer file or a lockbox. The "Identity Lookup Service" must be used to obtain that type of information and must be considered more authoritative over the information obtained from the rolodex service.
