@@ -2240,6 +2240,7 @@ This request proves that a lockbox access is valid and can be used to validate a
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Purpose - reason for validation (each service using this validation should have a unique purpose string)
   * Lockbox information
+    * Lockbox account ID - (optional) the assigned account ID for the lockbox, if specified the access token must validate the account ID as valid
     * Lockbox access token - a verifiable token that is linked to the lockbox
     * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":" + `<purpose>`)
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret Identity information
@@ -2263,6 +2264,7 @@ Success or failure.
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
         "purpose": "whatever",
         "lockbox": {
+          "$id": "123456",
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
           "accessSecretProofExpires": 43843298934
@@ -3196,12 +3198,14 @@ This request proves that an identity login is valid and can be used to validate 
 ### Inputs
 
   * Client one time use nonce (cryptographically random string)
-  * Identity access token - as returned from the "identity access complete" request
-  * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-lookup-update")
-  * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
-  * Stable ID - a stable ID representing the user regardless of which identity is being used or the current peer contact ID
-  * Public peer file- the public peer file associated with the contact ID
-  * Priority / weight - SRV like priority and weighting system to gauge which identity discovered to be associated to the same peer contact have highest priority
+  * identity bundle information
+    * Identity access token - as returned from the "identity access complete" request
+    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-lookup-update")
+    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
+    * Stable ID - a stable ID representing the user regardless of which identity is being used or the current peer contact ID
+    * Public peer file- the public peer file associated with the contact ID
+    * Priority / weight - SRV like priority and weighting system to gauge which identity discovered to be associated to the same peer contact have highest priority
+    * signed by public peer file specified
 
 ### Returns
 
@@ -3220,18 +3224,28 @@ Success or failure.
         "$method": "identity-lookup-update",
     
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
-        "identity": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934,
-    
-          "uri": "identity://domain.com/alice",
-          "provider": "domain.com",
-    
-          "stableID": "0acc990c7b6e7d5cb9a3183d432e37776fb182bf",
-          "peer": {...},
-          "priority": 5,
-          "weight": 1
+        "identityBundle": {
+          "identity": {
+            "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
+            "accessToken": "a913c2c3314ce71aee554986204a349b",
+            "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "accessSecretProofExpires": 43843298934,
+      
+            "uri": "identity://domain.com/alice",
+            "provider": "domain.com",
+      
+            "stableID": "0acc990c7b6e7d5cb9a3183d432e37776fb182bf",
+            "peer": {...},
+            "priority": 5,
+            "weight": 1
+          }
+          "signature": {
+            "reference": "#b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
+            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "digestValue": "IUe324k...oV5/A8Q38Gj45i4jddX=",
+            "digestSigned": "MDAwMDAw...MGJ5dGVzLiBQbGVhc2UsIGQ=",
+            "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
+          }
         }
       }
     }
