@@ -3205,7 +3205,7 @@ This request proves that an identity login is valid and can be used to validate 
     * Stable ID - a stable ID representing the user regardless of which identity is being used or the current peer contact ID
     * Public peer file- the public peer file associated with the contact ID
     * Priority / weight - SRV like priority and weighting system to gauge which identity discovered to be associated to the same peer contact have highest priority
-    * signed by public peer file specified
+    * signed by public peer file specified (only if peer file is being set, otherwise no "identityBundle" will be present)
 
 ### Returns
 
