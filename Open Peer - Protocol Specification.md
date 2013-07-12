@@ -3221,7 +3221,7 @@ Success or failure.
 
 The server must validate the lockbox access and the identity access to complete the update. The server must verify the stable ID has been calculated correctly.
 
-### Example
+### Example Association
 
     {
       "request": {
@@ -3261,6 +3261,39 @@ The server must validate the lockbox access and the identity access to complete 
             "digestSigned": "MDAwMDAw...MGJ5dGVzLiBQbGVhc2UsIGQ=",
             "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
           }
+        }
+      }
+    }
+
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "identity",
+        "$method": "identity-lookup-update",
+        "$timestamp": 439439493
+      }
+    }
+
+### Example Remove Association
+
+    {
+      "request": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "identity",
+        "$method": "identity-lookup-update",
+    
+        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "identity": {
+          "accessToken": "a913c2c3314ce71aee554986204a349b",
+          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+          "accessSecretProofExpires": 43843298934,
+    
+          "uri": "identity://domain.com/alice",
+          "provider": "domain.com"      
         }
       }
     }
