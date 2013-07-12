@@ -3198,11 +3198,17 @@ This request proves that an identity login is valid and can be used to validate 
 ### Inputs
 
   * Client one time use nonce (cryptographically random string)
+  * Lockbox information
+    * Lockbox account ID - the assigned account ID for the lockbox
+    * Lockbox domain - this is the domain for the lockbox to use
+    * Lockbox access token - a verifiable token that is linked to the lockbox
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":identity-lookup-update")
+    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret Identity information
   * identity bundle information
     * Identity access token - as returned from the "identity access complete" request
     * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-lookup-update")
     * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
-    * Stable ID - a stable ID representing the user regardless of which identity is being used or the current peer contact ID
+    * Stable ID - a stable ID representing the user regardless of which identity is being used or the current peer contact ID, stable ID = hash("stable-id:" + `<lockbox-domain>` + ":" + `<lockbox-account-id>`)
     * Public peer file- the public peer file associated with the contact ID
     * Priority / weight - SRV like priority and weighting system to gauge which identity discovered to be associated to the same peer contact have highest priority
     * signed by public peer file specified (only if peer file is being set, otherwise no "identityBundle" will be present)
@@ -3212,6 +3218,8 @@ This request proves that an identity login is valid and can be used to validate 
 Success or failure.
 
 ### Security Considerations
+
+The server must validate the lockbox access and the identity access to complete the update. The server must verify the stable ID has been calculated correctly.
 
 ### Example
 
@@ -3224,6 +3232,13 @@ Success or failure.
         "$method": "identity-lookup-update",
     
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "lockbox": {
+          "$id": "123456",
+          "domain": "domain.com",
+          "accessToken": "a913c2c3314ce71aee554986204a349b",
+          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+          "accessSecretProofExpires": 43843298934
+        },
         "identityBundle": {
           "identity": {
             "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
@@ -3238,7 +3253,7 @@ Success or failure.
             "peer": {...},
             "priority": 5,
             "weight": 1
-          }
+          },
           "signature": {
             "reference": "#b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
             "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
