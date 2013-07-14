@@ -331,14 +331,27 @@ Example Public Peer File
               "$id": "C",
               "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
               "identities": {
-                "identityBundle": [
+                "identityProofBundle": [
                   {
-                    "identity": {
+                    "identityProof": {
                       "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
-                      "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
-                      "uri": "identity://facebook.com/id48483",
-                      "created": 54593943,
-                      "expires": 65439343
+                      "contactProofBundle": {
+                        "contactProof": {
+                          "$id": "2d950c960b52c32a4766a148e8a39d0527110fee",
+                          "stableID": "cb4bfff3a457ed7e832b4004d7d73f0411d5c0be",
+                          "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
+                          "uri": "identity://facebook.com/id48483",
+                          "created": 54593943,
+                          "expires": 65439343
+                        },
+                        "signature": {
+                          "reference": "#2d950c960b52c32a4766a148e8a39d0527110fee",
+                          "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                          "digestValue": "Wm1Sa...lptUT0=",
+                          "digestSigned": "ZmRh...2FzZmQ=",
+                          "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
+                        }
+                      }
                     },
                     "signature": {
                       "reference": "#b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
@@ -347,18 +360,31 @@ Example Public Peer File
                       "digestSigned": "MDAwMDAwMGJ5dGVzLiBQbGVhc2UsIGQ=",
                       "key": {
                         "$id": "b7ef37...4a0d58628d3",
-                        "domain": "hookflash.org",
+                        "domain": "hookflash.me",
                         "service": "identity"
                       }
                     }
                   },
                   {
-                    "identity": {
+                    "identityProof": {
                       "$id": "0a9b2290343734118469e36d88276ffa6277d196",
-                      "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
-                      "uri": "identity://twitter.com/booyah",
-                      "created": 54593943,
-                      "expires": 65439343
+                      "contactProofBundle": {
+                        "contactProof": {
+                          "$id": "353c7684dcf8683540a9d9e9da00a91591864d73",
+                          "stableID": "cb4bfff3a457ed7e832b4004d7d73f0411d5c0be",
+                          "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
+                          "uri": "identity://twitter.com/booyah",
+                          "created": 54593943,
+                          "expires": 65439343
+                        },
+                        "signature": {
+                          "reference": "#353c7684dcf8683540a9d9e9da00a91591864d73",
+                          "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                          "digestValue": "TXpV...R1EzTXc9PQ==",
+                          "digestSigned": "MzUz...2NGQ3Mw==",
+                          "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
+                        }
+                      }
                     },
                     "signature": {
                       "reference": "#0a9b2290343734118469e36d88276ffa6277d196",
@@ -2809,6 +2835,39 @@ List of resulting identities that resolve in the order requested as follows:
               "feed": "http://domain.com/user/alice/feed",
               "avatars": {
                 "avatar": { "url": "http://domain.com/user/alice/p" }
+              },
+              "identityProofBundle": {
+                "identityProof": {
+                  "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
+                  "contactProofBundle": {
+                    "contactProof": {
+                      "$id": "2d950c960b52c32a4766a148e8a39d0527110fee",
+                      "stableID": "123456",
+                      "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
+                      "uri": "identity://domain.com/alice",
+                      "created": 54593943,
+                      "expires": 65439343
+                    },
+                    "signature": {
+                      "reference": "#2d950c960b52c32a4766a148e8a39d0527110fee",
+                      "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                      "digestValue": "Wm1Sa...lptUT0=",
+                      "digestSigned": "ZmRh...2FzZmQ=",
+                      "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
+                    }
+                  }
+                },
+                "signature": {
+                  "reference": "#b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
+                  "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                  "digestValue": "IUe324koV5/A8Q38Gj45i4jddX=",
+                  "digestSigned": "MDAwMDAwMGJ5dGVzLiBQbGVhc2UsIGQ=",
+                  "key": {
+                    "$id": "b7ef37...4a0d58628d3",
+                    "domain": "domain.com",
+                    "service": "identity"
+                  }
+                }
               }
             },
             {...},
@@ -2820,7 +2879,8 @@ List of resulting identities that resolve in the order requested as follows:
               "priority": 1,
               "weight": 1,
               "updated": 5849594,
-              "expires": 58843493
+              "expires": 58843493,
+              "identityProofBundle": { ... }
             },
             {...},
             {
@@ -2848,7 +2908,8 @@ List of resulting identities that resolve in the order requested as follows:
                     "height": 200
                   }
                 ]
-              }
+              },
+              "identityProofBundle": { ... }
             }
           ]
         }
@@ -3239,27 +3300,35 @@ The server must validate the lockbox access and the identity access to complete 
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
           "accessSecretProofExpires": 43843298934
         },
-        "identityBundle": {
-          "identity": {
-            "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
-            "accessToken": "a913c2c3314ce71aee554986204a349b",
-            "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-            "accessSecretProofExpires": 43843298934,
-      
-            "uri": "identity://domain.com/alice",
-            "provider": "domain.com",
-      
-            "stableID": "0acc990c7b6e7d5cb9a3183d432e37776fb182bf",
-            "peer": {...},
-            "priority": 5,
-            "weight": 1
-          },
-          "signature": {
-            "reference": "#b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
-            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
-            "digestValue": "IUe324k...oV5/A8Q38Gj45i4jddX=",
-            "digestSigned": "MDAwMDAw...MGJ5dGVzLiBQbGVhc2UsIGQ=",
-            "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
+        "identity": {
+          "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
+          "accessToken": "a913c2c3314ce71aee554986204a349b",
+          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+          "accessSecretProofExpires": 43843298934,
+    
+          "uri": "identity://domain.com/alice",
+          "provider": "domain.com",
+    
+          "stableID": "0acc990c7b6e7d5cb9a3183d432e37776fb182bf",
+          "peer": {...},
+          "priority": 5,
+          "weight": 1,
+          "contactProofBundle": {
+            "contactProof": {
+              "$id": "2d950c960b52c32a4766a148e8a39d0527110fee",
+              "stableID": "0acc990c7b6e7d5cb9a3183d432e37776fb182bf",
+              "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
+              "uri": "identity://domain.com/alice",
+              "created": 54593943,
+              "expires": 65439343
+            },
+            "signature": {
+              "reference": "#2d950c960b52c32a4766a148e8a39d0527110fee",
+              "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+              "digestValue": "Wm1Sa...lptUT0=",
+              "digestSigned": "ZmRh...2FzZmQ=",
+              "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
+            }
           }
         }
       }
@@ -3306,82 +3375,6 @@ The server must validate the lockbox access and the identity access to complete 
         "$handler": "identity",
         "$method": "identity-lookup-update",
         "$timestamp": 439439493
-      }
-    }
-
-
-Identity Sign Request
----------------------
-
-### Purpose
-
-This request requests a signed identity a given proof of a successful identity login.
-
-### Inputs
-
-  * Original identity
-  * Client one time use nonce (cryptographically random string)
-  * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-sign")
-  * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
-
-### Returns
-
-Signed identity bundle by the identity service.
-
-### Security Considerations
-
-### Example
-
-    {
-      "request": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "identity",
-        "$method": "identity-sign",
-    
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
-        "identity": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934,
-    
-          "uri": "identity://domain.com/alice",
-          "provider": "domain.com"
-        }
-      }
-    }
-
-    {
-      "result": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "identity",
-        "$method": "identity-sign",
-        "$timestamp": 439439493,
-    
-        "identityBundle": {
-          "identity": {
-            "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
-            "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
-            "uri": "identity://domain.com/alice",
-            "created": 54593943,
-            "expires": 65439343
-          },
-          "signature": {
-            "reference": "#b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
-            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
-            "digestValue": "IUe324k...oV5/A8Q38Gj45i4jddX=",
-            "digestSigned": "MDAwMDAw...MGJ5dGVzLiBQbGVhc2UsIGQ=",
-            "key": {
-              "$id": "b7ef37...4a0d58628d3",
-              "domain": "provider.com",
-              "service": "identity"
-            }
-          }
-        }
       }
     }
 
