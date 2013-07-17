@@ -2104,8 +2104,7 @@ This request obtains access to a lockbox. Access is granted by way of login proo
   * Lockbox information
     * Lockbox domain - the domain hosting the lockbox
     * Lockbox account ID - (optional, if known) the assigned account ID for the lockbox
-    * Lockbox key "lockbox half" - (optional, if known), this is server side base-64 encoded XORed portion of the lockbox key that must be combined with the client side portion of the key to create the full lockbox key. If specified the identity access token and proof must be specified.
-    * Lockbox key "hash" - (optional) hash of the combined XORed lockbox key. If this hash is specified then this hash can be used to login to the lockbox account (by specifying the lockbox account ID).
+    * Lockbox key "hash" - (optional) hash of the lockbox key. If this hash is specified then this hash can be used to login to the lockbox account (by specifying the lockbox account ID).
     * Lockbox reset flag - (optional) if specified and true, a new lockbox must be created for the identity specified (and an identity must be specified for access) and this identity must become unassociated with any other lockboxes. If this identity was previously the only associated identity with a previous lockbox then the previous lockbox can be deleted entirely.
   * Agent
     * Product - the user agent identification for the product, typically "name/version (os/system)" information)
@@ -2125,8 +2124,7 @@ This request obtains access to a lockbox. Access is granted by way of login proo
     * Lockbox access secret - a secret that can be used in combination to the "lockbox access token" to provide proof of previous successful login
     * Lockbox access expiry - the window in which the access key is valid
     * Lockbox domain - the domain hosting the lockbox
-    * Lockbox key "lockbox half" - this is server side base-64 encoded XORed portion of the lockbox key that must be combined with the client side portion of the key to create the full lockbox key.
-    * Lockbox key "hash" - hash of the combined XORed lockbox key as previously passed in.
+    * Lockbox key "hash" - hash of the lockbox key as previously passed in.
   * Grant service challenge (optional, if challenge is required)
     * ID - a challenge ID that the server generated which the client application will have to authorize
     * Name - a human readable name for the service requesting the challenge
@@ -2146,7 +2144,7 @@ Access to the lockbox does not grant access to the contents of the lockbox. The 
 
 The server will validate the identity login via the identity service to access the account or validate the client has the correct lockbox key hash to access the account. An identity that has a different provider is considered a different identity. Thus an identity is deemed unique by its identity and its identity provider combined.
 
-If the lockbox key "lockbox half" is specified because it was regenerated then all the information associated to the account is purged. The grants to the various namespaced values still remain valid but the data contained is completely wiped out. The remaining identities that were not used to login during the regeneration need to be marked as needing update since they will have the incorrect lockbox key "identity half".
+If the lockbox reset flag is specified then a new account is created based on the identity and the existing account remains associated to the old identities, or the old account is removed if no other identities remain associated.
 
 ### Example
 
@@ -2170,7 +2168,6 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
     
         "lockbox": {
           "domain": "example.com",
-          "keyLockboxHalf": "Wm1SellXWmtabVJoWm1wcmFuSmlhMnB5WW1WbWEycHlaV3ByY21ZPQ==",
           "hash": "cf69f9e4ed98bb739b4c72fc4fff403467014874"
         },
     
@@ -2214,8 +2211,7 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
           "accessSecret": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
           "accessSecretExpires": 8483943493,
     
-          "domain": "example.com",
-          "keyLockboxHalf": "Wm1SellXWmtabVJoWm1wcmFuSmlhMnB5WW1WbWEycHlaV3ByY21ZPQ=="
+          "domain": "example.com"
         },
     
         "namespaceGrantChallenge": {
@@ -3078,7 +3074,7 @@ This notification is sent from the inner browser window to the outer window as a
     * Identity access expiry - the window in which the access key is valid
   * Lock box information (optional, if known)
       * Lockbox domain - if lockbox domain is known in advance, this is the domain for the lockbox to use
-      * Lockbox key "identity half" - this is client side base-64 encoded XORed portion of the lockbox key that must be combined with the server side portion of the key to create the full lockbox key.
+      * Lockbox key - this is client side base-64 encoded lockbox key.
       * Lockbox reset flag - this flag is used if the lockbox must be reset with a new password and all data within to be flushed.
 
 ### Returns
@@ -3117,7 +3113,7 @@ By using information not stored on a server, this ensures that should the server
     
         "lockbox": {
           "domain": "domain.com",
-          "keyIdentityHalf": "V20x...IbGFWM0J5WTIxWlBRPT0=",
+          "key": "V20x...IbGFWM0J5WTIxWlBRPT0=",
           "reset": false
         }
       }
@@ -3142,7 +3138,7 @@ This request is sent from the outer browser window to the inner window as a post
     * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
   * Lock box information
     * Lockbox domain - if lockbox domain is known in advance, this is the domain for the lockbox to use
-    * Lockbox key "identity half" - this is client side base-64 encoded XORed portion of the lockbox key that must be combined with the server side portion of the key to create the full lockbox key.
+    * Lockbox key - this is client side base-64 encoded lockbox key
 
 ### Returns
 
@@ -3173,7 +3169,7 @@ The lockbox key should be encrypted locally in JavaScript before being sent a se
         },
         "lockbox": {
           "domain": "domain.com",
-          "keyIdentityHalf": "V20x...IbGFWM0J5WTIxWlBRPT0="
+          "key": "V20x...IbGFWM0J5WTIxWlBRPT0="
         }
       }
     }
