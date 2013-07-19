@@ -1,3 +1,8 @@
 {
-	"name": "op-docs"
+	"name": "op-docs",
+	"config": {
+		"run": {
+			"packagePath": "viewer"
+		}
+	}
 }
