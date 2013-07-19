@@ -1062,27 +1062,29 @@ SCP is an alternative TCP like peer-to-peer communication protocol that messages
 Open Peer Signalling Protocol
 =============================
 
-Non Encrypted JSON Signalling Protocol
---------------------------------------
+JSON Packaging
+--------------
 
-The signalling protocol used for Open Peer is simple JSON based protocol and uses RUDP or SCP as the transport.
+The signalling protocol used for Open Peer is simple JSON based protocol and uses TCP, or RUDP, or DTLS/SCTP as the transport. Basically, open peer requires a reliable stream to operate.
 
 The packaging of an JSON message for deliver to a peer entity is extremely simple when no encryption is used (known as "text/x-open-peer-json-plain"):
 
   * Message Size [4 bytes in network order] - The length of the raw JSON message about to be received
   * JSON data - the JSON message data to be receive of exactly the message size specified (no NUL termination is required or expected).
 
+
 Encrypted JSON Signalling Protocol Using TLS
 --------------------------------------------
 
-Open Peer can utilize standard TLS to connection from a peer to a server. In this mode the messaging is encoded exactly the same except delivered through a TLS pipe over RUDP, also using the RUDP mime type of "text/x-open-peer-json-tls".
+Open Peer can utilize standard TLS to connection from a peer to a server. In this mode, TLS is considered a stream like any other stream and the same rules of packaging are applied depending on the context of the negotiated packaging.
 
-Encrypted JSON Signalling Protocol Using Messaging and Not Using TLS
---------------------------------------------------------------------
 
-Open Peer has one important expectation difference from the typical TLS scenario and thus offers an an alternative offering to TLS for signalling called "text/x-open-peer-json-mls", where MLS = Message Layer Security as opposed to TLS which is Transport Layer Security).
+Message Layer Security
+----------------------
 
-TLS is majority used by HTTPS (although not exclusively) under a scenario where an anonymous client without any public/private key connects to a server that has a public/private key whose identity is validated from a trusted authority chain, such as VeriSign or Thawte. In such a situation, TLS requires negotiation to establish a bidirectional channel with known trust chains to verify the servers identity and prevent man-in-the-middle attacks without ever being able to validate the identity of the client (unless prearranged private data is exchanged additionally in the application layer).
+Open Peer has one important expectation difference from the typical TLS scenario and thus offers an an alternative offering to TLS. Open Peer always knows the public key of the remote party in advance of issuing a connection.
+
+TLS is majority used by HTTPS (although not exclusively) under a scenario where an anonymous client without any public / private key connects to a server that has a public / private key whose identity is validated from a trusted authority chain, such as VeriSign or Thawte. In such a situation, TLS requires negotiation to establish a bidirectional channel with known trust chains to verify the servers identity and prevent man-in-the-middle attacks without ever being able to validate the identity of the client (unless prearranged private data is exchanged additionally in the application layer).
 
 In the Open Peer case, all peers have a public and private key, without exception, be it peer to peer or peer to server. In all cases, a peer initiating a connection always knows the public key of the designation peer in advance (thus avoiding man-in-the-middle attacks) of the connection itself. Trust is established via the Bootstrapper's introduction to services as well as Identity Providers that provide Asserted Identities.
 
@@ -1090,13 +1092,13 @@ Open Peer connections can take advantage of this situation by utilizing the pre-
 
 The format for the unidirectional message is as follows:
 
-  * Encryption key algorithm selection (16 bits network byte order, upper 8 bits reserved and must be set to "0") - When negotiating, each number represents selected keys / algorithm pair for use by the number chosen but "0" is used to represent a key/algorithm negotiation. Every "0" key causes a reset of all encryption algorithms in progress to substitute with the values specified in the "0" package. Each key / algorithm selected is selected from the supported keys/algorithms offered to the remote party, but can only be select using algorithms the remote party supports. As such, there is one mandated algorithm to ensure compatibility, "http://openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1", where the AES (Rijndael- 128) in CFB mode with a 32 byte key size, 16 byte block size, and a 16 byte feedback size with a SHA1-HMAC.
-  * 32 bit - encrypted data bundle size
+  * Message Size [4 bytes in network order] - The length of the raw encrypted message, including encryption headers and integrity footers
+  * Encryption key algorithm selection (16 bits network byte order, upper 8 bits reserved and must be set to "0") - When negotiating, each number represents selected keys / algorithm pair for use by the number chosen but "0" is used to represent a key/algorithm negotiation. Every "0" key causes a reset of all encryption algorithms in progress to substitute with the values specified in the "0" package. Each key / algorithm selected is selected from the supported keys/algorithms offered to the remote party, but can only be select using algorithms the remote party supports. As such, there is one mandated algorithm to ensure compatibility, "http://openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5", where the AES (Rijndael- 128) in CFB mode with a 32 byte key size, 16 byte block size, 16 byte feedback size, SHA1-HMAC integrity protection, and an md5 hash IV sequence calculation.
   * Data bundle, consisting of:
-    * JSON message encrypted using the algorithm/key selected
-    * hmac of the data encrypted using the algorithm/key selected
+    * JSON message encrypted using the algorithm / key selected
+    * hmac integrity of the data encrypted using the algorithm / key selected
 
-The advantage of pre-knowing the public key by the sender allows for unidirectional encryption with different keys being used in each direction and allows for encryption to begin in both directions in a single round trip negotiation.
+The advantage of pre-knowing the public key of the remote party by the sender allows for unidirectional encryption with different keys being used in each direction and allows for encryption to begin in both directions in a single round trip negotiation.
 
 Message level security is not to be used except for this specific scenario and only when the keys are pre- known by the initiator of the connection and where both parties have public and private keys. Further, this is a message centric encryption and not stream level encryption as offered by TLS. Any received public key and Asserted Identities must be validated at the application layer by exchanging Asserted Identity information in correlation with Public Peer Files.
 
@@ -1108,27 +1110,28 @@ The "0" package contains the following:
 
     * Nonce - this nonce should be validated as having only been seen once by the receiving client
     * Expiry - this package must be verified as valid before the expiry or it's considered invalid
+    * Context - this identifier allows the stream to correlate with other layers and the meaning is externally defined / negotiated
     * Algorithms - preference ordered set of algorithms supported by the client
     * List of keys, with each key containing:
       * key ID - this corresponds to the algorithm selection ID of which key to use in any subsequent decryption
       * algorithm - the algorithm to use when decrypting payloads using this key ID
       * algorithm input data - each algorithm requires its own set of keying information required for decryption, which is contained here. All sensitive data is encrypted using the public key of the remote party
 
-For the mandatory "aes-cfb-32-16-16-sha1" algorithm, the following algorithm input information is used:
+For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm, the following algorithm input information is used:
 
   * key - the 32 byte AES key, base64encode(remote_public_key_encrypt(<32-byte-aes-key>))
-  * iv - the 16 byte AES initialization vector, base64encode(remote_public_key_encrypt(<32-byte-aes-key>))
-  * hmacSecretKey - the initial secret key input string, base64encode(remote_public_key_encrypt(`<secret-key-string>`))
+  * iv - the 16 byte AES initialization vector, base64encode(remote_public_key_encrypt(<16-byte-aes-iv>))
+  * hmacSecretKey - the initial secret key input string, base64encode(remote_public_key_encrypt(`<secret-key-passphrase>`))
 
-When the mandatory key is used, the AES CFB is initialized with these values and will continue to encrypt payloads using this keying until a new "0" package arrives which would reset the algorithms with new keying information for subsequent messages in the message stream. The hmac is calculated using the following algorithm, hmac(`<secret-key-string>` + ":" + `<sequence-number>`, `<decrypted-message>`)), where the sequence number starts at 1 and increments by 1 each time the same "encryption key algorithm" is used (and resets back to 1 the next time a new "0" package is received). The sequence number is appended to prevent the same message repeated from containing the same hmac hash proof in the result.
+When the mandatory key is used, the AES CFB is initialized with these values and will continue to encrypt payloads using this keying until a new "0" package arrives which would reset the algorithms with new keying information for subsequent messages in the message stream. The hmac is calculated using the following algorithm, sha1_hmac(`<hmac-secret-passphase>`, `<encrypted-message>`)). The aes key and secrey key passphrase remains the same until a new "0" package is sent, but the IV is changed for every message sent. The next IV for the mandated algorithm is calculated based upon the hash of the previous IV and previous hmac, next_iv = md5_hash(`<previous_iv>` + ":" + `<previous_hmac>`).
 
-Any sensitive data contained in the "0" package must be encrypted using the public key of the receiving party. The entire package must be signed by the public key of the party sending the "0" package and the receiver must validate this package's signature before it assumes any of the data sent in the package is considered valid.
+Any sensitive data contained in the "0" package must be encrypted using the public key of the receiving party. Thus the key, iv, and hmacSecretKey must be encrypted. The entire package must be signed by the public key of the party sending the "0" package and the receiver must validate this package's signature before it assumes any of the data sent in the package is considered valid.
 
-The party receiving the connection request cannot respond until it knows the corresponding public key of the initiator of the request, which must match and verify the signature used in the initiator's original "0" package. The "0" package must be the first package sent on the wire in either direction. The party receiving the connection request must assume all data received via encrypted messages may not be valid until it can verify the signature in the original "0" package and all subsequent "0" packages. The public key used in the "0" packages must never change throughout the lifetime of the connection.
+The receiving party must verify the signature used in the initiator's "0" package and all subsequent packages. The first "0" package must include the x509 certificate of the sending party unless the key is guaranteed to be known in advanced by the receiving party. A reference to a key can be used if the reference can be resolved by the receiving party. The subsequent "0" packages must use the same key as the first package, thus the x509 certificate does not need to be included again. The hash of the x509 certificate is considered the fingerprint of the sending parties certificate. The "0" package must be the first package sent on the wire in either direction. The party receiving the connection request must assume all data received via encrypted messages may not be from the correct party until the fingerprint of the x509 certificate is verified by a higher layer. The public key used in the "0" packages must never change throughout the lifetime of the connection. The certificate used in this exchange need not be the same certificate used by a higher layer, such as the public peer file's certificate.
 
 All keying information and salts must be generated using cryptographically random algorithms only.
 
-The algorithms used for encrypting must be limited to the algorithms supported by the remote party, but the mandatory "aes-cfb-32-16-16-sha1" algorithm must always be considered a valid algorithm available in any minimal implementation.
+The algorithms used for encrypting must be limited to the algorithms supported by the remote party, but the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm must always be considered a valid algorithm available in any minimal implementation.
 
 Example of the "0" package is JSON in place text with the following data in the bundle:
 
@@ -1137,18 +1140,19 @@ Example of the "0" package is JSON in place text with the following data in the 
         "keying": {
           "$id": "f25f588141f7232e40b1529667b8ea626d078d20",
           "nonce": "11a9960ebfe2287c1e235aceb912d8d54532be05",
+          "context": "8c7de9247c0c6ba629c61eed5bb1878b37b8234d:cabc3aaea9caa97a77e30a6b011c734b5cb011fd",
           "expires": "348498329",
           "algorithms": {
             "algorithm": [
-              "http://openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1",
-              "http://openpeer.org/2012/12/14/jsonmls#aes-cfb-16-16-16-md5"
+              "http://openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
+              "http://openpeer.org/2012/12/14/jsonmls#aes-cfb-16-16-16-md5-md5"
             ]
           },
           "keys": {
             "key": [
               {
                 "$id": 1,
-                "algorithm": "http://openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1",
+                "algorithm": "http://openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
                 "inputs": {
                   "key": "Y21wclpXd...HFjbXgzWlhKbA==",
                   "iv": "Y21wclpXd...HFjbXgzWlhKbA==",
@@ -1157,7 +1161,7 @@ Example of the "0" package is JSON in place text with the following data in the 
               },
               {
                 "$id": 2,
-                "algorithm": "http://openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1",
+                "algorithm": "http://openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
                 "inputs": {
                   "key": "WTIxd2NscFhkSEZq...YlhneldsaEtiQT09",
                   "iv": "V1RJeGQyTnNjRmhrTGk...bGhuZWxkc2FFdGlRVDA5",
@@ -1166,7 +1170,7 @@ Example of the "0" package is JSON in place text with the following data in the 
               },
               {
                 "$id": 3,
-                "algorithm": "http://openpeer.org/2012/12/14/jsonmls#aes-cfb-16-16-16-md5",
+                "algorithm": "http://openpeer.org/2012/12/14/jsonmls#aes-cfb-16-16-16-md5-md5",
                 "inputs": {
                   "key": "Wm1wR1d4Vlltc...mtwWFVrVkZNUT09",
                   "iv": "V20xd1IxZDRWbGx...dGVnJWa1pOVVQwOQ==",
@@ -1181,10 +1185,48 @@ Example of the "0" package is JSON in place text with the following data in the 
           "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
           "digestValue": "OzIyMmI3NG...WJlOTY4NmJiOWQwYzkwZGYwMTI=",
           "digestSigned": "G4Fwe...0E/YT=",
-          "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
+          "key": {  "x509Data": "MIID5jCCA0+gA...lVN" }
         }
       }
     }
+
+
+Multiplexed Stream Packaging
+----------------------------
+
+Streams maybe multiplexed allowing for multiple messages that are are packaged across different channel connection numbers. In this situation each package is wrapped in a channel package where the channels numbers are negotiated at a higher layer but each number represents a bi-directional connection where messages can be sent over an existing stream. The default channel number should start with "0" when the stream is first opened.
+
+The format of the package is:
+  * Channel number [4 bytes in network order] - The bi-directional messaging channel
+  * Message Size [4 bytes in network order]
+  * raw binary data
+
+Any newly seen channel number represents the opening of a channel with that number. A message size of "0" indicated the channel number in use is now closed.
+
+The choice of channel number to use when creating a new channel is external to this definition.
+
+
+### Multiplexed Stream Packaging with JSON Packaging ###
+
+JSON Packaging can be sent over a multiplexed stream channel.
+
+When combining multiplexed stream packaging and JSON packaging, the format of the JSON channel is:
+  * JSON data - the JSON message data to be receive of exactly the message size specified (no NUL termination is required or expected).
+
+This allows for JSON to be efficiently packaged within the multiplexed stream where the message size is not repeated.
+
+
+### Multiplexed Stream Packaging with Message Layer Security ###
+
+Encrypted JSON Signaling Protocol can be used with multiplex stream channels.
+
+When combining multiplexed stream packaging and symmetric encrypted data, the format of the channel is:
+  * Encryption key algorithm selection (16 bits network byte order, upper 8 bits reserved and must be set to "0") - When negotiating, each number represents selected keys / algorithm pair for use by the number chosen but "0" is used to represent a key / algorithm negotiation.
+  * Data bundle, consisting of:
+    * JSON message encrypted using the algorithm / key selected
+    * hmac integrity of the data encrypted using the algorithm / key selected
+
+The interpretation of the algorithm, data and if it contains an integrity footer are negotiated externally. Algorithm numbers can be reserved for signaling purposes, so long as those algorithms are negotiated externally.
 
 
 General Request, Reply, Notify and Result Formation Rules
@@ -2145,6 +2187,8 @@ Access to the lockbox does not grant access to the contents of the lockbox. The 
 The server will validate the identity login via the identity service to access the account or validate the client has the correct lockbox key hash to access the account. An identity that has a different provider is considered a different identity. Thus an identity is deemed unique by its identity and its identity provider combined.
 
 If the lockbox reset flag is specified then a new account is created based on the identity and the existing account remains associated to the old identities, or the old account is removed if no other identities remain associated.
+
+If the lockbox key hash does not match for the account but the identity access passed into the account is valid and matches the account ID used then all data in all namespaces for the account must be wiped out. The lockbox key hash must become updated with the new key hash.
 
 ### Example
 
@@ -4891,7 +4935,7 @@ Peer Identify Request
 
 ### Purpose
 
-This request notifies the contacted peer of the original requesting peer's identity. This request must be the first request sent from the peer that initiated the connection (i.e. the requesting peer) to the peer that received the connection (i.e. the contacted peer).
+This request notifies the contacted peer of the original requesting peer's identifying information. This request must be the first request sent from the peer that initiated the connection (i.e. the requesting peer) to the peer that received the connection (i.e. the contacted peer).
 
 ### Inputs
 
@@ -4899,21 +4943,25 @@ This request notifies the contacted peer of the original requesting peer's ident
   * Client nonce
   * Expiry of the request
   * Find secret as obtained from the Section "B" of the public peer file for the receiving peer - peer should reject peer unless this is present or unless the peer is in a common conversation thread with the peer)
+  * Fingerprint - the fingerprint of the certificate used by the requesting peer's transport
   * The location information of initiating peer
   * The public peer file of the contacting peer - section A at minimal
   * Signed by initiating peer's private key
 
 ### Outputs
 
+  * Digest value - the value of the digest from the signature of the requesting peer's "peer identify proof bundle"
+  * Fingerprint - the finger print if the certfiicate used by the receiving peer's transport
   * Location of the receiving peer
+  * Signed by responding peer's private key
 
 ### Security Considerations
 
-The requesting peer must send this request over a secure channel. The public certificate of the secure channel must match the contacted peer's certificate otherwise contact has been initiated to the wrong peer and the connection must be terminated immediately by the requesting peer.
+The requesting peer must send this request over a secure channel. The fingerprints for the transport layer's secure channel must match the fingerprint specified by the remote party's proof bundle or the channel might be compromised. The public peer file sent by the requesting peer must be validated by the receiving peer as well as the associated proof bundle. The digest value inside the result's proof bundle must match the digest value as sent in the signature of the request by the requesting party. The proof bundle of the receiving peer must be validated byt the requesting peer.
 
-The requesting peer must choose an expiry window long enough as reasonable for the contacted peer to verify that it wants to allow the initiating peer to connect but no longer. The window must allow for the time to fetch contact information about the peer and verify the identities of the peer from a 3rd party as well as potential access rights. Without this window, if the Peer Identify Request was accidently sent to the wrong contacted peer (which happens to be malicious) by the requesting peer, the malicious contacted peer could connect with the real receiving peer and replay the Peer Identify Request message. However, as long as the requesting peer verifies the receiving peer's public certificate matches what is expected then this replay attack should not be possible unless the contacted peer's private key has already been compromised.
+The requesting peer must choose an expiry window long enough as reasonable for the contacted peer to verify that it wants to allow the initiating peer to connect but no longer. The window must allow for the time to fetch contact information about the peer and verify the identities of the peer from a 3rd party as well as potential access rights. Without this window, if the Peer Identify Request was accidently sent to a malicious connected peer by the requesting peer, the malicious contacted peer could connect with the real receiving peer and replay the Peer Identify Request message. However, as long as the requesting peer verifies the receiving peer's fingerprint and proof signature matches what is expected then this replay attack should not be possible (unless the contacted peer's private key has already been compromised).
 
-The contacted peer must verify this is the first request it receives from the requesting peer. The contacted peer may disallow anonymous connections and require a verifiable connection ID. The contacted peer must verify the find secret matches the find secret in its own Section "B" of its public peer file (to insure this was not a replay of a request sent to a different peer file).
+The contacted peer must verify this is the first request it receives from the requesting peer. The contacted peer may disallow anonymous connections and require a verifiable pre-known identity associated to the requestor's public peer file. The contacted peer must verify the find secret matches the find secret in its own Section "B" of its public peer file (to insure this was not a replay of a request sent to a different peer).
 
 The contacted peer must verify the request has not expired and should verify the one time key has not been used before. The signature on the bundle must be verified to ensure the requesting peer signed it.
 
@@ -4933,6 +4981,8 @@ The contacted peer must verify the request has not expired and should verify the
             "expires": 574732832,
     
             "findSecret": "YjAwOWE2YmU4OWNlOTdkY2QxNzY1NDA5MGYy",
+    
+            "fingerprint": "28c5c1099f3d4c14390f046d8182748576ae17b3",
     
             "location": {
               "$id": "5c5fdfab4bbf8cc8345555172914b9733b2034a4",
@@ -4960,7 +5010,7 @@ The contacted peer must verify the request has not expired and should verify the
             "reference": "#ec065f4b46a22872f85f6ba5addf1e2",
             "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
             "digestValue": "ZGZrbnNua2...pmZXdraiBlYnJlcnJmZXJl",
-            "digestSigned": "WkdacmJuTnVhMnBtWlhkcmFpQmxZbkpsY25KbVpYSmw=",
+            "digestSigned": "WkdacmJuTnVhMnBtWl...mFpQmxZbkpsY25KbVpYSmw=",
             "key": { "uri": "peer://example.com/db9e3a737c690e7cdcfbacc29e4a54dfa5356b63" }
           }
         }
@@ -4974,16 +5024,33 @@ The contacted peer must verify the request has not expired and should verify the
         "$method": "peer-identify",
         "$timestamp": 43848328432,
     
-        "location": {
-          "$id": "9e02827c0f43c511c30bd410bacf9a83",
-          "contact": "peer://domain.com/8da6e36f8a86ba4210c008e0f0d1ba76",
-          "details": {
-            "device": { "$id": "e473775bf1db49090ba54f7503623c91" },
-            "ip": "74.213.129.11",
-            "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
-            "os": "iOS v4.3.5",
-            "system": "iPad v2",
-            "host": "momo"
+        "peerIdentityProofBundle": {
+          "peerIdentityProof": {
+            "$id": "8c905668ddb739b05c66734ffa6e46073c3d4a27",
+    
+            "digest": "ZGZrbnNua2...pmZXdraiBlYnJlcnJmZXJl",
+    
+            "fingerprint": "31e450e5f094e464f21b668102974e027010c8a7",
+     
+            "location": {
+              "$id": "9e02827c0f43c511c30bd410bacf9a83",
+              "contact": "peer://domain.com/5c15749f598b9ea1f60c48adf792ed72f581f3e4",
+              "details": {
+                "device": { "$id": "df036bcabfb1826a2596478b0d858e4d" },
+                "ip": "89.43.12.11",
+                "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
+                "os": "iOS v6.1",
+                "system": "iPad v2",
+                "host": "trucker"
+              }
+            }
+          },
+          "signature": {
+            "reference": "#8c905668ddb739b05c66734ffa6e46073c3d4a27",
+            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "digestValue": "c2RwI...HN1Y2tz",
+            "digestSigned": "MyUndJSE4c2RwIHN1Y2tz...TJ0eiBjMlJ3SUhOMVkydHo=",
+            "key": { "uri": "peer://example.com/d1878a88dc500bcf33a9b6b478b7d76e82b7775e" }
           }
         }
       }
