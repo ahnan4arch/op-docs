@@ -331,14 +331,27 @@ Example Public Peer File
               "$id": "C",
               "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
               "identities": {
-                "identityBundle": [
+                "identityProofBundle": [
                   {
-                    "identity": {
+                    "identityProof": {
                       "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
-                      "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
-                      "uri": "identity://facebook.com/id48483",
-                      "created": 54593943,
-                      "expires": 65439343
+                      "contactProofBundle": {
+                        "contactProof": {
+                          "$id": "2d950c960b52c32a4766a148e8a39d0527110fee",
+                          "stableID": "cb4bfff3a457ed7e832b4004d7d73f0411d5c0be",
+                          "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
+                          "uri": "identity://facebook.com/id48483",
+                          "created": 54593943,
+                          "expires": 65439343
+                        },
+                        "signature": {
+                          "reference": "#2d950c960b52c32a4766a148e8a39d0527110fee",
+                          "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                          "digestValue": "Wm1Sa...lptUT0=",
+                          "digestSigned": "ZmRh...2FzZmQ=",
+                          "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
+                        }
+                      }
                     },
                     "signature": {
                       "reference": "#b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
@@ -347,18 +360,31 @@ Example Public Peer File
                       "digestSigned": "MDAwMDAwMGJ5dGVzLiBQbGVhc2UsIGQ=",
                       "key": {
                         "$id": "b7ef37...4a0d58628d3",
-                        "domain": "hookflash.org",
+                        "domain": "hookflash.me",
                         "service": "identity"
                       }
                     }
                   },
                   {
-                    "identity": {
+                    "identityProof": {
                       "$id": "0a9b2290343734118469e36d88276ffa6277d196",
-                      "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
-                      "uri": "identity://twitter.com/booyah",
-                      "created": 54593943,
-                      "expires": 65439343
+                      "contactProofBundle": {
+                        "contactProof": {
+                          "$id": "353c7684dcf8683540a9d9e9da00a91591864d73",
+                          "stableID": "cb4bfff3a457ed7e832b4004d7d73f0411d5c0be",
+                          "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
+                          "uri": "identity://twitter.com/booyah",
+                          "created": 54593943,
+                          "expires": 65439343
+                        },
+                        "signature": {
+                          "reference": "#353c7684dcf8683540a9d9e9da00a91591864d73",
+                          "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                          "digestValue": "TXpV...R1EzTXc9PQ==",
+                          "digestSigned": "MzUz...2NGQ3Mw==",
+                          "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
+                        }
+                      }
                     },
                     "signature": {
                       "reference": "#0a9b2290343734118469e36d88276ffa6277d196",
@@ -2078,8 +2104,7 @@ This request obtains access to a lockbox. Access is granted by way of login proo
   * Lockbox information
     * Lockbox domain - the domain hosting the lockbox
     * Lockbox account ID - (optional, if known) the assigned account ID for the lockbox
-    * Lockbox key "lockbox half" - (optional, if known), this is server side base-64 encoded XORed portion of the lockbox key that must be combined with the client side portion of the key to create the full lockbox key. If specified the identity access token and proof must be specified.
-    * Lockbox key "hash" - (optional) hash of the combined XORed lockbox key. If this hash is specified then this hash can be used to login to the lockbox account (by specifying the lockbox account ID).
+    * Lockbox key "hash" - (optional) hash of the lockbox key. If this hash is specified then this hash can be used to login to the lockbox account (by specifying the lockbox account ID).
     * Lockbox reset flag - (optional) if specified and true, a new lockbox must be created for the identity specified (and an identity must be specified for access) and this identity must become unassociated with any other lockboxes. If this identity was previously the only associated identity with a previous lockbox then the previous lockbox can be deleted entirely.
   * Agent
     * Product - the user agent identification for the product, typically "name/version (os/system)" information)
@@ -2099,8 +2124,7 @@ This request obtains access to a lockbox. Access is granted by way of login proo
     * Lockbox access secret - a secret that can be used in combination to the "lockbox access token" to provide proof of previous successful login
     * Lockbox access expiry - the window in which the access key is valid
     * Lockbox domain - the domain hosting the lockbox
-    * Lockbox key "lockbox half" - this is server side base-64 encoded XORed portion of the lockbox key that must be combined with the client side portion of the key to create the full lockbox key.
-    * Lockbox key "hash" - hash of the combined XORed lockbox key as previously passed in.
+    * Lockbox key "hash" - hash of the lockbox key as previously passed in.
   * Grant service challenge (optional, if challenge is required)
     * ID - a challenge ID that the server generated which the client application will have to authorize
     * Name - a human readable name for the service requesting the challenge
@@ -2120,7 +2144,7 @@ Access to the lockbox does not grant access to the contents of the lockbox. The 
 
 The server will validate the identity login via the identity service to access the account or validate the client has the correct lockbox key hash to access the account. An identity that has a different provider is considered a different identity. Thus an identity is deemed unique by its identity and its identity provider combined.
 
-If the lockbox key "lockbox half" is specified because it was regenerated then all the information associated to the account is purged. The grants to the various namespaced values still remain valid but the data contained is completely wiped out. The remaining identities that were not used to login during the regeneration need to be marked as needing update since they will have the incorrect lockbox key "identity half".
+If the lockbox reset flag is specified then a new account is created based on the identity and the existing account remains associated to the old identities, or the old account is removed if no other identities remain associated.
 
 ### Example
 
@@ -2144,7 +2168,6 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
     
         "lockbox": {
           "domain": "example.com",
-          "keyLockboxHalf": "Wm1SellXWmtabVJoWm1wcmFuSmlhMnB5WW1WbWEycHlaV3ByY21ZPQ==",
           "hash": "cf69f9e4ed98bb739b4c72fc4fff403467014874"
         },
     
@@ -2188,8 +2211,7 @@ If the lockbox key "lockbox half" is specified because it was regenerated then a
           "accessSecret": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
           "accessSecretExpires": 8483943493,
     
-          "domain": "example.com",
-          "keyLockboxHalf": "Wm1SellXWmtabVJoWm1wcmFuSmlhMnB5WW1WbWEycHlaV3ByY21ZPQ=="
+          "domain": "example.com"
         },
     
         "namespaceGrantChallenge": {
@@ -2240,6 +2262,7 @@ This request proves that a lockbox access is valid and can be used to validate a
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Purpose - reason for validation (each service using this validation should have a unique purpose string)
   * Lockbox information
+    * Lockbox account ID - (optional) the assigned account ID for the lockbox, if specified the access token must validate the account ID as valid
     * Lockbox access token - a verifiable token that is linked to the lockbox
     * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":" + `<purpose>`)
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret Identity information
@@ -2263,6 +2286,7 @@ Success or failure.
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
         "purpose": "whatever",
         "lockbox": {
+          "$id": "123456",
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
           "accessSecretProofExpires": 43843298934
@@ -2807,6 +2831,39 @@ List of resulting identities that resolve in the order requested as follows:
               "feed": "http://domain.com/user/alice/feed",
               "avatars": {
                 "avatar": { "url": "http://domain.com/user/alice/p" }
+              },
+              "identityProofBundle": {
+                "identityProof": {
+                  "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
+                  "contactProofBundle": {
+                    "contactProof": {
+                      "$id": "2d950c960b52c32a4766a148e8a39d0527110fee",
+                      "stableID": "123456",
+                      "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
+                      "uri": "identity://domain.com/alice",
+                      "created": 54593943,
+                      "expires": 65439343
+                    },
+                    "signature": {
+                      "reference": "#2d950c960b52c32a4766a148e8a39d0527110fee",
+                      "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                      "digestValue": "Wm1Sa...lptUT0=",
+                      "digestSigned": "ZmRh...2FzZmQ=",
+                      "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
+                    }
+                  }
+                },
+                "signature": {
+                  "reference": "#b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
+                  "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                  "digestValue": "IUe324koV5/A8Q38Gj45i4jddX=",
+                  "digestSigned": "MDAwMDAwMGJ5dGVzLiBQbGVhc2UsIGQ=",
+                  "key": {
+                    "$id": "b7ef37...4a0d58628d3",
+                    "domain": "domain.com",
+                    "service": "identity"
+                  }
+                }
               }
             },
             {...},
@@ -2818,7 +2875,8 @@ List of resulting identities that resolve in the order requested as follows:
               "priority": 1,
               "weight": 1,
               "updated": 5849594,
-              "expires": 58843493
+              "expires": 58843493,
+              "identityProofBundle": { ... }
             },
             {...},
             {
@@ -2846,7 +2904,8 @@ List of resulting identities that resolve in the order requested as follows:
                     "height": 200
                   }
                 ]
-              }
+              },
+              "identityProofBundle": { ... }
             }
           ]
         }
@@ -3015,7 +3074,7 @@ This notification is sent from the inner browser window to the outer window as a
     * Identity access expiry - the window in which the access key is valid
   * Lock box information (optional, if known)
       * Lockbox domain - if lockbox domain is known in advance, this is the domain for the lockbox to use
-      * Lockbox key "identity half" - this is client side base-64 encoded XORed portion of the lockbox key that must be combined with the server side portion of the key to create the full lockbox key.
+      * Lockbox key - this is client side base-64 encoded lockbox key.
       * Lockbox reset flag - this flag is used if the lockbox must be reset with a new password and all data within to be flushed.
 
 ### Returns
@@ -3054,7 +3113,7 @@ By using information not stored on a server, this ensures that should the server
     
         "lockbox": {
           "domain": "domain.com",
-          "keyIdentityHalf": "V20x...IbGFWM0J5WTIxWlBRPT0=",
+          "key": "V20x...IbGFWM0J5WTIxWlBRPT0=",
           "reset": false
         }
       }
@@ -3079,7 +3138,7 @@ This request is sent from the outer browser window to the inner window as a post
     * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
   * Lock box information
     * Lockbox domain - if lockbox domain is known in advance, this is the domain for the lockbox to use
-    * Lockbox key "identity half" - this is client side base-64 encoded XORed portion of the lockbox key that must be combined with the server side portion of the key to create the full lockbox key.
+    * Lockbox key - this is client side base-64 encoded lockbox key
 
 ### Returns
 
@@ -3110,7 +3169,7 @@ The lockbox key should be encrypted locally in JavaScript before being sent a se
         },
         "lockbox": {
           "domain": "domain.com",
-          "keyIdentityHalf": "V20x...IbGFWM0J5WTIxWlBRPT0="
+          "key": "V20x...IbGFWM0J5WTIxWlBRPT0="
         }
       }
     }
@@ -3196,12 +3255,20 @@ This request proves that an identity login is valid and can be used to validate 
 ### Inputs
 
   * Client one time use nonce (cryptographically random string)
-  * Identity access token - as returned from the "identity access complete" request
-  * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-lookup-update")
-  * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
-  * Stable ID - a stable ID representing the user regardless of which identity is being used or the current peer contact ID
-  * Public peer file- the public peer file associated with the contact ID
-  * Priority / weight - SRV like priority and weighting system to gauge which identity discovered to be associated to the same peer contact have highest priority
+  * Lockbox information
+    * Lockbox account ID - the assigned account ID for the lockbox
+    * Lockbox domain - this is the domain for the lockbox to use
+    * Lockbox access token - a verifiable token that is linked to the lockbox
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":identity-lookup-update")
+    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret Identity information
+  * identity bundle information
+    * Identity access token - as returned from the "identity access complete" request
+    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-lookup-update")
+    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
+    * Stable ID - a stable ID representing the user regardless of which identity is being used or the current peer contact ID, stable ID = hash("stable-id:" + `<lockbox-domain>` + ":" + `<lockbox-account-id>`)
+    * Public peer file- the public peer file associated with the contact ID
+    * Priority / weight - SRV like priority and weighting system to gauge which identity discovered to be associated to the same peer contact have highest priority
+    * signed by public peer file specified (only if peer file is being set, otherwise no "identityBundle" will be present)
 
 ### Returns
 
@@ -3209,7 +3276,9 @@ Success or failure.
 
 ### Security Considerations
 
-### Example
+The server must validate the lockbox access and the identity access to complete the update. The server must verify the stable ID has been calculated correctly.
+
+### Example Association
 
     {
       "request": {
@@ -3220,7 +3289,15 @@ Success or failure.
         "$method": "identity-lookup-update",
     
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "lockbox": {
+          "$id": "123456",
+          "domain": "domain.com",
+          "accessToken": "a913c2c3314ce71aee554986204a349b",
+          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+          "accessSecretProofExpires": 43843298934
+        },
         "identity": {
+          "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
           "accessSecretProofExpires": 43843298934,
@@ -3231,7 +3308,24 @@ Success or failure.
           "stableID": "0acc990c7b6e7d5cb9a3183d432e37776fb182bf",
           "peer": {...},
           "priority": 5,
-          "weight": 1
+          "weight": 1,
+          "contactProofBundle": {
+            "contactProof": {
+              "$id": "2d950c960b52c32a4766a148e8a39d0527110fee",
+              "stableID": "0acc990c7b6e7d5cb9a3183d432e37776fb182bf",
+              "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
+              "uri": "identity://domain.com/alice",
+              "created": 54593943,
+              "expires": 65439343
+            },
+            "signature": {
+              "reference": "#2d950c960b52c32a4766a148e8a39d0527110fee",
+              "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+              "digestValue": "Wm1Sa...lptUT0=",
+              "digestSigned": "ZmRh...2FzZmQ=",
+              "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
+            }
+          }
         }
       }
     }
@@ -3247,29 +3341,7 @@ Success or failure.
       }
     }
 
-
-Identity Sign Request
----------------------
-
-### Purpose
-
-This request requests a signed identity a given proof of a successful identity login.
-
-### Inputs
-
-  * Original identity
-  * Client one time use nonce (cryptographically random string)
-  * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-sign")
-  * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
-
-### Returns
-
-Signed identity bundle by the identity service.
-
-### Security Considerations
-
-### Example
+### Example Remove Association
 
     {
       "request": {
@@ -3277,7 +3349,7 @@ Signed identity bundle by the identity service.
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
-        "$method": "identity-sign",
+        "$method": "identity-lookup-update",
     
         "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
         "identity": {
@@ -3286,7 +3358,7 @@ Signed identity bundle by the identity service.
           "accessSecretProofExpires": 43843298934,
     
           "uri": "identity://domain.com/alice",
-          "provider": "domain.com"
+          "provider": "domain.com"      
         }
       }
     }
@@ -3297,29 +3369,8 @@ Signed identity bundle by the identity service.
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
-        "$method": "identity-sign",
-        "$timestamp": 439439493,
-    
-        "identityBundle": {
-          "identity": {
-            "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
-            "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
-            "uri": "identity://domain.com/alice",
-            "created": 54593943,
-            "expires": 65439343
-          },
-          "signature": {
-            "reference": "#b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
-            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
-            "digestValue": "IUe324k...oV5/A8Q38Gj45i4jddX=",
-            "digestSigned": "MDAwMDAw...MGJ5dGVzLiBQbGVhc2UsIGQ=",
-            "key": {
-              "$id": "b7ef37...4a0d58628d3",
-              "domain": "provider.com",
-              "service": "identity"
-            }
-          }
-        }
+        "$method": "identity-lookup-update",
+        "$timestamp": 439439493
       }
     }
 
