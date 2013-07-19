@@ -7,7 +7,7 @@ const MARKED = require("marked");
 const REQUEST = require("request");
 const WAITFOR = require("waitfor");
 
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 const MODE = "view";
 
 
