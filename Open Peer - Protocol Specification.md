@@ -4343,8 +4343,8 @@ Since the client and server are the only entities that know the session ID, the 
     }
 
 
-Session Channel Map Request
----------------------------
+Channel Map Request
+-------------------
 
 ### Purpose
 
@@ -4360,6 +4360,17 @@ Map a channel in the multiplex stream to a remote party. This request must be is
 ### Example
 
     {
+      "request": {
+        "$domain": "domain.com",
+        "$appid": "xyz123",
+        "$id": "abc123",
+        "$handler": "peer-finder",
+        "$method": "channel map",
+    
+        "channel": 5,
+        "accessToken": "",
+        "accessSecret": "",
+      }
     }
 
     {
