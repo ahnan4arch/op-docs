@@ -4211,19 +4211,7 @@ If a Section-B of the public peer file is not present, the peer does not wish to
     
             "relay": {
               "accessToken": "9d934822ccca53ac6e16e279830f4ffe3cfe1d0e",
-              "accessSecret": "NWNmZGNkZWJmNDI5MDMzMmI2Mzc4YTYzZWMyZmVhNjA=",
-              "protocols": {
-                "protocol": [
-                  {
-                    "transport": "tcp",
-                    "srv": "74.12.11.34:5434"
-                  },
-                  {
-                    "transport": "secure-websocket/tcp",
-                    "srv": "ip74-12-11-34.example.com"
-                  }
-                ]
-              },
+              "accessSecret": "NWNmZGNkZWJmNDI5MDMzMmI2Mzc4YTYzZWMyZmVhNjA="
             },
         
             "server": "hooflash/1.0 (centos)",
