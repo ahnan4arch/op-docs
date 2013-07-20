@@ -1696,9 +1696,9 @@ Returns a list of Finders containing the following information for each Finder:
   * Finder ID - the unique ID that represents this finder in the system
   * Array of protocols supported, with each defining:
     * Transport - a string describing the type of transport supported
-    * SRV record [or pre-resolved comma separated IP:port pair locations] - for example for "rudp/udp" SRV lookup type is _finder._udp.domain.com
+    * host record [or pre-resolved comma separated IP:port pair locations] - for example for "multiplexed-json/tcp" lookup type is SRV with _finder._tcp.domain.com
   * Public key for the finder - Can be either the full X.509 certificate or a key name lookup for certificates returned from the certificate server
-  * Weight / priority - default values for SRV like weight/priority when SRV entry is pre-resolved IP:port pairs
+  * Weight / priority - default values for SRV like weight / priority when SRV entry is pre-resolved IP:port pairs
   * Geographic region ID - (optional) each server belongs to a logical geographic region (clients can organize servers into geographic regions for fail over reasons)
   * Created - the epoch when the finder registered itself to the Bootstrapped Finder service. A finder with the same ID but a newer created date should replace an existing finder with the same ID.
   * Expires - the epoch when this finder information should be discarded and a new finder fetched to replace the existing one. There is no guarantee the finder will remain online for this period of time as this is a recommendation only. Should initiated communication to a finder server fail, the finder information might be considered no longer valid as the finder server might be gone.
@@ -1743,11 +1743,11 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
                   "protocol": [
                     {
                       "transport": "multiplexed-json/tcp",
-                      "srv": "finders.example.com"
+                      "host": "finders.example.com"
                     },
                     {
                       "transport": "multiplexed-json/secure-web-socket",
-                      "srv": "finders.example.com"
+                      "host": "finders.example.com"
                     }
                   ]
                 },
@@ -1777,11 +1777,11 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
                   "protocol": [
                     {
                        "transport": "multiplex-json/tcp",
-                       "srv": "100.200.100.1:4032,5.6.7.8:4032"
+                       "host": "100.200.100.1:4032,5.6.7.8:4032"
                     },
                     {
                        "transport": "multiplex-json/secure-web-socket",
-                       "srv": "ip100-200-100-1.finder.example.com"
+                       "host": "ip100-200-100-1.finder.example.com"
                     }
                   ]
                 },
@@ -3544,7 +3544,7 @@ List of services available to peer contact services, containing:
               "methods": {
                 "method": {
                   "name": "turn",
-                  "uri": "service.com",
+                  "host": "service.com",
                   "username": "id39392",
                   "password": "bdaaba26fa8ccac7807a786156b1f0fc87b2e28a"
                 }
@@ -3558,7 +3558,7 @@ List of services available to peer contact services, containing:
               "methods": {
                 "method": {
                   "name": "stun",
-                  "uri": "service.com",
+                  "host": "service.com",
                   "username": "id39392",
                   "password": "bdaaba26fa8ccac7807a786156b1f0fc87b2e28a"
                 }
@@ -4352,6 +4352,11 @@ Map a channel in the multiplex stream to a remote party. This request must be is
 
 ### Inputs
 
+   * channel number - channel number to allocate
+   * access token - token as returned during peer finder session create (to connect to this session)
+   * access secret proof - proof = hash("proof:" + `<client-nonce>` + ":" + `<channel-number>` + ":" hmac(`<access-secret>`, "finder-relay-access-validate:" + `<context>` + ":" + `<expires>` + ":" + `<access-token>` + ":channel-map"))
+   * access secret proof expiry - expiry time of the access secret proof
+
 ### Outputs
 
 
@@ -4365,15 +4370,26 @@ Map a channel in the multiplex stream to a remote party. This request must be is
         "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
-        "$method": "channel map",
+        "$method": "channel-map",
     
         "channel": 5,
-        "accessToken": "",
-        "accessSecret": "",
+        "nonce": "6771816e06b7b6f5d24f0d65df018dd256a31027",
+        "context": "3b5db5880803d91f2ba9ca522c558fd1c545c28e",
+        "accessToken": "9d934822ccca53ac6e16e279830f4ffe3cfe1d0e",
+        "accessSecretProof": "SSByZWFsbHk...gaGF0ZSBTRFA=",
+        "accessSecretProofExpires": 3884383
       }
     }
 
     {
+      "result": {
+        "$domain": "domain.com",
+        "$appid": "xyz123",
+        "$id": "abc123",
+        "$handler": "peer-finder",
+        "$method": "channel-map",
+        "$timestamp": 13494934
+      }
     }
 
 
@@ -4389,7 +4405,7 @@ Peer Location Find Request (A)
 
 ### Purpose
 
-This is the request to find a peer that includes the proof of permission to contact the peer and the location information on how to contact the contacting peer.
+This is the request to find a peer that includes the proof of permission to contact the peer and the location information on how to contact the contacting peer. This request is sent from the requesting peer to the requesting peer's finder.
 
 ### Inputs
   * Cipher suite to use in the proof and for the encryption
@@ -4397,12 +4413,30 @@ This is the request to find a peer that includes the proof of permission to cont
   * Client nonce - cryptographically random onetime use string
   * Find secret proof - i.e. hmac(`<find-secret [from public-peer-file-section-B]>`, "proof:" + `<client-nonce>` + ":" + expires))
   * Find proof expires
-  * Peer secret (encrypted) - peer secret is a random key which is then encrypted using the public key of the peer receiving the find request
+  * Context - this identifier is combined with the remote peer's context to form the "requester:reply" context ID for the MLS layer as well as the userFrag for ICE negotiation.
+  * Peer secret (encrypted) - peer secret is a random passphrase which is then encrypted using the public key of the peer receiving the find request - this key is password used for ICE negotiation
   * Location details
     * Location ID of requesting location
     * Contact ID of requesting location
     * Location details
-  * Location candidate contact addresses for peer location, each containing transport, IP, port, usernameFrag, password and priority (note: password is encrypted using the peer secret and the IV is the hash of the username frag)
+  * Location candidate contact addresses for peer location, each containing:
+    * transport
+    * if class is "ice":
+      * transport
+      * type - "host" or "srflx" or "prflx" or "relay"
+      * IP
+      * port
+      * priority
+      * related IP (optional, mandatory if type is "srflx" or "prflx" or "relay")
+      * related port (optional)
+    * if class is "finder-relay":
+      * transport - either "multiplexed-json-mls/tcp" or "multiplexed-json-mls/secure-web-socket"
+      * type - "relay"
+      * host - host where to connect to the finder relay
+      * port - port to connect to the finder relay
+      * access token - token as returned during peer finder session create
+      * access secret proof (encrypted) - encrypted version of access secret proof, proof = hmac(`<access-secret>`, "finder-relay-access-validate:" + `<context>` + ":" + `<expires>` + ":" + `<access-token>` + ":channel-map"), encrypted using key = hmac(`<peer-secret>`, "proof:" + `<access-token>`), iv=hash(`<access-token>`)
+      * access secret proof expiry - expiry time of the access secret proof
   * Signed by peer making request
 
 ### Security Considerations
@@ -4434,6 +4468,8 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
             "find": "peer://domain.com/900c9cb1aeb816da4bdf58a972693fce20e",
             "findSecretProof": "85d2f8f2b20e55de0f9642d3f14483567c1971d3",
             "findSecretProofExpires": 9484848,
+    
+            "context": "3b5db5880803d91f2ba9ca522c558fd1c545c28e",
             "peerSecretEncrypted": "ODVkMmY4ZjJiMjBlNTVkZ...0MmQzZjE0NDgzNTY3YzE5NzFkMw==",
     
             "location": {
@@ -4450,19 +4486,35 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
               "candidates": {
                 "candidate": [
                   {
-                    "transport": "rudp/udp",
+                    "class": "finder-relay",
+                    "transport": "multiplexed-json-mls/tcp",
+                    "type": "relay",
+                    "host": "100.200.10.20",
+                    "port": "port",
+                    "accessToken": "9d934822ccca53ac6e16e279830f4ffe3cfe1d0e",
+                    "accessSecretProofEncrypted": "U0RQIHN1Y2t...zIHJlbGFseSBiYWQ=",
+                    "accessSecretProofExpires": 3884383
+                  }
+                  {
+                    "class": "ice",
+                    "transport": "json-mls/rudp",
+                    "type": "srflx",
+                    "foundation": "2130706431",
                     "ip": "100.200.10.20",
                     "port": 9549,
-                    "usernameFrag": "7475bd88ec76c0f791fde51e56770f0d",
-                    "passwordEncrypted": "ZWJiOGM1ZTll...TY0ODRkYzZiZTg0YWZmYWExNDQ4OWMxZTU1Nw==",
-                    "priority": 43843
+                    "priority": 43843,
+                    "related": {
+                      "ip": "192.168.10.10",
+                      "port": 32932
+                    }
                   },
                   {
-                    "transport": "rudp/udp",
+                    "class": "ice",
+                    "transport": "json-mls/rudp",
+                    "type": "host",
+                    "foundation": "1694498815",
                     "ip": "192.168.10.10",
                     "port": 19597,
-                    "usernameFrag": "398ee0fca8badd89927efc52f0db0f2",
-                    "passwordEncrypted": "ZDJkNWY1YjU...OWZkOGE2MTM2MWM4NzJmOWQ3YzJjMDgxZTU3Nw==",
                     "priority": 32932
                   }
                 ]
@@ -4517,25 +4569,38 @@ Since the request was successfully issued, the information contained in the deta
         "$method": "peer-location-find",
         "$timestamp": 13494934,
     
-        "locations": {
-          "location": [
-            {
-              "$id": "170f5d7f6ad2293bb339e788c8f2ff6c",
-              "contact": "peer://domain.com/900c9cb1aeb816da4bdf58a972693fce20e",
-              "details": {
-                "device": { "$id": "e31fcab6582823b862b646980e2b5f4efad75c69" },
-                "ip": "28.123.121.12",
-                "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
-                "os": "iOS v4.3.5",
-                "system": "iPad v2",
-                "host": "foobar"
-              }
-            },
-            {
-              "$id": "5a693555913da634c0b03139ec198bb8bad485ee",
-              ...
+        "serverFindProofBundle": {
+          "serverFindProof": {
+            "$id": "76bda29cbef7b810c464a5dfd68e41bc",
+    
+            "locations": {
+              "location": [
+                {
+                  "$id": "170f5d7f6ad2293bb339e788c8f2ff6c",
+                  "contact": "peer://domain.com/900c9cb1aeb816da4bdf58a972693fce20e",
+                  "details": {
+                    "device": { "$id": "e31fcab6582823b862b646980e2b5f4efad75c69" },
+                    "ip": "28.123.121.12",
+                    "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
+                    "os": "iOS v4.3.5",
+                    "system": "iPad v2",
+                    "host": "foobar"
+                  }
+                },
+                {
+                  "$id": "5a693555913da634c0b03139ec198bb8bad485ee",
+                  ...
+                }
+              ]
             }
-          ]
+          },
+          "signature": {
+            "reference": "#76bda29cbef7b810c464a5dfd68e41bc",
+            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "digestValue": "TlRSbVpEUm1OakJ...LnhNamRtWVdRNE9EazBNUT09",
+            "digestSigned": "VGxSU2JWcEVVbTFP....hUzR1TG5oTmFtUnRXVmRSTkU5RWF6Qk5VVDA5",
+            "key": { "fingerprint": "54fd4f60cbbbf0077ec33c6447497127fad88941" }
+          }
         }
       }
     }
@@ -4546,12 +4611,11 @@ Peer Location Find Request (C)
 
 ### Purpose
 
-This is the forwarded request to the finder responsible for the contacted peer.
+This request is forwarded from the requesting peer's finder to the replying peer's finder.
 
 ### Inputs
 
   * Same information as Peer Location Find Request (A)
-  * Routes (stack of routes for reversing the request)
 
 ### Security Considerations
 
@@ -4571,10 +4635,6 @@ In theory, a malicious peer later responding the Peer Location Find Request coul
     
         "findProofBundle" : {
           ...
-        },
-    
-        "routes": {
-          "route": { "$id": "27f2e2cfc87d1f77d44afde730bfa15a" }
         }
       }
     }
@@ -4585,12 +4645,11 @@ Peer Location Find Request (D)
 
 ### Purpose
 
-This is the forwarded request to the contacted peer.
+This request is forwarded from the replying peer's finder to the replying peer.
 
 ### Inputs
 
-  * Same information as Peer Location Find Request (C)
-  * Additional route(s) (stack of routes for reversing the request)
+  * Same information as Peer Location Find Request (A)
 
 ### Security Consideration
 
@@ -4631,29 +4690,32 @@ Peer Location Find Reply (E)
 
 ### Purpose
 
-This is the reply from the contacted peer to the contacting peer.
+This reply is sent directly from the replying peer to the requesting peer's finder (by the replying peer creating a direct connection from the replying peer to the requesting peer's finder).
 
 ### Outputs
 
   * Digest value from signature sent in original request - the reply location might not have the ability to validate the signature of the request but the reply location must validate the signature's hash value is correct and copy this value back to the original requester bundled in its own signed package (since the requester knows the original value and must have the public peer file of the reply location to validate the reply's bundle). This allows the requester to validate the original request remained non-tampered throughout and ignore replies where tampering might have occurred.
-  * Location identifier of location being contacted
-  * Candidates
-    * Candidate transport
-    * Candidate IP
-    * Candidate port
-    * Candidate username fragment
-    * Candidate password encrypted
-    * Candidate priority
+  * Context - this identifier is combined with the remote peer's context to form the "requester:reply" context ID for the MLS layer as well as the userFrag for ICE negotiation.
+  * Peer secret - this key is the password used for ICE negotiation
+  * Location details
+    * Location ID of requesting location
+    * Contact ID of requesting location
+    * Location details
+  * Location candidate contact addresses for peer location, each containing:
+    * transport
+    * if class is "ice":
+      * transport
+      * type - "host" or "srflx" or "prflx" or "relay"
+      * IP
+      * port
+      * priority
+      * related IP (optional, mandatory if type is "srflx" or "prflx" or "relay")
+      * related port (optional)
   * Signed by replying peer
-  * Route(s) given in request (stack of routes for reversing the request)
 
 ### Security Considerations
 
-The contacted peer will decrypt the "peer secret encrypted" using its private key and use the "peer secret" to encrypt its candidate passwords in the reply. Since these usernames and passwords are used exclusively for the sake of discovering contactable addresses between peers in an ICE fashion, the worse a compromised finder could do would be to misdirect a peer to contact a wrong address. Since a malicious finder could already misdirect peers there is no additional protection provided by securing these credentials further.
-
-In theory a compromised finder could respond to the Peer Location Find Request attempting to direct the original requesting peer initiating a connection to malicious host. However, since the compromised finder cannot know the "peer secret", the misdirection attempt will fail.
-
-However, a compromised finder could misdirect the contacted peer by substituting the request's "peer secret" and candidates with its own candidates. While the channel will be opened to the misdirected peer, the peer will fail to communicate as the original requesting peer must prove itself by issuing the "Peer Identity Request".
+This request must be sent over a secure channel with MLS.
 
 ### Example
 
@@ -4669,6 +4731,10 @@ However, a compromised finder could misdirect the contacted peer by substituting
         "findProofBundle" : {
           "findProof": {
             "requestFindProofBundleDigestValue": "ZDUzMjU1ZDA2YTE...NjIxYzVhN2JjNA==",
+    
+            "context": "a497f346db82ae34c2d9b7f62e34b9757d211bef",
+            "peerSecret": "402a95986e81cfacb1d0668f240713f4ca556d73",
+    
             "location": {
               "$id": "1f77425b06b33bfc1d9932a0716f3f2c92ec0e5",
               "contact": "peer://domain.com/541244886de66987ba30cf8d19544b7a12754042",
@@ -4683,19 +4749,25 @@ However, a compromised finder could misdirect the contacted peer by substituting
               "candidates": {
                 "candidate": [
                   {
-                    "transport": "rudp/udp",
+                    "class": "ice",
+                    "transport": "json-mls/rudp",
+                    "type": "srflx",
+                    "foundation": "2130706431",
                     "ip": "100.200.10.20",
                     "port": 9549,
-                    "usernameFrag": "7475bd88ec76c0f791fde51e56770f0d",
-                    "passwordEncrypted": "MmY4MzgzMz...NWFkN2E1NDM0OTk2YzYwMDU2YjhkYzA2MmYxZA==",
-                    "priority": 4388438
+                    "priority": 4388438,
+                    "related": {
+                      "ip": "192.168.10.10",
+                      "port": 32932
+                    }
                   },
                   {
-                    "transport": "rudp/udp",
+                    "class": "ice",
+                    "transport": "json-mls/rudp",
+                    "type": "host",
+                    "foundation": "1694498815",
                     "ip": "192.168.10.10",
                     "port": 19597,
-                    "username": "398ee0fca8badd89927efc52f0db0f2",
-                    "passwordEncrypted": "ZDg4MDNhM...dlYmEzYmFiNmE0YzNhMGQ1OGQ1MzMxZWFmNWJmYg==",
                     "priority": 43923293
                   }
                 ]
@@ -4709,16 +4781,10 @@ However, a compromised finder could misdirect the contacted peer by substituting
             "digestSigned": "WkRVek...TNelZoTjJKak5BPT0=",
             "key": { "uri": "peer://domain.com/541244886de66987ba30cf8d19544b7a12754042" }
           }
-        },
-    
-        "routes": {
-          "route": [
-            { "$id": "27f2e2cfc87d1f77d44afde730bfa15a" },
-            { "$id": "79434b37a8bb8408fca8c16b89e4faca" }
-          ]
         }
       }
     }
+
 
 
 Peer Location Find Reply (F)
@@ -4726,12 +4792,11 @@ Peer Location Find Reply (F)
 
 ### Purpose
 
-This is the forwarded reply from the contacted peer to the contacting peer.
+This reply is forwarded from the requesting peer's finder to the requesting peer.
 
 ### Outputs
 
   * Same information as Peer Location Find Reply (E)
-  * One less route popped off the stack as stack is reversed
 
 ### Security Considerations
 
@@ -4750,47 +4815,10 @@ This is an internal communication from peer finder to peer finder. The receiving
     
         "findProofBundle" : {
           ...
-        },
-    
-        "routes": {
-          "route": { "$id": "27f2e2cfc87d1f77d44afde730bfa15a" }
         }
       }
     }
 
-
-Peer Location Find Reply (G)
-----------------------------
-
-### Purpose
-
-This is the forwarded reply from the contacted peer to the contacting peer.
-
-### Outputs
-
-  * Same information as Peer Location Find Reply (F)
-  * All routes are now popped of stack
-
-### Security Considerations
-
-The client will receive location candidates that it believes will belong to the original peer requesting to connect. The client will issue ICE requests to discover which or the candidates are valid. Upon successful ICE discovery, the client will issue a Message/RUDP/UDP connection to the receiving peer (or the encrypted alternative).
-
-### Example
-
-    {
-      "reply": {
-        "$domain": "domain.com",
-        "$appid": "xyz123",
-        "$id": "abc123",
-        "$handler": "peer-finder",
-        "$method": "peer-location-find",
-        "$timestamp": 4344333232,
-    
-        "findProofBundle" : {
-          ...
-        }
-      }
-    }
 
 
 Peer Location Find Request (single point to multipoint when challenged)
@@ -4804,17 +4832,16 @@ The request is identical to "single point to single point" except the request wo
 
 For the sake of simplicity, Peer Location Find Request/Reply A-H are not repeated.
 
-Peer Location Find Request (H)
+Peer Location Find Request (G)
 ------------------------------
 
 ### Purpose
 
-This is the forked forwarded request to the finder responsible for the secondary location of contacted peer.
+This request is forked and sent to the alternate replying peer's finder.
 
 ### Inputs
 
   * Same information as Peer Location Find Request (A)
-  * Routes (stack of routes for reversing the request) - the route would probably have same identifiers as Peer Location Find Request (C) as the contacting peer exists at the same routable location.
 
 ### Security Considerations
 
@@ -4832,26 +4859,21 @@ Same as Peer Location Find Request (C)
     
         "findProofBundle" : {
           ...
-        },
-    
-        "routes": {
-          "route": { "$id": "27f2e2cfc87d1f77d44afde730bfa15a" }
         }
       }
     }
 
 
-Peer Location Find Request (I)
+Peer Location Find Request (H)
 ------------------------------
 
 ### Purpose
 
-This is the forwarded request to the contacted peer.
+This request is sent from the alternate replying peer's finder to the alternate replying peer.
 
 ### Inputs
 
-  * Same information as Peer Location Find Request (H)
-  * Additional route(s) (stack of routes for reversing the request) - the additional route would be different since the route to reverse from Finder 3 to Finder 1 is different than the route from Finder 2 to Finder 1.
+  * Same information as Peer Location Find Request (A)
 
 ### Security Considerations
 
@@ -4869,30 +4891,21 @@ Same as Peer Location Find Request (D)
     
         "findProofBundle" : {
           ...
-        },
-    
-        "routes": {
-          "route": [
-            { "$id": "27f2e2cfc87d1f77d44afde730bfa15a" },
-            { "$id": "c173cc0e1653a64f31b0bf12a1f72d1d" }
-          ]
         }
       }
     }
 
 
-Peer Location Find Reply (J)
+Peer Location Find Reply (I)
 ----------------------------
 
 ### Purpose
 
-This is the reply from the contacted peer at the secondary location to the contacting peer. This looks very much like Peer Location Find Reply (E) except the identifiers would be completely different.
+This reply is sent directly from the alternative replying peer to the requesting peer's finder (by the alternative replying peer creating a direct connection from the alternative replying peer to the requesting peer's finder). This looks very much like Peer Location Find Reply (E) except the identifiers would be completely different.
 
 ### Outputs
 
-  * Same username as provided in Peer Location Find Request (A)
-  * Same information as applicable in Peer Location Find Reply (E) but with different identifiers since these identifiers come from a different contacted peer location.
-  * Same routes as provided in Peer Location Find Request (I)
+  * Same information as applicable in Peer Location Find Reply (E) but with different values as generated from the alternative location.
 
 ### Security Considerations
 
@@ -4912,7 +4925,12 @@ Same as Peer Location Find Reply (E)
         "findProofBundle" : {
           "findProof": {
             "$id": "d53255d06a17778b88501f570301e7621c5a7bc4",
+    
+            "context": "a9a68a09f904611efd91e245e8e62ab836f757dc",
+            "peerSecret": "e0ff7c2fcd42202e2fa3d93029f829157db7cd7e",
+    
             "requestFindProofBundleDigestValue": "ZDUzMjU1ZDA2YTE...NjIxYzVhN2JjNA==",
+    
             "location": {
               "$id": "d0866fe404867a94949771bfd606f68c3c3c5bd1",
               "contact": "peer://domain.com/541244886de66987ba30cf8d19544b7a12754042",
@@ -4927,19 +4945,23 @@ Same as Peer Location Find Reply (E)
               "candidates": {
                 "candidate": [
                   {
-                    "transport": "rudp/udp",
+                    "class": "ice",
+                    "transport": "json-mls/rudp",
+                    "foundation": "43848384",
                     "ip": "75.43.32.12",
                     "port": 43432,
-                    "usernameFrag": "5158a221a95f9d1f57763f8373875807732992b0",
-                    "passwordEncrypted": "NTg1MjFjZmUyMDc...NzhjMDcxYzZlZDY2NDQzNDNiZGIwNmQ4Nw==",
-                    "priority": 39932
+                    "priority": 39932,
+                    "related": {
+                      "ip": "192.168.10.200",
+                      "port": 32932
+                    }
                   },
                   {
-                    "transport": "rudp/udp",
+                    "class": "ice",
+                    "transport": "json-mls/rudp",
+                    "foundation": "43243242",
                     "ip": "192.168.10.200",
                     "port": 20574,
-                    "usernameFrag": "643fce25e69fd1023abb02af48e90446d7add1be",
-                    "passwordEncrypted": "NmU5Zj...NTAzZWNlOTc4YWQ4Njc5ZTcwNGUzNzA1Yzg5NjNiNw==",
                     "priority": 488323
                   }
                 ]
@@ -4953,57 +4975,12 @@ Same as Peer Location Find Reply (E)
             "digestSigned": "WkRVek...TNelZoTjJKak5BPT0=",
             "key": { "uri": "peer://domain.com/541244886de66987ba30cf8d19544b7a12754042" }
           }
-        },
-    
-        "routes": {
-          "route": [
-            { "$id": "27f2e2cfc87d1f77d44afde730bfa15a" },
-            { "$id": "c173cc0e1653a64f31b0bf12a1f72d1d" }
-          ]
         }
       }
     }
 
 
-Peer Location Find Reply (K)
-----------------------------
-
-### Purpose
-
-This is the forwarded reply from the contacted peer at the secondary location to the contacting peer.
-
-### Outputs
-
-  * Same information as Peer Location Find Reply (J)
-  * One less route popped off the stack as stack is reversed
-
-### Security Considerations
-
-Same as Peer Location Find Reply (F)
-
-### Example
-
-    {
-      "reply": {
-        "$domain": "domain.com",
-        "$appid": "xyz123",
-        "$id": "abc123",
-        "$handler": "peer-finder",
-        "$method": "peer-location-find",
-        "$timestamp": 435848548434,
-    
-        "findProofBundle" : {
-          ...
-        },
-    
-        "routes": {
-          "route": { "$id": "27f2e2cfc87d1f77d44afde730bfa15a" }
-        }
-      }
-    }
-
-
-Peer Location Find Reply (L)
+Peer Location Find Reply (J)
 ----------------------------
 
 ### Purpose
@@ -5012,12 +4989,11 @@ This is the forwarded reply from the contacted peer to the contacting peer.
 
 ### Outputs
 
-  * Same information as Peer Location Find Reply (K)
-  * All routes now popped of stack
-
+  * Same information as Peer Location Find Reply (I)
+ 
 ### Security Considerations
 
-Same as Peer Location Find Reply (G)
+Same as Peer Location Find Reply (F)
 
 ### Example
 
@@ -5068,9 +5044,9 @@ This request notifies the contacted peer of the original requesting peer's ident
 
 The requesting peer must send this request over a secure channel. The fingerprints for the transport layer's secure channel must match the fingerprint specified by the remote party's proof bundle or the channel might be compromised. The public peer file sent by the requesting peer must be validated by the receiving peer as well as the associated proof bundle. The digest value inside the result's proof bundle must match the digest value as sent in the signature of the request by the requesting party. The proof bundle of the receiving peer must be validated byt the requesting peer.
 
-The requesting peer must choose an expiry window long enough as reasonable for the contacted peer to verify that it wants to allow the initiating peer to connect but no longer. The window must allow for the time to fetch contact information about the peer and verify the identities of the peer from a 3rd party as well as potential access rights. Without this window, if the Peer Identify Request was accidently sent to a malicious connected peer by the requesting peer, the malicious contacted peer could connect with the real receiving peer and replay the Peer Identify Request message. However, as long as the requesting peer verifies the receiving peer's fingerprint and proof signature matches what is expected then this replay attack should not be possible (unless the contacted peer's private key has already been compromised).
+The requesting peer must choose an expiry window long enough as reasonable for the contacted peer to verify that it wants to allow the initiating peer to connect but no longer. The window must allow for the time to fetch contact information about the peer and verify the identities of the peer from a 3rd party as well as potential access rights. Without this window, if the Peer Identify Request was accidentally sent to a malicious connected peer by the requesting peer, the malicious contacted peer could connect with the real receiving peer and replay the Peer Identify Request message. However, as long as the requesting peer verifies the receiving peer's fingerprint and proof signature matches what is expected then this replay attack should not be possible (unless the contacted peer's private key has already been compromised).
 
-The contacted peer must verify this is the first request it receives from the requesting peer. The contacted peer may disallow anonymous connections and require a verifiable pre-known identity associated to the requestor's public peer file. The contacted peer must verify the find secret matches the find secret in its own Section "B" of its public peer file (to insure this was not a replay of a request sent to a different peer).
+The contacted peer must verify this is the first request it receives from the requesting peer. The contacted peer may disallow anonymous connections and require a verifiable pre-known identity associated to the requester's public peer file. The contacted peer must verify the find secret matches the find secret in its own Section "B" of its public peer file (to insure this was not a replay of a request sent to a different peer).
 
 The contacted peer must verify the request has not expired and should verify the one time key has not been used before. The signature on the bundle must be verified to ensure the requesting peer signed it.
 
