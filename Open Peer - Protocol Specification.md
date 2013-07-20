@@ -13,19 +13,19 @@ The holy grail of communication on the Internet has been to allow peer-to-peer c
 
 Unfortunately, the goal of peer-to-peer and the reality of peer-to-peer do not match. Centralization of data into the Internet cloud is prolific and firewalls frequently impede direct peer-to-peer communication making peer-to-peer connection extremely difficult to setup and challenging to architect.
 
-What further reduces the proliferation of peer-to-peer is a lack of standardization, openness and ubiquity of the technology. The standards bodies have been working for years on firewall traversal techniques and standardization of the approaches and a new joint effort called WebRTC between the W3C and IETF on how browsers can directly communication between browsers to move media. This joint effort does not specify how signalling happens between peers so it's not a complete solutions on its own.
+What further reduces the proliferation of peer-to-peer is a lack of standardization, openness and ubiquity of the technology. The standards bodies have been working for years on firewall traversal techniques and standardization of the approaches and a new joint effort called WebRTC between the W3C and IETF on how browsers can directly communication between browsers to move media. This joint effort does not specify how signaling happens between peers so it's not a complete solutions on its own.
 
-Performing peer-to-peer approach to signalling has been notoriously difficult for a variety of reasons:
+Performing peer-to-peer approach to signaling has been notoriously difficult for a variety of reasons:
 
   1. Without a publicly addressable intermediate 'server' machine to initiate communication, two peers behind firewalls are never able to communicate with each other. Thus, a peer network almost always requires some sort of rendezvous and relay servers to initiate contact between peers behind firewalls (and firewalls tend to be used more frequently than not for end users).
 
-  2. Automatically promoting the few publically addressable home machines into rendezvous and relay servers is not the best option. Average users tend to not want to have their home/work machines to be automatically promoted to rendezvous and relay servers since it consumes their bandwidth and costs them to relay traffic for others who "leech" off their bandwidth. This cost factor causes end users to intentionally shutdown protocols that promote end user machines into servers. Over time, the number of average users willing to have their machines operate as servers for the benefit of those leeching decreases relative to the number of those whom leech off those servers until the entire system collapses with a too great server/leech ratio. As an example, Skype's network collapsed for this very reason and they were forced to setup their own super nodes to handle the load.
+  2. Automatically promoting the few publicly addressable home machines into rendezvous and relay servers is not the best option. Average users tend to not want to have their home/work machines to be automatically promoted to rendezvous and relay servers since it consumes their bandwidth and costs them to relay traffic for others who "leech" off their bandwidth. This cost factor causes end users to intentionally shutdown protocols that promote end user machines into servers. Over time, the number of average users willing to have their machines operate as servers for the benefit of those leeching decreases relative to the number of those whom leech off those servers until the entire system collapses with a too great server/leech ratio. As an example, Skype's network collapsed for this very reason and they were forced to setup their own super nodes to handle the load.
 
   3. Some peer-to-peer networks require ports to be opened on a firewall to operate. Where possible, peers will register themselves with UPnP to open the ports when the firewall automatically. Unfortunately, many firewalls lack the ability to automatically open ports or actively disallow this feature for fear that this opens the network to security holes. If opening ports automatically is not possible then users are required to open ports manually. Thus only the technically savvy can perform this task and such peer networks tend to be limited to those who are technically savvy. This is not a universal solution since it assumes too much technical ability and responsibility of the end user.
 
   4. Many peer networks rely on mutual peers not behaving in an evil manner. Peers that do not act in an altruistic fashion can easily disrupt these networks. When all peers behave properly there is no problem with such a network; however, the moment an 'evil' node or cluster of 'evil' nodes is injected into the peer network, parts or all of the network can suffer fatal issues and security can be compromised.
 
-Open Peer is peer-to-peer signalling protocol taking advantages of the IETF advances of firewall penetration techniques for moving media and adds a layer to performs the media signalling in a peer-to- peer fashion but does expect that a minimal requirement of rendezvous servers existing. Beyond the initial rendezvous to get past firewalls, the servers should drop out of the protocol flow and are no longer required.
+Open Peer is peer-to-peer signaling protocol taking advantages of the IETF advances of firewall penetration techniques for moving media and adds a layer to performs the media signalling in a peer-to- peer fashion but does expect that a minimal requirement of rendezvous servers existing. Beyond the initial rendezvous to get past firewalls, the servers should drop out of the protocol flow and are no longer required.
 
 Open Peer was designed with these main goals in mind:
 
@@ -39,9 +39,9 @@ Open Peer was designed with these main goals in mind:
 
   5. Identity protection - the ability of users to easily provide proof of their identity using existing social platforms while protecting these identities from spoofed by others.
 
-  6. Decreased cost - without the need to continuously relay signalling or media through centralized servers, the costs to host, administer, relay, replicate, process and store data on servers while providing 5 9s uptime is decreased.
+  6. Decreased cost - without the need to continuously relay signaling or media through centralized servers, the costs to host, administer, relay, replicate, process and store data on servers while providing 5 9s uptime is decreased.
 
-  7. webRTC enabling protocol - designed to be the engine that allows webRTC to function, supporting federation of independent websites and services, provide security and online identity protection and validation, and peer-to-peer signalling bypassing the need for heavy cloud based infrastructure.
+  7. webRTC enabling protocol - designed to be the engine that allows webRTC to function, supporting federation of independent websites and services, provide security and online identity protection and validation, and peer-to-peer signaling bypassing the need for heavy cloud based infrastructure.
 
   8. Scalability - whether starting at 50 users or moving beyond 5,00,000 users, the protocol is designed to allow for easy scalability by removing the complexity of communications out of the servers.
 
@@ -193,13 +193,9 @@ Syntax
 
 `identity:[type:][//<domain>/]<identity-string>`
 
-If a `//` is not present after the `identity:` scheme, then the identity is assumed to be a specialized registered type that must be resolved in a specialized manner. If the `//` is present then the identity is resolved by the specified domain, with an optional username/password access credentials to the identity lookup service.
+If a `//` is not present after the `identity:` scheme, then the identity is assumed to be a specialized registered type that must be resolved in a specialized manner. If the `//` is present then the identity is resolved by the specified domain.
 
 Where:
-
-  * `<username>` - the username used for basic auth to the identity lookup service
-
-  * `<password>` - the password used for basic auth to the identity lookup service
 
   * `<domain>` - the domain service where the identity is resolved, e.g. "foo.com" or "bar.com".
 
@@ -248,7 +244,7 @@ Section "C" (packaged and signed by identity's private key)
   * Any/all asserted public identities
   * Extension authorized-peer data
 
-The public key is used as a way to send the peer privately encrypted data from another source. As long as the other source has the correct public key it is possible to establish direct secure communication by exchanging keys using public/private keys as the encryptions method.
+The public key is used as a way to send the peer privately encrypted data from another source. As long as the other source has the correct public key it is possible to establish direct secure communication by exchanging keys using public / private keys as the encryptions method.
 
 The salt is used in Section "A" to establish randomness into the files that is not forgeable or controllable by the creator of the file this ensuring that hashes are dispersed based on randomness being present.
 
@@ -544,11 +540,11 @@ Overall Design Goals
 
 RUDP was designed to allow bi-direction FIFO (First-In-First-Out) congestion controlled streamed data between two peers that is modelled after TCP, except that it is highly friendly to firewalls and utilizes firewall friendly protocols and techniques to connect between peers. The RUDP can be used between peers or from server to server.
 
-TCP is a great protocol for signalling as it is reliable and messages are always delivered in order to a report party in a FIFO manner. The major problem with TCP is that it is not firewall friendly for peer-to- peer scenarios. TCP works great for peer-to-server where one entity is not located behind a firewall (i.e. the server). However, TCP between peers using today's marketed firewalls is virtually impossible.
+TCP is a great protocol for signaling as it is reliable and messages are always delivered in order to a report party in a FIFO manner. The major problem with TCP is that it is not firewall friendly for peer-to- peer scenarios. TCP works great for peer-to-server where one entity is not located behind a firewall (i.e. the server). However, TCP between peers using today's marketed firewalls is virtually impossible.
 
 RUDP uses STUN/ICE/TURN as the basis for establishing peer-to-peer connections then uses a UDP packaging technique to deliver application data. Additionally because RUDP is a FIFO based protocol like TCP, it can layer protocols such as TLS directly above its transport with little to no change at all being required (other than pumping the data through an RUDP socket instead of a TCP socket).
 
-RUDP uses ICE to perform connectivity probes between peers and utilizes a STUN extension for connecting, teardown, and reliable as well as unreliable data acknowledgements.
+RUDP uses ICE to perform connectivity probes between peers and utilizes a STUN extension for connecting, tear-down, and reliable as well as unreliable data acknowledgments.
 
 RUDP supports vector based acknowledgments and XOR bit parities to prevent malicious clients from being able to pretend a download stream was downloading faster than the server is truly capable of delivering.
 
@@ -1059,24 +1055,51 @@ SCP is an alternative TCP like peer-to-peer communication protocol that messages
     algorithm within the list offered by the remote party.
 
 
-Open Peer Signalling Protocol
+Open Peer Signaling Protocol
 =============================
 
-JSON Packaging
+JSON Signaling
 --------------
 
-The signalling protocol used for Open Peer is simple JSON based protocol and uses TCP, or RUDP, or DTLS/SCTP as the transport. Basically, open peer requires a reliable stream to operate.
+The signaling protocol used for Open Peer is simple JSON based protocol and uses TCP, or RUDP, or DTLS/SCTP as the transport. Basically, open peer requires a reliable stream to operate.
 
-The packaging of an JSON message for deliver to a peer entity is extremely simple when no encryption is used (known as "text/x-open-peer-json-plain"):
+The packaging of an JSON message for deliver to a peer entity is simple:
 
   * Message Size [4 bytes in network order] - The length of the raw JSON message about to be received
   * JSON data - the JSON message data to be receive of exactly the message size specified (no NUL termination is required or expected).
 
 
-Encrypted JSON Signalling Protocol Using TLS
---------------------------------------------
+The packaging of an JSON message for deliver over RUDP is known as "json/stream"):
 
-Open Peer can utilize standard TLS to connection from a peer to a server. In this mode, TLS is considered a stream like any other stream and the same rules of packaging are applied depending on the context of the negotiated packaging.
+### JSON Signaling over RUDP ###
+
+Open Peer can utilize RUDP to connection from a peer to peer. In this mode, RUDP is considered a stream and the same rules of packaging are applied depending on the context of the negotiated packaging.
+
+The packaging of an JSON message for deliver over RUDP is known as "json/rudp"):
+
+### JSON Signaling over TCP ###
+
+Open Peer can utilize standard TCP to connection from a peer to a server. In this mode, TCP is considered a stream and the same rules of packaging are applied depending on the context of the negotiated packaging.
+
+The packaging of an JSON message for deliver over RUDP is known as "json/tcp"):
+
+### JSON Signaling Using TLS ###
+
+Open Peer can utilize standard TLS to connection from a peer to a server. In this mode, TLS is considered a stream and the same rules of packaging are applied depending on the context of the negotiated packaging.
+
+The packaging of an JSON message for deliver over RUDP is known as "json/tls"):
+
+### JSON Signaling Using Web Socket Protocol ###
+
+Open Peer can utilize standard Web Socket Protocol to connection from a peer to a server. In this mode, the web socket is considered a stream and the same rules of packaging are applied depending on the context of the negotiated packaging. For consistency, the size packaging already present in Web Sockets is ignored.
+
+The packaging of an JSON message for deliver over RUDP is known as "json/web-socket"):
+
+### JSON Signaling Using Secure Web Socket Protocol ###
+
+Open Peer can utilize standard Web Socket Protocol to connection from a peer to a server. In this mode, the web socket is considered a stream and the same rules of packaging are applied depending on the context of the negotiated packaging. For consistency, the size packaging already present in Web Sockets is ignored.
+
+The packaging of an JSON message for deliver over RUDP is known as "json/tls-web-socket"):
 
 
 Message Layer Security
@@ -1095,8 +1118,8 @@ The format for the unidirectional message is as follows:
   * Message Size [4 bytes in network order] - The length of the raw encrypted message, including encryption headers and integrity footers
   * Encryption key algorithm selection (16 bits network byte order, upper 8 bits reserved and must be set to "0") - When negotiating, each number represents selected keys / algorithm pair for use by the number chosen but "0" is used to represent a key/algorithm negotiation. Every "0" key causes a reset of all encryption algorithms in progress to substitute with the values specified in the "0" package. Each key / algorithm selected is selected from the supported keys/algorithms offered to the remote party, but can only be select using algorithms the remote party supports. As such, there is one mandated algorithm to ensure compatibility, "http://openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5", where the AES (Rijndael- 128) in CFB mode with a 32 byte key size, 16 byte block size, 16 byte feedback size, SHA1-HMAC integrity protection, and an md5 hash IV sequence calculation.
   * Data bundle, consisting of:
+    * integrity header of the data encrypted using the algorithm / key selected (algorithm specific)
     * JSON message encrypted using the algorithm / key selected
-    * hmac integrity of the data encrypted using the algorithm / key selected
 
 The advantage of pre-knowing the public key of the remote party by the sender allows for unidirectional encryption with different keys being used in each direction and allows for encryption to begin in both directions in a single round trip negotiation.
 
@@ -1191,42 +1214,67 @@ Example of the "0" package is JSON in place text with the following data in the 
     }
 
 
-Multiplexed Stream Packaging
-----------------------------
+### JSON over MLS naming ###
 
-Streams maybe multiplexed allowing for multiple messages that are are packaged across different channel connection numbers. In this situation each package is wrapped in a channel package where the channels numbers are negotiated at a higher layer but each number represents a bi-directional connection where messages can be sent over an existing stream. The default channel number should start with "0" when the stream is first opened.
+The following names apply when signaling JSON over MLS:
+* json-mls/streams - JSON signaling using MLS over a generic stream
+* json-mls/rudp - JSON signaling using MLS over RUDP
+* json-mls/tcp - JSON signaling using MLS over TCP
+* json-mls/tls - JSON signaling using MLS over TLS
+* json-mls/web-socket - JSON signaling using MLS over web sockets
+* json-mls/tls-web-socket - JSON signaling using MLS over secure web sockets
+
+Multiplexed Streams
+-------------------
+
+Streams can be multiplexed allowing for multiple messages that are are packaged across different channel connection numbers. In this situation each package is wrapped with a channel number where the channels numbers are negotiated at a higher layer. Each channel number represents a bi-directional connection where messages can be sent over an existing stream independent of other channels. The default channel number should start with "0" when the stream is first opened.
 
 The format of the package is:
   * Channel number [4 bytes in network order] - The bi-directional messaging channel
   * Message Size [4 bytes in network order]
   * raw binary data
 
-Any newly seen channel number represents the opening of a channel with that number. A message size of "0" indicated the channel number in use is now closed.
+Any newly seen channel number represents the opening of a channel. A message size of "0" indicated the channel number in use is now closed.
 
 The choice of channel number to use when creating a new channel is external to this definition.
 
 
-### Multiplexed Stream Packaging with JSON Packaging ###
+### JSON Signaling over Multiplexed Streams ###
 
-JSON Packaging can be sent over a multiplexed stream channel.
+JSON signaling can be sent over a multiplexed stream channel.
 
 When combining multiplexed stream packaging and JSON packaging, the format of the JSON channel is:
   * JSON data - the JSON message data to be receive of exactly the message size specified (no NUL termination is required or expected).
 
 This allows for JSON to be efficiently packaged within the multiplexed stream where the message size is not repeated.
 
+The following names apply when multiplexing JSON signaling over a multiplexed channel:
+* multiplexed-json/streams - JSON signaling using MLS over a generic stream
+* multiplexed-json/rudp - JSON signaling using MLS over RUDP
+* multiplexed-json/tcp - JSON signaling using MLS over TCP
+* multiplexed-json/tls - JSON signaling using MLS over TLS
+* multiplexed-json/web-socket - JSON signaling using MLS over web sockets
+* multiplexed-json/tls-web-socket - JSON signaling using MLS over secure web sockets
 
-### Multiplexed Stream Packaging with Message Layer Security ###
+### Message Layer Security over Multiplexed Streams ###
 
-Encrypted JSON Signaling Protocol can be used with multiplex stream channels.
+Message Layer Security can be used with multiplex streams.
 
 When combining multiplexed stream packaging and symmetric encrypted data, the format of the channel is:
   * Encryption key algorithm selection (16 bits network byte order, upper 8 bits reserved and must be set to "0") - When negotiating, each number represents selected keys / algorithm pair for use by the number chosen but "0" is used to represent a key / algorithm negotiation.
   * Data bundle, consisting of:
+    * integrity header of the data encrypted using the algorithm / key selected (algorithm specific)
     * JSON message encrypted using the algorithm / key selected
-    * hmac integrity of the data encrypted using the algorithm / key selected
 
-The interpretation of the algorithm, data and if it contains an integrity footer are negotiated externally. Algorithm numbers can be reserved for signaling purposes, so long as those algorithms are negotiated externally.
+The interpretation of the algorithm, data and if it contains an integrity header are negotiated externally. Algorithm numbers can be reserved for signaling purposes, so long as those algorithms are negotiated externally.
+
+The following names apply when multiplexing JSON signaling over a multiplexed channel:
+* multiplexed-json-mls/streams - JSON signaling using MLS over a generic stream
+* multiplexed-json-mls/rudp - JSON signaling using MLS over RUDP
+* multiplexed-json-mls/tcp - JSON signaling using MLS over TCP
+* multiplexed-json-mls/tls - JSON signaling using MLS over TLS
+* multiplexed-json-mls/web-socket - JSON signaling using MLS over web sockets
+* multiplexed-json-mls/tls-web-socket - JSON signaling using MLS over secure web sockets
 
 
 General Request, Reply, Notify and Result Formation Rules
@@ -1239,11 +1287,11 @@ Open Peer has four types of messages:
   * reply - this is a special case "reply" to a request during the find where the finder returns an immediate result to the request but each peer location can give its own reply with the same ID as the request subsequently
   * notify - this is a special type of request whose result is ignored and not required (and no response is presumed to occur with a notify type)
 
-All request types and results use a simplified JSON format. The messages are sent either over HTTPS/TLS/MLS/Message or over RUDP/UDP or SCP protocols. Alternative protocols are acceptable so long as they maintain the integrity and public/private key aspects of these protocols.
+All request types and results use a simplified JSON format. The messages are sent either over HTTPS/TLS/MLS/Message or over RUDP/UDP or SCP protocols. Alternative protocols are acceptable so long as they maintain the integrity and public / private key aspects of these protocols.
 
 Every request must include the federated domain which the request is being processed and the application ID associated with the request (the result/reply should use the application ID of the original request). Every request type must include an ID and a handler service and method being invoked (to assist with message handling, processing and routing). The ID must be cryptographically strong and random thus checks to see which data channel the response comes on is not required. Every result message must mirror the request type's ID and include a timestamp to assist with detecting network time problems (whereas the timestamp is optional on request types).
 
-Even though all requests/responses are written in human readable form in this document, all requests/responses are sent on the wire in their Open Peer canonical form using the algorithm for the canonicalization of JSON signatures as specified in this document. This allows any clients or servers receive JSON requests that have non-compliant JSON parsers/generators to be able to easily validate signatures even if they cannot convert from raw JSON to canonical JSON easily. Further, this ensures the wire format is optimal on the wire since the canonical form is fairly compact (although if compression is applied in a higher layer then the wire savings might become moot).
+Even though all requests / responses are written in human readable form in this document, all requests / responses are sent on the wire in their Open Peer canonical form using the algorithm for the canonicalization of JSON signatures as specified in this document. This allows any clients or servers receive JSON requests that have non-compliant JSON parsers/generators to be able to easily validate signatures even if they cannot convert from raw JSON to canonical JSON easily. Further, this ensures the wire format is optimal on the wire since the canonical form is fairly compact (although if compression is applied in a higher layer then the wire savings might become moot).
 
 Open Peer JSON signatures are used to verify signatures within the JSON. The canonical form of JSON is as follows (unless otherwise specified within the JSON signature): http://openpeer.org/2012/12/14/jsonsig#rsa-sha1
 
@@ -1259,13 +1307,13 @@ The "$", "#text" and 'other' ordering is used to ensure the implementations whic
 
 JSON objects that have member string:value pairs that start with "$" in their string parts are only allowed to contain string, number, true, false or null values. JSON objects that have a member string:value pair with the string part equal to "#text" can only have a string as the corresponding value. This restriction is put into Open Peer to allow for easy JSON/XML conversions.
 
-All base64 encoding/decoding routines must use standard/common encoding scheme, without line breaks and with padding used for unused bytes.
+All base64 encoding / decoding routines must use standard / common encoding scheme, without line breaks and with padding used for unused bytes.
 
 The client may receive an error complaining that a request has expired if the client's clock was set wrong (401). Hence in every result, the epoch of the server will be sent for the client to detect potential clock errors. To reduce issues, the client should use a secure NTP service to set its own clock at some point before initiating contact to a server or another peer.
 
 The client is responsible for disconnecting at all times from the server. In the case of peer to peer, the initiating peer is considered the client role and the receiving peer plays the server role.
 
-There are exceptions to this rule. The server will close a connection without warning based on two inactivity time-outs. The larger timeout is based upon an expiry window when the entity is known or "registered" to the server. The smaller timeout window of inactivity (chosen and unspecified at the discretion of the server) is based on not having received any request or notification on a channel within that defined timeframe. If either of those two timeouts occurs, the server may disconnect which is typically the responsibility of the client. The server may disconnect any client it sees as likely malicious behaviour.
+There are exceptions to this rule. The server will close a connection without warning based on two inactivity time-outs. The larger timeout is based upon an expiry window when the entity is known or "registered" to the server. The smaller timeout window of inactivity (chosen and unspecified at the discretion of the server) is based on not having received any request or notification on a channel within that defined timeframe. If either of those two timeouts occurs, the server may disconnect which is typically the responsibility of the client. The server may disconnect any client it sees as likely malicious behavior.
 
 If a client disconnects without sending the unregister request, the server should assume the client disconnected prematurely and will discard any associated sessions.
 
@@ -1688,11 +1736,11 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
                 "protocols": {
                   "protocol": [
                     {
-                      "transport": "rudp/udp",
+                      "transport": "multiplexed-json/tcp",
                       "srv": "finders.example.com"
                     },
                     {
-                      "transport": "secure-websocket/tcp",
+                      "transport": "multiplexed-json/secure-web-socket",
                       "srv": "finders.example.com"
                     }
                   ]
@@ -1722,12 +1770,12 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
                 "protocols": {
                   "protocol": [
                     {
-                       "transport": "rudp/udp",
+                       "transport": "multiplex-json/tcp",
                        "srv": "100.200.100.1:4032,5.6.7.8:4032"
                     },
                     {
-                       "transport": "framed/tcp",
-                       "srv": "100.200.100.1:4099,5.6.7.8:4099"
+                       "transport": "multiplex-json/secure-web-socket",
+                       "srv": "ip100-200-100-1.finder.example.com"
                     }
                   ]
                 },
@@ -4064,26 +4112,29 @@ Obtain a session token that represents the peer on the finder server so continuo
 ### Inputs
 
   * One time use session proof bundle, consisting of
-    * Session ID
     * Finder ID - where this request is to be processed
     * Peer contact making the request
     * Client nonce - cryptographically random one time use key
     * Expiry for the one time use token
-    * User agent connecting, e.g. "application/major.minor[.build] (information)"
+    * Location details
+      * Location ID
+      * Device ID
+      * IP
+      * User agent
+      * OS
+      * System
+      * Host
     * Public peer file
     * Signed by peer private key
-  * Location details
-    * Location ID
-    * Device ID
-    * IP
-    * User agent
-    * OS
-    * System
-    * Host
 
 ### Outputs
 
+  * Relay information (for relay connections):
+    * access token - the access token needed for creating remote relay credentials that can be given to third parties to connect and relay information to this logged in application
+    * access secret - the secret part of the credentials encrypted using the public key of peer file specified in the session create request.
   * Expiry epoch (when next a keep alive must be sent by)
+  * Server agent
+  * Signed by finder's certificate
 
 ### Security Considerations
 
@@ -4154,8 +4205,38 @@ If a Section-B of the public peer file is not present, the peer does not wish to
         "$method": "session-create",
         "$timestamp": 13494934,
     
-        "server": "hooflash/1.0 (centos)",
-        "expires": 483949923
+        "serverProofBundle": {
+          "serverProof": {
+            "$id": "edbd821123e9cfedf0285a95989ac461",
+    
+            "relay": {
+              "accessToken": "9d934822ccca53ac6e16e279830f4ffe3cfe1d0e",
+              "accessSecret": "NWNmZGNkZWJmNDI5MDMzMmI2Mzc4YTYzZWMyZmVhNjA=",
+              "protocols": {
+                "protocol": [
+                  {
+                    "transport": "tcp",
+                    "srv": "74.12.11.34:5434"
+                  },
+                  {
+                    "transport": "secure-websocket/tcp",
+                    "srv": "ip74-12-11-34.example.com"
+                  }
+                ]
+              },
+            },
+        
+            "server": "hooflash/1.0 (centos)",
+            "expires": 483949923
+          },
+          "signature": {
+            "reference": "#edbd821123e9cfedf0285a95989ac461",
+            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "digestValue": "NTRmZDRmNjBjYmJi...xMjdmYWQ4ODk0MQ==",
+            "digestSigned": "TlRSbVpEUm1....GMwT1RjeE1qZG1ZV1E0T0RrME1RPT0=",
+            "key": { "fingerprint": "54fd4f60cbbbf0077ec33c6447497127fad88941" }
+          }
+        }
     
       }
     }
@@ -4265,6 +4346,29 @@ Since the client and server are the only entities that know the session ID, the 
     
         "expires": 483949923
       }
+    }
+
+
+Session Channel Map Request
+---------------------------
+
+### Purpose
+
+Map a channel in the multiplex stream to a remote party. This request must be issued before messages can be sent on a client defined multiplexed channel number. This request can be issued outside of the context of a session.
+
+### Inputs
+
+### Outputs
+
+
+### Security Considerations
+
+### Example
+
+    {
+    }
+
+    {
     }
 
 
@@ -4951,7 +5055,7 @@ This request notifies the contacted peer of the original requesting peer's ident
 ### Outputs
 
   * Digest value - the value of the digest from the signature of the requesting peer's "peer identify proof bundle"
-  * Fingerprint - the finger print if the certfiicate used by the receiving peer's transport
+  * Fingerprint - the finger print if the certificate used by the receiving peer's transport
   * Location of the receiving peer
   * Signed by responding peer's private key
 
