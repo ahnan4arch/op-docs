@@ -1217,12 +1217,13 @@ Example of the "0" package is JSON in place text with the following data in the 
 ### JSON over MLS naming ###
 
 The following names apply when signaling JSON over MLS:
-* json-mls/streams - JSON signaling using MLS over a generic stream
-* json-mls/rudp - JSON signaling using MLS over RUDP
-* json-mls/tcp - JSON signaling using MLS over TCP
-* json-mls/tls - JSON signaling using MLS over TLS
-* json-mls/web-socket - JSON signaling using MLS over web sockets
-* json-mls/tls-web-socket - JSON signaling using MLS over secure web sockets
+
+  * json-mls/streams - JSON signaling using MLS over a generic stream
+  * json-mls/rudp - JSON signaling using MLS over RUDP
+  * json-mls/tcp - JSON signaling using MLS over TCP
+  * json-mls/tls - JSON signaling using MLS over TLS
+  * json-mls/web-socket - JSON signaling using MLS over web sockets
+  * json-mls/tls-web-socket - JSON signaling using MLS over secure web sockets
 
 Multiplexed Streams
 -------------------
@@ -1230,6 +1231,7 @@ Multiplexed Streams
 Streams can be multiplexed allowing for multiple messages that are are packaged across different channel connection numbers. In this situation each package is wrapped with a channel number where the channels numbers are negotiated at a higher layer. Each channel number represents a bi-directional connection where messages can be sent over an existing stream independent of other channels. The default channel number should start with "0" when the stream is first opened.
 
 The format of the package is:
+
   * Channel number [4 bytes in network order] - The bi-directional messaging channel
   * Message Size [4 bytes in network order]
   * raw binary data
@@ -1244,23 +1246,26 @@ The choice of channel number to use when creating a new channel is external to t
 JSON signaling can be sent over a multiplexed stream channel.
 
 When combining multiplexed stream packaging and JSON packaging, the format of the JSON channel is:
+
   * JSON data - the JSON message data to be receive of exactly the message size specified (no NUL termination is required or expected).
 
 This allows for JSON to be efficiently packaged within the multiplexed stream where the message size is not repeated.
 
 The following names apply when multiplexing JSON signaling over a multiplexed channel:
-* multiplexed-json/streams - JSON signaling using MLS over a generic stream
-* multiplexed-json/rudp - JSON signaling using MLS over RUDP
-* multiplexed-json/tcp - JSON signaling using MLS over TCP
-* multiplexed-json/tls - JSON signaling using MLS over TLS
-* multiplexed-json/web-socket - JSON signaling using MLS over web sockets
-* multiplexed-json/tls-web-socket - JSON signaling using MLS over secure web sockets
+
+  * multiplexed-json/streams - JSON signaling using MLS over a generic stream
+  * multiplexed-json/rudp - JSON signaling using MLS over RUDP
+  * multiplexed-json/tcp - JSON signaling using MLS over TCP
+  * multiplexed-json/tls - JSON signaling using MLS over TLS
+  * multiplexed-json/web-socket - JSON signaling using MLS over web sockets
+  * multiplexed-json/tls-web-socket - JSON signaling using MLS over secure web sockets
 
 ### Message Layer Security over Multiplexed Streams ###
 
 Message Layer Security can be used with multiplex streams.
 
 When combining multiplexed stream packaging and symmetric encrypted data, the format of the channel is:
+
   * Encryption key algorithm selection (16 bits network byte order, upper 8 bits reserved and must be set to "0") - When negotiating, each number represents selected keys / algorithm pair for use by the number chosen but "0" is used to represent a key / algorithm negotiation.
   * Data bundle, consisting of:
     * integrity header of the data encrypted using the algorithm / key selected (algorithm specific)
@@ -1269,12 +1274,13 @@ When combining multiplexed stream packaging and symmetric encrypted data, the fo
 The interpretation of the algorithm, data and if it contains an integrity header are negotiated externally. Algorithm numbers can be reserved for signaling purposes, so long as those algorithms are negotiated externally.
 
 The following names apply when multiplexing JSON signaling over a multiplexed channel:
-* multiplexed-json-mls/streams - JSON signaling using MLS over a generic stream
-* multiplexed-json-mls/rudp - JSON signaling using MLS over RUDP
-* multiplexed-json-mls/tcp - JSON signaling using MLS over TCP
-* multiplexed-json-mls/tls - JSON signaling using MLS over TLS
-* multiplexed-json-mls/web-socket - JSON signaling using MLS over web sockets
-* multiplexed-json-mls/tls-web-socket - JSON signaling using MLS over secure web sockets
+
+  * multiplexed-json-mls/streams - JSON signaling using MLS over a generic stream
+  * multiplexed-json-mls/rudp - JSON signaling using MLS over RUDP
+  * multiplexed-json-mls/tcp - JSON signaling using MLS over TCP
+  * multiplexed-json-mls/tls - JSON signaling using MLS over TLS
+  * multiplexed-json-mls/web-socket - JSON signaling using MLS over web sockets
+  * multiplexed-json-mls/tls-web-socket - JSON signaling using MLS over secure web sockets
 
 
 General Request, Reply, Notify and Result Formation Rules
