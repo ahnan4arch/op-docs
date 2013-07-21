@@ -1167,24 +1167,24 @@ Open Peer connections can take advantage of this situation by utilizing the pre-
 The format for the unidirectional message is as follows:
 
   * Message Size [4 bytes in network order] - The length of the raw encrypted message, including encryption headers and integrity footers
-  * Encryption key algorithm selection (16 bits network byte order, upper 8 bits reserved and must be set to "0") - When negotiating, each number represents selected keys / algorithm pair for use by the number chosen but "0" is used to represent a key/algorithm negotiation. Every "0" key causes a reset of all encryption algorithms in progress to substitute with the values specified in the "0" package. Each key / algorithm selected is selected from the supported keys/algorithms offered to the remote party, but can only be select using algorithms the remote party supports. As such, there is one mandated algorithm to ensure compatibility, "http://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5", where the AES (Rijndael- 128) in CFB mode with a 32 byte key size, 16 byte block size, 16 byte feedback size, SHA1-HMAC integrity protection, and an md5 hash IV sequence calculation.
+  * Encryption key algorithm selection (16 bits network byte order, upper 8 bits reserved and must be set to "0") - When negotiating, each number represents selected keys / algorithm pair for use by the number chosen but "0" is used to represent a key / algorithm negotiation. Every "0" key causes a reset of all encryption algorithms in progress to substitute with the values specified in the "0" package. Each key / algorithm selected is selected from the supported keys / algorithms offered to the remote party, but can only be amongst the algorithms the remote party supports. As such, there is one mandated algorithm to ensure compatibility, "http://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5", where the AES (Rijndael- 128) in CFB mode with a 32 byte key size, 16 byte block size, 16 byte feedback size, SHA1-HMAC integrity protection, and an md5 hash IV sequence calculation.
   * Data bundle, consisting of:
     * integrity header of the data encrypted using the algorithm / key selected (algorithm specific)
     * JSON message encrypted using the algorithm / key selected
 
 The advantage of pre-knowing the public key of the remote party by the sender allows for unidirectional encryption with different keys being used in each direction and allows for encryption to begin in both directions in a single round trip negotiation.
 
-Message level security is not to be used except for this specific scenario and only when the keys are pre- known by the initiator of the connection and where both parties have public and private keys. Further, this is a message centric encryption and not stream level encryption as offered by TLS. Any received public key and Asserted Identities must be validated at the application layer by exchanging Asserted Identity information in correlation with Public Peer Files.
+Message level security is not to be used except for this specific scenario and only when the keys are pre-known by the initiator of the connection and where both parties have public and private keys. Further, this is a message centric encryption and not stream level encryption as offered by TLS. Any received public key and asserted identities must be validated at a higher layer by exchanging identity information in correlation with public peer files.
 
-The "0" package is sent in plain text in JSON format and the data bundle has a 0 byte size hmac since the signature as part of the JSON package is used instead.
+The "0" package is sent in plain text in JSON format and the data bundle has does not contain an integrity hmac since the signature as part of the JSON package is used instead.
 
 The "0" package contains the following:
 
   * Signed keying bundle including:
 
     * Nonce - this nonce should be validated as having only been seen once by the receiving client
-    * Expiry - this package must be verified as valid before the expiry or it's considered invalid
-    * Context - this identifier allows the stream to correlate with other layers and the meaning is externally defined / negotiated
+    * Expiry - a time-stamp and this package must be verified as valid before the expiry or it's considered invalid
+    * Context - this identifier allows the stream to correlate with other upper layers and the meaning is externally defined / negotiated
     * Algorithms - preference ordered set of algorithms supported by the client
     * List of keys, with each key containing:
       * key ID - this corresponds to the algorithm selection ID of which key to use in any subsequent decryption
@@ -1193,19 +1193,19 @@ The "0" package contains the following:
 
 For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm, the following algorithm input information is used:
 
-  * key - the 32 byte AES key, base64(remote_public_key_encrypt(<32-byte-aes-key>))
-  * iv - the 16 byte AES initialization vector, base64(remote_public_key_encrypt(<16-byte-aes-iv>))
-  * hmacSecretKey - the initial secret key input string, base64(remote_public_key_encrypt(`<secret-key-passphrase>`))
+  * key - the 32 byte AES key, base64(rsa_encrypt(`<remote-public-key>`, `<32-byte-aes-key>`))
+  * iv - the 16 byte AES initialization vector, base64(rsa_encrypt(`<remote-public-key>`, `<16-byte-aes-iv>`))
+  * hmacIntegrityKey - the initial secret key input string, base64(rsa_encrypt(`<remote-public-key>`, `<integrity-passphrase>`))
 
-When the mandatory key is used, the AES CFB is initialized with these values and will continue to encrypt payloads using this keying until a new "0" package arrives which would reset the algorithms with new keying information for subsequent messages in the message stream. The hmac is calculated using the following algorithm, sha1_hmac(`<hmac-secret-passphase>`, `<encrypted-message>`)). The aes key and secrey key passphrase remains the same until a new "0" package is sent, but the IV is changed for every message sent. The next IV for the mandated algorithm is calculated based upon the hash of the previous IV and previous hmac, next_iv = md5_hash(`<previous_iv>` + ":" + `<previous_hmac>`).
+When the mandatory key is used, the AES CFB is initialized with these values and will continue to encrypt payloads using this keying until a new "0" package arrives. Once a new "0" package arrives all keying material is reset and forgotten and the algorithms with new keying information for subsequent messages are used for messages in a stream. The hmac is calculated using the following algorithm, hmac(`<integrity-passphrase>`, `<encrypted-message>`)). The AES key and integrity passphrase remains the same until a new "0" package is sent, but the IV is changed for every message. The next IV used for the keying selected is calculated based upon the hash of the previous IV for the selected keying and previous hmac integrity value, next_iv = hash(hex(`<previous-iv>`) + ":" + hex(`<previous-integrity-hmac>`)).
 
-Any sensitive data contained in the "0" package must be encrypted using the public key of the receiving party. Thus the key, iv, and hmacSecretKey must be encrypted. The entire package must be signed by the public key of the party sending the "0" package and the receiver must validate this package's signature before it assumes any of the data sent in the package is considered valid.
+Any sensitive data contained in the "0" package must be encrypted using the public key of the receiving party. Thus the key, iv, and hmacIntegrityKey must be encrypted. The entire package must be signed by the public key of the party sending the "0" package and the receiver must validate this package's signature before it assumes any of the data sent in the package is considered valid and / or trustworthy.
 
-The receiving party must verify the signature used in the initiator's "0" package and all subsequent packages. The first "0" package must include the x509 certificate of the sending party unless the key is guaranteed to be known in advanced by the receiving party. A reference to a key can be used if the reference can be resolved by the receiving party. The subsequent "0" packages must use the same key as the first package, thus the x509 certificate does not need to be included again. The hash of the x509 certificate is considered the fingerprint of the sending parties certificate. The "0" package must be the first package sent on the wire in either direction. The party receiving the connection request must assume all data received via encrypted messages may not be from the correct party until the fingerprint of the x509 certificate is verified by a higher layer. The public key used in the "0" packages must never change throughout the lifetime of the connection. The certificate used in this exchange need not be the same certificate used by a higher layer, such as the public peer file's certificate.
+The receiving party must verify the signature used in the sender's "0" package and all subsequent "0" packages. The first "0" package must include the x509 certificate of the sending party, unless the key is guaranteed to be known in advanced by the receiving party in which case a reference to they public key may be used. The subsequent "0" packages must use the same key as the first package, thus the x509 certificate should not need to be included again, and a signature key reference in future signatures should be used (as determined to be easiest resolvable for the remote party). The "0" package must be the first package sent on the wire in either direction. The public key used in this exchange need not be the same public key used by a higher layer, such as the public peer file's certificate.
 
 All keying information and salts must be generated using cryptographically random algorithms only.
 
-The algorithms used for encrypting must be limited to the algorithms supported by the remote party, but the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm must always be considered a valid algorithm available in any minimal implementation.
+The algorithms used for encrypting must be limited to the algorithms known to be supported by the remote party, but the mandatory algorithm must always be considered a valid algorithm available in any minimal implementation.
 
 Example of the "0" package is JSON in place text with the following data in the bundle:
 
@@ -1230,7 +1230,7 @@ Example of the "0" package is JSON in place text with the following data in the 
                 "inputs": {
                   "key": "Y21wclpXd...HFjbXgzWlhKbA==",
                   "iv": "Y21wclpXd...HFjbXgzWlhKbA==",
-                  "hmacSecretKey": "VjFSSmVHUXlUbk5qU...aHVaV3hrYzJGRmRHbFJWREE1"
+                  "hmacIntegrityKey": "VjFSSmVHUXlUbk5qU...aHVaV3hrYzJGRmRHbFJWREE1"
                 }
               },
               {
@@ -1239,7 +1239,7 @@ Example of the "0" package is JSON in place text with the following data in the 
                 "inputs": {
                   "key": "WTIxd2NscFhkSEZq...YlhneldsaEtiQT09",
                   "iv": "V1RJeGQyTnNjRmhrTGk...bGhuZWxkc2FFdGlRVDA5",
-                  "hmacSecretKey": "ZmpGU1NtVkhVW...MQ=="
+                  "hmacIntegrityKey": "ZmpGU1NtVkhVW...MQ=="
                 }
               },
               {
@@ -1248,7 +1248,7 @@ Example of the "0" package is JSON in place text with the following data in the 
                 "inputs": {
                   "key": "Wm1wR1d4Vlltc...mtwWFVrVkZNUT09",
                   "iv": "V20xd1IxZDRWbGx...dGVnJWa1pOVVQwOQ==",
-                  "hmacSecretKey": "VjIweGQxSXhaRFJX...WUXdPUT09"
+                  "hmacIntegrityKey": "VjIweGQxSXhaRFJX...WUXdPUT09"
                 }
               }
             ]
@@ -1311,6 +1311,7 @@ The following names apply when multiplexing JSON signaling over a multiplexed ch
   * multiplexed-json/web-socket - JSON signaling using MLS over web sockets
   * multiplexed-json/tls-web-socket - JSON signaling using MLS over secure web sockets
 
+
 ### Message Layer Security over Multiplexed Streams ###
 
 Message Layer Security can be used with multiplex streams.
@@ -1346,7 +1347,7 @@ Open Peer has four types of messages:
 
 All request types and results use a simplified JSON format. The messages are sent either over HTTPS/TLS/MLS/Message or over RUDP/UDP or SCP protocols. Alternative protocols are acceptable so long as they maintain the integrity and public / private key aspects of these protocols.
 
-Every request must include the federated domain which the request is being processed and the application ID associated with the request (the result/reply should use the application ID of the original request). Every request type must include an ID and a handler service and method being invoked (to assist with message handling, processing and routing). The ID must be cryptographically strong and random thus checks to see which data channel the response comes on is not required. Every result message must mirror the request type's ID and include a timestamp to assist with detecting network time problems (whereas the timestamp is optional on request types).
+Every request must include the federated domain which the request is being processed and the application ID associated with the request (the result / reply should use the application ID of the original request). Every request type must include an ID and a handler service and method being invoked (to assist with message handling, processing and routing). The ID must be cryptographically strong and random thus checks to see which data channel the response comes on is not required. Every result message must mirror the request type's ID and include a time-stamp to assist with detecting network time problems (whereas the timestamp is optional on request types).
 
 Even though all requests / responses are written in human readable form in this document, on-the-wire requests and responses should be written for favor of size efficiency. The recommended method is the Open Peer canonical form using the algorithm for the canonicalization of JSON signatures as specified in this document. This ensures the wire format is optimal on the wire since the canonical form is fairly compact (although if a compression algorithm is applied to the message at a higher layer then the wire savings might become moot).
 
@@ -1406,9 +1407,9 @@ Open Peer uses the following definitions (unless otherwise specified):
   * public key - a RSA compatible public key encoded as X.509 DER encoding (BER decoding) format
   * private key - a RSA compatible encoded as "SubjectPublicKeyInfo" PKCS #1 format.
   * signature key - a key defined or referenced from within a signature (see JSON Signatures).
-  * key - a binary value key or passphase used as input into encrypt / decrypt routines which may pre-pass through hash / hmac algorithms before being utilized.
+  * key - a binary value key or passphrase used as input into encrypt / decrypt routines which may pre-pass through hash / hmac algorithms before being utilized.
   * IV - the initialization vector for an encryption / decryption algorithm, always 16 bytes long.
-  * passhrase - a cryptographically generated string using limited subset of the visible ASCII characters, or a user input passphrase. Each character in a passphrase is given a security strength of 5 bits. Thus a passphrase input into a "SHA1" algorithm should contain a minimal "(20 x 8) / 5 = 32" characters; a passhrase used for AES should contain a minimal "(32 x 8) / 5 = 52" characters; a passphrased used for IV calculation should contain a minimal "(16 x 8) / 5 = 26" characters;
+  * passphrase - a cryptographically generated string using limited subset of the visible ASCII characters, or a user input passphrase. Each character in a passphrase is given a security strength of 5 bits. Thus a passphrase input into a "SHA1" algorithm should contain a minimal "(20 x 8) / 5 = 32" characters; a passhrase used for AES should contain a minimal "(32 x 8) / 5 = 52" characters; a passphrase used for IV calculation should contain a minimal "(16 x 8) / 5 = 26" characters;
   * salt - binary cryptographically random data
   * salt string - passphrase compatible cryptographically random data
 
@@ -1475,7 +1476,7 @@ The binary verification digest has value is compared against the decode64(`<sign
 
 The key used to verify the signature comes from they "key" specified in the signature. This key can be the full public key or a descriptive reference to which public key was used.
 
-The signature verification is as follows: publicKeySignVerify(decode64(`<digest-signed>`))
+The signature verification is as follows: verify(`<referenced-public-key>`, decode64(`<digest-signed>`))
 
 
 ### Signature Key containing x509 Public Key ###
@@ -1589,8 +1590,8 @@ The identity URI being validated is contained within the "contactProof" JSON obj
 
 The following steps must be perform to prove an identity is associated with a peer URI:
 
-  * the current date (within the "contactProof") must be beyond the creation date (a small window is allowed for small clock variations)
-  * the current date (within the "contactProof") must not be beyond the expiry date
+  * the current date time-stamp (within the "contactProof") must be beyond the creation date (a small window is allowed for small clock variations)
+  * the current date time-stamp (within the "contactProof") must not be beyond the expiry date
   * peer URI (within the "contactProof") must match the peer URI being associated
   * the signature on the "contactProof" must be signed by the public key from the public peer file associated with the peer URI
   * the signature on the "identityProof" must be signed by the domain from the identity URI being validated and the referenced certificate obtained and checked from performing a "Certificated Get" on the domain; alternatively if the identity URI is of a legacy type, an identity lookup must be performed on the identity and provider of the identity returned by by the lookup must match the domain referenced in the signature
@@ -1598,17 +1599,18 @@ The following steps must be perform to prove an identity is associated with a pe
 An identity lookup should be performed on the identity to obtain the latest identity proof thus only the latest identity proof should be considered valid.
 
 
-Open Peer Default Signature Algorithm
--------------------------------------
+Open Peer Mandated Signature Algorithm
+--------------------------------------
 
-This is the default algorithm that must be supported by all implementations to allow for JSON signatures:
+This is the default mandated algorithm that must be supported by all implementations to allow for JSON signatures:
 http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1
 
 This is a namespace URL only and not a URI reference to a valid document definition. If the signature algorithm is omitted this algorithm must be applied, but all clients should always output their signature algorithm as part of the signature.
 
-The hash algorithm used is sha1. The signature public key / private keys are RSA compatible.
+The hash algorithm used is SHA1. The signature public key / private keys are RSA compatible.
 
 This algorithms uses the canonical form whose rules are described in the next sub-section.
+
 
 ### Canonical JSON ###
 
