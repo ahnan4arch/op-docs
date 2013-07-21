@@ -248,7 +248,7 @@ Section "A" (packaged and signed by identity's private key)
 Section "B" (packaged and signed by identity's private key)
 -----------------------------------------------------------
 
-  * Peer Contact's full URI (to know how to locate the peer universally but does not directly reveal any identities). Peer's contact ID is calculated as follows: hex(hash("contact:" + `<public-peer-section-A-JSON-object>`)). When the input `<public-peer-file-section-A-JSON-object>` is used in the hash, the same canonical algorithm method as the signature in section "A". The input into the algorithm is the entire section "A" bundle including the certificate signing the section bundle. Thus the input canonical sequence will always start start with the exact phrase (followed by the remaining information): {"sectionBundle":{"section":{"$id":"A",
+  * Peer contact's full URI (to know how to locate the peer universally but does not directly reveal any identities). Peer's contact ID part of the full peer URI is calculated as follows: hex(hash("contact:" + `<public-peer-section-A-JSON-object>`)), where the hash algorithm used is "SHA256" for the default "http://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5" namespace. When the input `<public-peer-file-section-A-JSON-object>` is used in the hash, the same canonical algorithm method as the signature in section "A". The input into the algorithm is the entire section "A" bundle including the certificate signing the section bundle. Thus the input canonical sequence will always start start with the exact phrase (followed by the remaining information): {"sectionBundle":{"section":{"$id":"A",
   * Find secret passphrase (must be known by peer attempting to initiate a finder connection to another peer).
   * "other" custom data as desired
   * signed by public key in section "A" and referenced by peer URI
@@ -257,8 +257,8 @@ Section "B" (packaged and signed by identity's private key)
 Section "C" (packaged and signed by identity's private key)
 -----------------------------------------------------------
 
-  * Peer Contact's full URI (to know how to locate the peer universally). See Section "B" for calculation.
-  * Any/all asserted public identities
+  * Peer contact's full URI (to know how to locate the peer universally). See Section "B" for calculation.
+  * Any / all asserted public identities
   * "other" custom data as desired
   * signed by public key in section "A" and referenced by peer URI
 
@@ -285,7 +285,7 @@ When verifying Section "A":
 When verifying Section "B" / Section "C":
 
   * the domain used in the peer URI must match the domain used in the signature of the signed salt
-  * the "contact ID" part of the peer URI must match the following calculation: hex(hash("contact:" + `<public-peer-section-A-JSON-object>`))
+  * the "contact ID" part of the peer URI must match the following calculation: hex(hash("contact:" + `<public-peer-section-A-JSON-object>`)), where the hash algorithm used is "SHA256" for the default "http://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5" namespace.
   * the signature must be signed by the public key contained in Section "A"
   * the reference peer URI in the signature must be the same URI as defined within the section
 
@@ -440,50 +440,73 @@ Example Public Peer File
 The Makeup of the Private Peer File
 ===================================
 
-The Private Peer File is never given out to any other peer. However, the peer file can be stored with a trusted service as the contents are encrypted. The contents of the file must be encrypted to prevent unauthorized access to the private key that is the matching pair for the public key in the Public Peer File. This file can be used to prove ownership of the Public Peer File.
+The Private Peer File is never given out to any other peer. However, the peer file can be stored with a trusted service as the contents are encrypted (although a second level of encryption is recommended). The contents of the file must be encrypted to prevent unauthorized access to the private key that is the matching pair for the public key in the Public Peer File. This file can be used to prove ownership of the Public Peer File.
 
-The file does not carry any recommended extension and is managed by the client application that must maintain the security and integrity of the file.
+The file does not carry any recommended extension and is managed by the client application that must maintain the security and integrity of the file. A "private peer file secret passphrase" is used to protect the contents of this public peer file.
 
 The contents of the file are as follows:
+
 
 Section "A"
 -----------
 
-  * Cipher suite to use for all hash computations and encryptions related to contents of the private peer file and this cipher suite must match the public peer file's cipher suite (note: this does not apply to signed JSON segments which have their own method to describe algorithms and key selection)
-  * Peer Contact's full URI (to know how to locate the peer universally).
-  * Salt (base-64 encoded binary salt)
-  * 'Private Peer File secret' proof, hash = hmac(`<private-peer-file-secret>`, "proof:" + `<peer-contact-id>`)
+This section is used to prove association to the public peer file and provide a method to validate the "private peer file secret passphase" before it is used in decryption algorithms.
+
+  * Algorithm to use for all hash computations and encryptions related to contents of the private peer file and this algorithm must match the related public peer file (note: this does not apply to signed JSON signatures which have their own method to describe algorithms and key selection), the default algorithm is http://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5 (see the General Validation / Encryption Rules section).
+  * Peer contact's full URI (see public peer file Section "B" for calculation)
+  * Binary salt, encoded as: base64(`<binary-salt>`)
+  * 'Private Peer File secret passphrase' proof, result = hex(hmac(`<private-peer-file-secret-passphrase>`, "proof:" + `<peer-contact-id>`))
+    * note: `<peer-contact-id>` is only the contact ID part of the full peer URI whose calculation is described in Section "B" of the public peer file
+    * note: the hmac algorithm uses SHA256 rather than SHA1 for the default http://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5
+  * Signed by the private key
+
 
 Section "B" (encrypted using the method described in Section A)
 ---------------------------------------------------------------
 
-  * Encrypted Peer Contact's full URI (to know how to locate the peer universally), key=hmac(`<private-peer-file-secret>`, "contact:" + base64(`<salt>`)), iv=hash("contact:" + base64(`<salt>`))
-  * Encrypted private key - the key is stored in "PrivateKeyInfo" unencrypted RSA encoding using PKCS #8 but then encrypted and base 64 encoded using: key = hmac(`<private-peer-file-secret>`, "privatekey:" + base64(`<salt>`)), iv=hash("privatekey:" + base64(`<salt>`))
-  * Encrypted Public Peer File, key = hmac(`<private-peer-file-secret>`, "peer:" + base64(`<salt>`)), iv=hash("peer:" + base64(`<salt>`))
-  * Encrypted private data, key = hmac(`<private-peer-file-secret>`, "data:" + `<salt>`), iv= hash("data:" + base64(`<salt>`))
+This section contains the keying information needed as part of the private peer file.
 
-The format of the Private Peer File is defined so it can be stored on server (should a client desire to do so) with only clients that have the correct "private peer file secret" being able to request download of the file without the server knowing the value of the data contained within the file.
+  * Encrypted version of peer contact's full URI (to prove association), encrypted version = base64(encrypt(`<key>`, `<peer-uri>`)), where key = hmac(`<private-peer-file-secret-passphrase>`, "contact:" + base64(`<salt>`)), iv=hash("contact:" + base64(`<binary-salt>`))
+  * Encrypted private key - the key is stored in "PrivateKeyInfo" unencrypted RSA encoding using PKCS #8 but then encrypted, encrypted private key = base64(encrypt(`<key>`, `<private-key>`)), where key = hmac(`<private-peer-file-secret-passphrase>`, "privatekey:" + base64(`<binary-salt>`)), iv=hash("privatekey:" + base64(`<binary-salt>`))
+  * Encrypted Public Peer File - the full generated public peer file is encrypted within the private peer file; encrypted public peer file = base64(encrypt(`<key>`, `<public-peer-file>`)), where key = hmac(`<private-peer-file-secret-passphrase>`, "peer:" + base64(`<binary-salt>`)), iv=hash("peer:" + base64(`<binary-salt>`))
+  * Encrypted custom private data - a JSON message of custom data can be encrypted within this section; encrypted custom JSON data =  base64(encrypt(`<key>`, `<custom-JSON-data>`)), where key = hmac(`<private-peer-file-secret-passphrase>`, "data:" + base64(`<binary-salt>`)), iv= hash("data:" + base64(`<binary-salt>`))
+  * Signed by the private key
+
+The format of the Private Peer File is defined so it can be stored on server (should a client desire to do so) with only clients that have the correct "private peer file secret passphrase" being able to request download of the file without the server knowing the value of the data contained within the file, or the actual "private peer file secret passphrase".
 
 The Peer Contact's URI is used to indicate which Public Peer File the Private Peer File is correlated.
 
-The key salts combined with hash input phrases are used to ensure that the "private peer file secret" is not directly used to encrypt more than one piece of data.
+The key salt from Section "A" is combined with the hmac of "private peer file secret passphrase" to ensure that the "private peer file secret passphrase" is not directly used to encrypt more than one piece of data within the same file.
 
-The "private peer file secret" proof is used so a server can verify a client does have the correct information to request download of the Private Peer File. Only a client that knows the "private peer file secret" would be able to generate the correct key proof in a challenge. The contact ID is combined with the secret to add extra complexity into the secret to ensure no two users have the same stored secret resulting hash should the private peer file is published into a database and two users use the same secret value.
+The "private peer file secret passphrase" proof is used so a server can verify a client does have the correct information to request download of the Private Peer File. Only a client that knows the "private peer file secret passphrase" would be able to generate the correct key proof in a derived hash challenge. The contact ID is combined with the secret to add extra complexity into the secret to ensure no two users accidentally using the same "private peer file secret passphrase" would result in the same hash in their private peer file.
 
 The encrypted private key is the private key pair matching the public key in the Public Peer File.
 
 The encrypted Public Peer File is a complete encryption of the Public Peer File (i.e. all sections), thus requiring only one file to store both the public and private key.
 
-The encrypted private data is extension data for use for whatever purposes required by a client.
+The encrypted private data is extension data for use for whatever purposes required by a client and is an encoded form of a JSON package.
+
 
 Security Considerations
 -----------------------
 
-The contact URI must be the computed hash based on Section "A" of the Public Peer File. The salt must be cryptographically random. Both sections of the private peer file must be signed to ensure the contents of the private peer file have not been modified by another entity and must be verified by the client before the private peer file is used.
+The following steps should be used to validate the private peer file:
 
-All data in this file is considered secure thus all data must be encrypted.
+  * The contact ID is taken from the peer URI contained in Section "A" of the private peer file, with the salt to perform the proof required to validate the "'Private Peer File secret passphrase' proof"
+  * The peer URI encrypted in Section "B" is then decrypted and compared against Section "A"'s full peer URI and must match
+  * The public peer file is then decrypted from Section "B" of the private and the peer URI is calculated as described in Section "B" of the public peer file and compared against the peer URI contained in Section "A" of the private peer file (and must match)
+  * The signatures of the public and private peer file must be validated
 
-The "private peer file secret" should be a cryptographically random string that is sufficiently long to protect the sensitive contents it encodes and should not derived from a user's password.
+Once these steps are performed, the private key in the private peer file is considered valid and may be used.
+
+When generating a private peer file, the salt must be cryptographically random. Both sections of the private peer file must be signed to ensure the contents of the private peer file have not been modified by another entity.
+
+All data in this file is considered strictly private; thus all data must be encrypted.
+
+The "private peer file secret passphrase" should be a cryptographically randomly generated string rather than a user input passphrase. The generated passphrase must be sufficiently long to protect the sensitive contents it encodes.
+
+If the private peer file secret passphrase is to be protected by a user's passphrase, the user's passphrase must undergo key stretching.
+
 
 Example Private Peer File
 -------------------------
@@ -527,6 +550,7 @@ Example Private Peer File
         ]
       }
     }
+
 
 Overall Network Architecture
 ============================
@@ -1169,9 +1193,9 @@ The "0" package contains the following:
 
 For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm, the following algorithm input information is used:
 
-  * key - the 32 byte AES key, base64encode(remote_public_key_encrypt(<32-byte-aes-key>))
-  * iv - the 16 byte AES initialization vector, base64encode(remote_public_key_encrypt(<16-byte-aes-iv>))
-  * hmacSecretKey - the initial secret key input string, base64encode(remote_public_key_encrypt(`<secret-key-passphrase>`))
+  * key - the 32 byte AES key, base64(remote_public_key_encrypt(<32-byte-aes-key>))
+  * iv - the 16 byte AES initialization vector, base64(remote_public_key_encrypt(<16-byte-aes-iv>))
+  * hmacSecretKey - the initial secret key input string, base64(remote_public_key_encrypt(`<secret-key-passphrase>`))
 
 When the mandatory key is used, the AES CFB is initialized with these values and will continue to encrypt payloads using this keying until a new "0" package arrives which would reset the algorithms with new keying information for subsequent messages in the message stream. The hmac is calculated using the following algorithm, sha1_hmac(`<hmac-secret-passphase>`, `<encrypted-message>`)). The aes key and secrey key passphrase remains the same until a new "0" package is sent, but the IV is changed for every message sent. The next IV for the mandated algorithm is calculated based upon the hash of the previous IV and previous hmac, next_iv = md5_hash(`<previous_iv>` + ":" + `<previous_hmac>`).
 
@@ -1326,8 +1350,6 @@ Every request must include the federated domain which the request is being proce
 
 Even though all requests / responses are written in human readable form in this document, on-the-wire requests and responses should be written for favor of size efficiency. The recommended method is the Open Peer canonical form using the algorithm for the canonicalization of JSON signatures as specified in this document. This ensures the wire format is optimal on the wire since the canonical form is fairly compact (although if a compression algorithm is applied to the message at a higher layer then the wire savings might become moot).
 
-All base64 encoding / decoding routines must use standard / common encoding scheme, without line breaks and with padding used for unused bytes.
-
 The client may receive an error complaining that a request has expired if the client's clock was set wrong (401). Hence in every result, the epoch of the server will be sent for the client to detect potential clock errors. To reduce issues, the client should use a secure NTP service to set its own clock at some point before initiating contact to a server or another peer.
 
 The client is responsible for disconnecting at all times from the server. In the case of peer to peer, the initiating peer is considered the client role and the receiving peer plays the server role.
@@ -1400,13 +1422,13 @@ Open Peer uses the following definitions for use with the "http://meta.openpeer.
   * encrypt(hmac(...)) - Same algorithm as encrypt(...) but the hash uses hmac with "SHA256" instead of "SHA1".
   * decrypt(hash(...)) - Same algorithm as encrypt(...) but the hash uses "SHA256" instead of "SHA1".
   * decrypt(hmac(...)) - Same algorithm as encrypt(...) but the hash uses hmac with "SHA256" instead of "SHA1".
-  * base64(...) - Coverts from raw binary input to base 64 encoding. This is the default encoding for binary values of variable or long length.
+  * base64(...) - Coverts from raw binary input to base 64 encoding. This is the default encoding for binary values of variable or long length. All base64 encoding / decoding routines must use standard RFC4648 encoding, without line separators, and with "=" byte padding mandated strictly. This ensures a canonical form of base 64 is used in input hash calculations.
   * decode64(...) - Converts from a base 64 encoded string to raw binary
   * hex(...) - Converts from binary to a hex encoded string [always lowercase hex]
   * bin(...) - Converts from a hex encoded string to binary
   * sign(key, value) - Using the private key specified, sign the value, returns a binary result. Care must be taken when using sign to never sign directly information given from an untrusted party. If untrusted data must be signed, the signature must always use a computed hashed version of the untrusted data.
   * verify(key, value) - Using the public key specified, verify the binary value which was the result of a previous signature
-  * key_stretch(...) - takes a user inputted string and applies a repetitive hash in a loop to strengthen the key not by adding cryptographic bits of security but to ensure that brute force attacks on the value take a minimum amount of CPU time to compute the attack value. User input values should always be combined with unique salt to ensure the same two inputted values do not result in the same result (to prevent hash table lookup results on user values).
+  * key_stretch(...) - takes a user inputted string and applies a repetitive hash in a loop to strengthen the key not by adding cryptographic bits of security but to ensure that brute force attacks on the value take a minimum amount of CPU time to compute the attack value. User input values should always be combined with unique salt to ensure the same two inputted values do not result in the same result (to prevent hash table lookup results on user values). For more on key stretching, see http://en.wikipedia.org/wiki/Key_stretching
 
 
 JSON Signatures
