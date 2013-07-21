@@ -3653,7 +3653,7 @@ This request proves that an identity login is valid and can be used to validate 
     * Lockbox account ID - the assigned account ID for the lockbox
     * Lockbox domain - this is the domain for the lockbox to use
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":identity-lookup-update"))
+    * Proof of 'lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":identity-lookup-update"))
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
   * identity bundle information
     * Identity access token - as returned from the "identity access complete" request
@@ -3784,8 +3784,8 @@ This request retrieves gets a list of peer contact services available to the pee
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":peer-services-get")
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
+    * Proof of 'lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":peer-services-get"))
+    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
 
 ### Returns
 
@@ -4433,18 +4433,18 @@ Obtain a session token that represents the peer on the finder server so continuo
 
   * Relay information (for relay connections):
     * access token - the access token needed for creating remote relay credentials that can be given to third parties to connect and relay information to this logged in application
-    * access secret - the secret part of the credentials encrypted using the public key of peer file specified in the session create request.
+    * access secret encrypted - the secret passphrase used for giving out relay credentials to 3rd parties, encrypted access secret = base64(rsa_encrypt(`<public-key-from-request-peer-file>`, `<access-secret>`))
   * Expiry epoch (when next a keep alive must be sent by)
   * Server agent
-  * Signed by finder's certificate
+  * Signed by finder's certificate - uses finder's public key fingerprint as signature key reference
 
 ### Security Considerations
 
 The server must validate that the token bundle has not expired.
 
-The server must verify that the request has been signed by the peer's private peer file. The contact id specified in the bundle must match the calculated contact ID based on the included public peer file Section "A". The one time key is used to prevent replay attacks to the server by ensuring the registration can only be used once on the server.
+The server must verify that the request has been signed by the peer's private peer file. The contact id specified in the bundle must match the calculated contact ID based on the included public peer file Section "A". The client nonce is used to prevent replay attacks to the server by ensuring the registration can only be used once on the server. The server should remember the client nonce has been seen for a reasonable period of time or at maximum until the request expiry time, and reject all requests with the same client nonce value. The finder ID specified in the bundle must match the finder ID of the finder.
 
-If a Section-B of the public peer file is not present, the peer does not wish to be found in the network.
+If a Section-B of the public peer file is not present, the peer does not wish to be found in the network but may issue find requests.
 
 ### Example
 
@@ -4461,7 +4461,7 @@ If a Section-B of the public peer file is not present, the peer does not wish to
             "$id": "6fc5c4ea068698ab31b6b6f75666808f",
     
             "finder": { "$id": "a7f0c5df6d118ee2a16309bc8110bce009f7e318" },
-            "clientNonce": "09b11ed79d531a2ccd2756a2104abbbf77da10d6",
+            "nonce": "09b11ed79d531a2ccd2756a2104abbbf77da10d6",
             "expires": 4848343494,
     
             "location": {
@@ -4649,8 +4649,9 @@ Map a channel in the multiplex stream to a remote party. This request must be is
 ### Inputs
 
    * channel number - channel number to allocate
-   * access token - token as returned during peer finder session create (to connect to this session)
-   * access secret proof - proof = hash("proof:" + `<client-nonce>` + ":" + `<channel-number>` + ":" hmac(`<access-secret>`, "finder-relay-access-validate:" + `<context>` + ":" + `<expires>` + ":" + `<access-token>` + ":channel-map"))
+   * nonce - a client defined one time use value
+   * relay access token - token as returned during peer finder session create (to connect to this session)
+   * relay access secret proof - proof = hex(hash("proof:" + `<client-nonce>` + ":" + `<channel-number>` + ":" hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<context>` + ":" + `<expires>` + ":" + `<relay-access-token>` + ":channel-map"))))
    * access secret proof expiry - expiry time of the access secret proof
 
 ### Outputs
@@ -4670,10 +4671,12 @@ Map a channel in the multiplex stream to a remote party. This request must be is
     
         "channel": 5,
         "nonce": "6771816e06b7b6f5d24f0d65df018dd256a31027",
-        "context": "3b5db5880803d91f2ba9ca522c558fd1c545c28e",
-        "accessToken": "9d934822ccca53ac6e16e279830f4ffe3cfe1d0e",
-        "accessSecretProof": "SSByZWFsbHk...gaGF0ZSBTRFA=",
-        "accessSecretProofExpires": 3884383
+        "relay": {
+          "context": "3b5db5880803d91f2ba9ca522c558fd1c545c28e",
+          "accessToken": "9d934822ccca53ac6e16e279830f4ffe3cfe1d0e",
+          "accessSecretProof": "SSByZWFsbHk...gaGF0ZSBTRFA=",
+          "accessSecretProofExpires": 3884383
+        }
       }
     }
 
@@ -4707,10 +4710,10 @@ This is the request to find a peer that includes the proof of permission to cont
   * Cipher suite to use in the proof and for the encryption
   * Contact id of contact to be found
   * Client nonce - cryptographically random onetime use string
-  * Find secret proof - i.e. hmac(`<find-secret [from public-peer-file-section-B]>`, "proof:" + `<client-nonce>` + ":" + expires))
+  * Find secret proof - i.e. hex(hmac(`<find-secret-from-remote-public-peer-file-section-B>`, "proof:" + `<client-nonce>` + ":" + expires))
   * Find proof expires
-  * Context - this identifier is combined with the remote peer's context to form the "requester:reply" context ID for the MLS layer as well as the userFrag for ICE negotiation.
-  * Peer secret (encrypted) - peer secret is a random passphrase which is then encrypted using the public key of the peer receiving the find request - this key is password used for ICE negotiation
+  * Context - the is the requester's part of the context ID. This identifier is combined with the remote peer's context to form the "requester:reply" context ID for the MLS layer as well as the userFrag for ICE negotiation.
+  * Peer secret (encrypted) - peer secret is a random passphrase which is then encrypted using the public key of the peer receiving the find request - this key is password used for ICE negotiation, peer secret encrypted = base64(rsa_encrypt(`<remote-public-peer-file-public-key>`, `<peer-secret>`))
   * Location details
     * Location ID of requesting location
     * Contact ID of requesting location
@@ -4724,16 +4727,16 @@ This is the request to find a peer that includes the proof of permission to cont
       * port
       * priority
       * related IP (optional, mandatory if type is "srflx" or "prflx" or "relay")
-      * related port (optional)
+      * related port (optional, mandatory if type is "srflx" or "prflx" or "relay")
     * if class is "finder-relay":
       * transport - either "multiplexed-json-mls/tcp" or "multiplexed-json-mls/secure-web-socket"
       * type - "relay"
       * host - host where to connect to the finder relay
       * port - port to connect to the finder relay
       * access token - token as returned during peer finder session create
-      * access secret proof (encrypted) - encrypted version of access secret proof, proof = hmac(`<access-secret>`, "finder-relay-access-validate:" + `<context>` + ":" + `<expires>` + ":" + `<access-token>` + ":channel-map"), encrypted using key = hmac(`<peer-secret>`, "proof:" + `<access-token>`), iv=hash(`<access-token>`)
+      * access secret proof (encrypted) - encrypted version of access secret proof, proof = base64(encrypt(`<key>`, hex(hmac(`<access-secret>`, "finder-relay-access-validate:" + `<context>` + ":" + `<expires>` + ":" + `<access-token>` + ":channel-map")))), where key = hmac(`<peer-secret>`, "proof:" + `<access-token>`), iv = hash(`<access-token>`)
       * access secret proof expiry - expiry time of the access secret proof
-  * Signed by peer making request
+  * Signed by requesting peer
 
 ### Security Considerations
 
@@ -4759,7 +4762,7 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
           "findProof": {
             "$id": "d53255d06a17778b88501f570301e7621c5a7bc4",
     
-            "clientNonce": "7a95ff1f51923ae6e18cdb07aee14f9136afcb9c",
+            "nonce": "7a95ff1f51923ae6e18cdb07aee14f9136afcb9c",
     
             "find": "peer://domain.com/900c9cb1aeb816da4bdf58a972693fce20e",
             "findSecretProof": "85d2f8f2b20e55de0f9642d3f14483567c1971d3",
@@ -4849,6 +4852,7 @@ This is the result to the request and it returns a list of locations that the pe
 
   * List of locations being searched
   * Additional information about the locations (as applicable)
+  * Signed by finder private key and signature key referenced by fingerprint of finder's public key
 
 ### Security Considerations
 
