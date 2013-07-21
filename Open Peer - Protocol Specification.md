@@ -191,17 +191,23 @@ The "identity:" URI scheme
 Syntax
 -------
 
-`identity:[type:][//<domain>/]<identity-string>`
+`identity:[<type>:][//<domain>/]<identity-string>`
 
 If a `//` is not present after the `identity:` scheme, then the identity is assumed to be a specialized registered type that must be resolved in a specialized manner. If the `//` is present then the identity is resolved by the specified domain.
 
 Where:
 
   * `<domain>` - the domain service where the identity is resolved, e.g. "foo.com" or "bar.com".
-
+  * `<type>` - the legacy type of the identity (will not include a domain in this form), e.g. "phone", "email"
   * `<identity-string>` - the string that represents the persona of the identity but the interpretation is specific to a particular domain.
 
 The URL characters '?' ';' '#' are reserved characters in the URI scheme and should never be used within an identity.
+
+Identities must always be written in a normalized form. Domains must always be written in lowercase and identity strings are case sensitive. For example, if the identity string "Alice" is equivalent to "alice", the identity provider must always output only one form (and the recommended is all lowercase). Without that normalization "Alice" would not be considered the same identity as "alice".
+
+When using legacy identities, the identity is globally resolvable by any identity provider that shares a common shared global database of legacy identity types. Once a legacy identity is resolve, the domain responsible for providing service to the legacy domain can be known. Legacy identities are used for convenience to make legacy identity types that might be found in common address books into Open Peer contacts.
+
+All legacy identity types must be written in a normalized fashion. For example, a phone number would contain the country code followed by all the dialing digits, without any unneeded dialing prefixes, spacers, or separators; or as another example, an email would be converted to all lowercase to ensure "foo@bar.com" maps to the same identity as "FOO@BAR.COM".
 
 Examples
 ---------
