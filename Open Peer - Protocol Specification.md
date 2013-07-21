@@ -1690,7 +1690,7 @@ The request may optionally include an expiry when the request can be tried again
 Bootstrapper Service Requests
 =============================
 
-The communication to the Bootstrapper is done over HTTPS exclusively whose HTTPS server certificate was signed by one of the trusted root Internet certification authorities. For security purposes, the Bootstrapper is the introducer to all other services within the network including appropriate security credentials to connect to each network component.
+The communication to the Bootstrapper is done over HTTPS POST requests exclusively whose HTTPS server certificate was signed by one of the trusted root Internet certification authorities. For security purposes, the Bootstrapper is the introducer to all other services within the network including appropriate security credentials to connect to each network component.
 
 Locating the Bootstrapper
 ------------------------
@@ -1705,10 +1705,11 @@ peer://domain.com/e433a6f9793567217787e33950211453582cadff
 And an identity is written in the following form:
 identity://domain.com/alice
 
-In both cases, an HTTPS request is this performed on "domain.com", using the following URL:
+In both cases, an HTTPS POST request is this performed on "domain.com", using the following URL:
 https://domain.com/.well-known/openpeer-services-get
 
 Clients must confirm the HTTPS certificates comes from the same domain as the original domain request and reject any records that do not.
+
 
 Services Get Request
 --------------------
@@ -1735,14 +1736,13 @@ None.
 
 ### Security Considerations
 
-
 The client must ensure the server has an HTTPS certificate that was issued by a root certificate authority and that the certificate offered by the server is still within the X.509 validity date. The certificate authority for some Bootstrapped Networks may be pre-built into a client application and verified as accurate and can respond to mismatch as deemed appropriate by the client. The client may issue more than one certificate per service should an overlap window of X.509 certificate validity be required.  
 
 The server does not need to know or verify a client's intentions.  
 
 A 302-redirect error response can be returned by this response to allow the request to be redirected to another server. This allows this service to be easily hosted as needed.  
 
-The request nor the response should have an ID associated with the request/response and should not include an epoch. This is the only request in the system that has this exception. This allows for a hard- coded file to be uploaded on a server as the response to any request on the system to allow for easy service delegation without installing any server side scripting.  
+The request nor the response should have an ID associated with the request / response and does not need to include an time-stamp. This is the only request in the system that has this exception. This allows for a hard-coded file to be uploaded on a server as the response to any request on the system to allow for easy service delegation without installing any server side scripting.
 
 ### Example
 
@@ -1987,6 +1987,7 @@ Returns a list of Finders containing the following information for each Finder:
   * Geographic region ID - (optional) each server belongs to a logical geographic region (clients can organize servers into geographic regions for fail over reasons)
   * Created - the epoch when the finder registered itself to the Bootstrapped Finder service. A finder with the same ID but a newer created date should replace an existing finder with the same ID.
   * Expires - the epoch when this finder information should be discarded and a new finder fetched to replace the existing one. There is no guarantee the finder will remain online for this period of time as this is a recommendation only. Should initiated communication to a finder server fail, the finder information might be considered no longer valid as the finder server might be gone.
+  * Signed by the finder service
 
 ### Security Considerations
 
@@ -2115,6 +2116,7 @@ Returns a list of service certificates containing the following information for 
   * Service name
   * Expiry
   * X.509 public key certificate
+  * Signed by the Boostrapper service
 
 ### Security Considerations
 
@@ -2191,12 +2193,17 @@ The client must ensure the server has an HTTPS certificate that was issued by a 
 Namespace Grant Service Requests
 ================================
 
+The Namespace Grant Service is used to verify that a user has knowingly granted a 3rd party user agent the right to access various network services. A web page from a trusted source is used to verify a user's intention.
+
+NOTE: Services that normally issue user decided "namespace grant challenges" can opt to not issue challenges for trusted applications.
+
+
 Namespace Grant Inner Frame
 ---------------------------
 
 ### Purpose
 
-This inner frame is loaded from the outer application frame. The inner frame holds the namespace grant page for the namespace grant service. The inner/outer frames send information to/from each other via JavaScript posted messages. The inner page can display the namespace grant page, allowing the user to grant permission to the application requesting access to the namespaces. The outer and inner page are rendered inside a browser window and contains sufficient display size to allow the user to see what information is being granted.
+This inner frame is loaded from the outer application frame. The inner frame holds the namespace grant page for the namespace grant service. The inner / outer frames send information to / from each other via JavaScript posted messages. The inner page can display the namespace grant page from the trusted source, allowing the user to grant permission to the application requesting access to the namespaces. The outer and inner page are rendered inside a browser window and contains sufficient display size to allow the user to see what information is being granted.
 
 ### Inputs
 
@@ -2216,7 +2223,7 @@ Namespace Grant Window Request
 
 ### Purpose
 
-This request notification is sent from the inner frame to the outer window as a posted message. This allows the inner window to notify the outer window it's ready to start processing requests.
+This request notification is sent from the inner frame to the outer window as a posted message. This allows the inner window to notify the outer window it's ready to start processing requests, or when browser visibility is required.
 
 ### Inputs
 
@@ -2259,25 +2266,26 @@ Success or failure.
       }
     }
 
+
 Namespace Grant Start Notification
 ----------------------------------
 
 ### Purpose
 
-Once the browser window receives notification that it is ready, this request is sent to the inner frame by the outer frame to give the inner frame the needed information to start the grant process.
+Once the browser window receives notification that it is ready, this request is sent to the inner frame by the outer frame to give the inner frame the needed challenge information to start the grant process.
 
 ### Inputs
 
   * Agent
-    * Product - the user agent identification for the product, typically "name/version (os/system)" information)
+    * User agent - the user agent identification for the product, typically "name/version (os/system)"
     * Name - a human readable friendly name for the product
     * Image - a human visual image for the brand that must be square in shape.
     * Agent URL - a web page that can be rendered in a browser to obtain more information about the agent
   * List of grant service challenges containing:
     * ID - a challenge ID that the server generated which the client application will have to authorize
     * Name - a human readable name for the service requesting the challenge
-    * Image - a brandable image representing the service requesting the challenge
-    * URL - a browser renderable page the user can go to obtain more information about this service requesting the challenge
+    * Image - a branded image representing the service requesting the challenge
+    * URL - a browser URL the user can go to obtain more information about this service requesting the challenge
     * List of namespace URLs granted to the grant challenge
   * Browser information
     * Visibility - the browser window is being shown in what state
@@ -2285,8 +2293,8 @@ Once the browser window receives notification that it is ready, this request is 
       * "hidden" - the browser window is hidden and cannot be shown
       * "visible-on-demand" - the browser window is hidden but can be rendered visible via a request posted to the outer frame (note: if rendered inside an application, the application can show the window in a hidden state to start and the browser window can become visible only when the user needs to enter some credentials)
     * Popup
-      * "allow"- popups windows/new tabs are allowed to be opened
-      * "deny" - popup windows/new tables are not allowed to be opened
+      * "allow"- popups windows / new tabs are allowed to be opened
+      * "deny" - popup windows / new tables are not allowed to be opened
     * Outer frame reload URL - a URL to reload the outer frame should the grant process have to replace the outer frame's window with its own URL. Once the outer frame is reloaded the inner frame page is reloaded as well allowing the inner frame to send the completion request.
 
 ### Returns
@@ -2373,8 +2381,8 @@ This notification is sent from the inner browser window to the outer window as a
   * List of grant service challenge bundle proofs containing:
     * ID - a challenge ID that the server generated which the client application will have to authorize
     * Name - a human readable name for the service requesting the challenge
-    * Image - a brandable image representing the service requesting the challenge
-    * URL - a browser renderable page the user can go to obtain more information about this service requesting the challenge
+    * Image - a branded image representing the service requesting the challenge
+    * URL - a browser URL where the user can go to obtain more information about this service requesting the challenge
     * List of namespace URLs granted to the grant challenge
     * Signed by namespace grant service
 
@@ -2477,23 +2485,23 @@ This request obtains access to a lockbox. Access is granted by way of login proo
 
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Identity information (optional, if logging in using an identity)
-    * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":lockbox-access")
+    * Identity access token - as returned from the "Identity Access Complete" notification
+    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":lockbox-access"))
     * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
   * Lockbox information
     * Lockbox domain - the domain hosting the lockbox
     * Lockbox account ID - (optional, if known) the assigned account ID for the lockbox
-    * Lockbox key "hash" - (optional) hash of the lockbox key. If this hash is specified then this hash can be used to login to the lockbox account (by specifying the lockbox account ID).
-    * Lockbox reset flag - (optional) if specified and true, a new lockbox must be created for the identity specified (and an identity must be specified for access) and this identity must become unassociated with any other lockboxes. If this identity was previously the only associated identity with a previous lockbox then the previous lockbox can be deleted entirely.
+    * Lockbox key "hash" - (optional) hash of the lockbox key, hex(hash(`lockbox-key`)). If this hash specified matches the hash in the database associated with the account ID then this hash can be used to login to the lockbox account (by specifying the lockbox account ID). If validated identity information is present and the hash value does not match the has value in the database then the "lockbox reset flag" must be treated as if it was set to true, even if it was not.
+    * Lockbox reset flag - (optional) if specified and true, a new lockbox must be created for the identity specified (and an identity must be specified must be granted access) and this identity must become unassociated with any other existing lockbox accounts. If this identity was previously the only associated identity with a previous lockbox account then the previous lockbox account can be deleted entirely.
   * Agent
-    * Product - the user agent identification for the product, typically "name/version (os/system)" information)
+    * User agent - the user agent identification for the product, typically "name/version (os/system)"
     * Name - a human readable friendly name for the product
     * Image - a human visual image for the brand that must be square in shape.
     * Agent URL - a web page that can be rendered in a browser to obtain more information about the agent
   * Grant
-    * ID - a client generated cryptographic unique ID representing the agent's permission to access the lockbox. Once this ID is generated by a client, it should remain stable in subsequent accesses (or a new permission grant will be required). This ID should remain secret to the client application.
+    * ID - a client generated cryptographic unique ID representing the agent's permission to access the lockbox. Once this ID is generated by a client, it should remain stable in subsequent accesses (or a new permission grant will be required). This ID should remain secret to the client application and only given to trusted services.
   * List of namespace URLs where access is requested
     * namespace URL
 
@@ -2502,26 +2510,26 @@ This request obtains access to a lockbox. Access is granted by way of login proo
   * Lockbox information
     * Lockbox account ID - the assigned account ID for the lockbox
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Lockbox access secret - a secret that can be used in combination to the "lockbox access token" to provide proof of previous successful login
-    * Lockbox access expiry - the window in which the access key is valid
+    * Lockbox access secret - a secret passphrase that can be used in combination to the "lockbox access token" to provide proof of previous successful login
+    * Lockbox access expiry - the window in which the access key is valid (and should be sufficiently in the distant future for use as a long term key)
     * Lockbox domain - the domain hosting the lockbox
-    * Lockbox key "hash" - hash of the lockbox key as previously passed in.
+    * Lockbox key "hash" - hash of the lockbox key as previously passed in and associated to the lockbox account.
   * Grant service challenge (optional, if challenge is required)
     * ID - a challenge ID that the server generated which the client application will have to authorize
     * Name - a human readable name for the service requesting the challenge
-    * Image - a brandable image representing the service requesting the challenge
-    * URL - a browser renderable page the user can go to obtain more information about this service requesting the challenge
+    * Image - a branded image representing the service requesting the challenge
+    * URL - a browser URL where the user can go to obtain more information about this service requesting the challenge
     * Domains - a list of domains the service will accept trusted signatures as proof
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored, access was requested and access was previously granted
-    * Updated - timestamp (or version number) of when entries in the namespace were last updated
+    * Updated - time-stamp (or version number) of when entries in the namespace were last updated
   * List of identities attached to the lockbox
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
 
 ### Security Considerations
 
-Access to the lockbox does not grant access to the contents of the lockbox. The lockbox key must be obtained through an alternative method. Upon seeing namespaces used in conjunction with a grant ID where the namespace has not previously been granted, the lockbox will issue a grant service challenge to verify the grant has access to all those namespaces.
+Access to the lockbox does not grant access to the contents of the lockbox. The lockbox key must be obtained through an alternative method. Upon the server seeing namespaces used in conjunction with a grant ID where the namespace has not previously been granted, the lockbox will issue a "grant service challenge" to verify the user wishes to grant access to all those namespaces.
 
 The server will validate the identity login via the identity service to access the account or validate the client has the correct lockbox key hash to access the account. An identity that has a different provider is considered a different identity. Thus an identity is deemed unique by its identity and its identity provider combined.
 
@@ -2647,8 +2655,8 @@ This request proves that a lockbox access is valid and can be used to validate a
   * Lockbox information
     * Lockbox account ID - (optional) the assigned account ID for the lockbox, if specified the access token must validate the account ID as valid
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":" + `<purpose>`)
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret Identity information
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":" + `<purpose>`))
+    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
 
 ### Returns
 
@@ -2700,8 +2708,8 @@ This request proves that the grant ID challenge is proven valid by way of the na
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-namespace-grant-challenge-validate")
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret Identity information
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-namespace-grant-challenge-validate"))
+    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
   * Grant service challenge as issued by the lockbox service bundled with signature as returned from the namespace grant service
 
 ### Returns
@@ -2785,13 +2793,13 @@ This request updates the identities that are allowed to access the lockbox accou
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-identities-update")
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-identities-update"))
+    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
   * List of identities information
-    * Disposition - "update" is used to add/update an identity and "remove" removes access to an identity
+    * Disposition - "update" is used to add / update an identity and "remove" removes access to an identity
     * Identity access token - (optional, required if "update" is used), as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - (optional, required if "update" is used), proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":lockbox-access-update")
-    * Expiry of the proof for the 'identity access secret' - (optional, required if "update" is used) window in which access secret proof is considered valid
+    * Proof of 'identity access secret' - (optional, required if "update" is used), proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":lockbox-access-update"))
+    * Expiry of the proof for the 'identity access secret' - (optional, required if "update" is used) window in which access secret proof short term credentials are considered valid
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
 
@@ -2881,8 +2889,8 @@ This request retrieves data contained in the lockbox.
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-content-get")
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-content-get"))
+    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored
 
@@ -2890,8 +2898,8 @@ This request retrieves data contained in the lockbox.
 
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored
-    * Updated - timestamp (or version number) of when entries in the namespace were last updated
-    * List of values, each value is base 64 encode with the value encrypted with: key = hmac(`<lockbox-key>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv=hash(`<permission-url>` + ":" + `<value-name>`)
+    * Updated - time-stamp (or version number) of when entries in the namespace were last updated
+    * List of values, each value encrypted with: encrypted value = `<salt-string>` + ":" + base64(key, value), where key = hmac(`<lockbox-key>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv = hash(`<salt-string>`)
 
 ### Security Considerations
 
@@ -2942,14 +2950,14 @@ No value names within the same namespace URL should be identical.
             {
               "$id": "https://domain.com/pemissionname",
               "$updated": 5848843,
-              "value1": "ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
-              "value2": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
+              "value1": "4f3f25da69fab2abb5c839158cc54e5a1320fac6:ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
+              "value2": "7779796a91b8a37d922a0338b0f71fcc672379d1:Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
             },
             {
               "$id": "https://other.com/pemissionname",
               "$updated": 5848845,
-              "what1": "ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
-              "what2": "Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
+              "what1": "0ff33b2aa4b2da358cd7c04b420c10dc8c6e0521:ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
+              "what2": "f19c58e42a6a6f62164de7bc3352da9fbacf117a:Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
             }
           ]
         }
@@ -2970,17 +2978,17 @@ This request retrieves data contained in the lockbox.
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-content-set")
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof is considered valid
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-content-set"))
+    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored
-    * List of values, each value is base 64 encode with the value encrypted with: key = hmac(`<lockbox-key>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv=hash(`<permission-url>` + ":" + `<value-name>`), or a value of "-" to remove a value. The values are merged together with existing values or the values are removed if they contain a value of "-".
+    * List of values, each value encrypted with: encrypted value = `<salt-string>` + ":" + base64(key, value), where key = hmac(`<lockbox-key>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv = hash(`<salt-string>`), or a value of "-" to remove a value. The values are merged together with existing values or the values are removed if they contain a value of "-".
 
 ### Returns
 
 ### Security Considerations
 
-No value names within the same permission URL should be identical.
+No value names within the same permission URL should be identical. The salt string must be cryptographically randomly generated, and with sufficient length for use within an encryption IV.
 
 ### Example
 
@@ -3003,14 +3011,14 @@ No value names within the same permission URL should be identical.
           "namespace": [
             {
               "$id": "https://domain.com/pemissionname",
-              "value1": "ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
+              "value1": "4465e9c44b4bcdb9925c57365739d387899e2b91:ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
               "value2": "-",
-              "value3": "Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
+              "value3": "a49d7902da1690b1e16588969cf3beab77dae853:Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
             },
             {
               "$id": "https://other.com/pemissionname",
-              "what1": "ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
-              "what2": "Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
+              "what1": "9d47f79a64157a9adc2c3cc6648e5dfe38b97805:ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
+              "what2": "5b8e96e6083ba1c9d156e3af90e7aeeab8a55378:Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
             }
           ]
         }
@@ -3028,6 +3036,7 @@ No value names within the same permission URL should be identical.
         "$timestamp": 439439493
       }
     }
+
 
 Identity Lookup Service Requests
 ================================
@@ -3145,12 +3154,12 @@ List of resulting identities that resolve in the order requested as follows:
   * Provider - service responsible for this identity
   * Stable ID - a stable ID representing the user regardless of which identity is being used or the current peer contact ID
   * Public peer file
-  * TTL expiry timestamp - when must client do a recheck on the identity as the associated information might have changed
-  * Priority / weight - SRV like priority and weighting system to gauge which identity discovered to be associated to the same peer contact have highest priority
-  * Last update timestamp - when the information associated to the identity was last updated
+  * TTL expiry time-stamp - when must client do a recheck on the identity as the associated information might have changed
+  * Priority / weight - "SRV-like" priority and weighting system to gage which identity discovered to be associated to the same peer contact have highest priority
+  * Last update time-stamp - when the information associated to the identity was last updated
   * Identity display name - (optional), the display name to use with the identity
-  * Identity rendered public profile URL - (optional), a webpage that can be rendered by the browser to display profile information about this identity
-  * Programmatic public profile URL - (optional), a machine readable vcard like webpage that can be used to extract out common profile information
+  * Identity rendered public profile URL - (optional), a web-page that can be rendered by the browser to display profile information about this identity
+  * Programmatic public profile URL - (optional), a machine readable v-card like web-content-page that can be used to extract out common profile information
   * Public Feed URL - (optional), an RSS style feed representing the public activity for the user
   * Optional list of avatars containing:
     * Avatar name - (optional), name representing subject name of avatar (note: avatars with the same name are considered identical and thus are used to distinguish between varying sizes for the same avatar)
@@ -3299,12 +3308,12 @@ List of resulting identities that resolve in the order requested as follows:
 Identity Service Requests
 =========================
 
-Identity Access Inner Frame (webpage)
--------------------------------------
+Identity Access Inner Frame (web-page)
+--------------------------------------
 
 ### Purpose
 
-This inner frame is loaded from the outer application frame. The inner frame holds the login page for the identity. The inner/outer frames send information to/from each other via JavaScript posted messages. The inner page can display the identity provider's login page allowing the user to enter their identity credentials. The outer and inner page are rendered inside a browser window and contains sufficient display size to allow an identity provider to enter their credential information although the web view might start hidden to allow for auto-relogin (in which case there will be no rendered page for entering credential information).
+This inner frame is loaded from the outer application frame. The inner frame holds the login page for the identity. The inner / outer frames send information to / from each other via JavaScript posted messages. The inner page can display the identity provider's login page allowing the user to enter their identity credentials. The outer and inner page are rendered inside a browser window and contains sufficient display size to allow an identity provider to enter their credential information although the web view might start hidden to allow for auto-relogin (in which case there will be no rendered page for entering credential information).
 
 ### Inputs
 
@@ -3324,7 +3333,7 @@ Identity Access Window Request
 
 ### Purpose
 
-This request notification is sent from the inner frame to the outer frame as a posted message. This allows the inner window to notify the outer browser window that visibility is needed and/or if it's ready to start processing requests. Upon loading the inner frame must send to the outer frame that it is ready to start processing messaging.
+This request notification is sent from the inner frame to the outer frame as a posted message. This allows the inner window to notify the outer browser window that visibility is needed and / or if it's ready to start processing requests. Upon loading the inner frame must send to the outer frame that it is ready to start processing messaging.
 
 ### Inputs
 
@@ -3403,7 +3412,7 @@ None.
 
 If the full URI of the identity is specified, the client should attempt to relogin automatically to the identity (if possible).
 
-The identity relogin key is specific to the provider. This key must be only stored in an encrypted fashion if it is stored somewhere (e.g. inside the lockbox). This key is optional and not required to be supported but should be used to fascillitate the easy relogin to the identity service on other devices. This key should have a long lifetime but the lifetime is not known by the client application as a rechallenge can be issued by the identity service at any time without warning.
+The identity relogin key is specific to the provider. This key must be only stored in an encrypted fashion if it is stored somewhere (e.g. inside the lockbox). This key is optional and not required to be supported but should be used to facilitate the easy relogin to the identity service on other devices. This key should have a long lifetime but the lifetime is not known by the client application as a re-challenge can be issued by the identity service at any time without warning.
 
 If the outer fame is being reloaded after haven been replaced, this notification should not be sent again.
 
@@ -3453,8 +3462,8 @@ This notification is sent from the inner browser window to the outer window as a
     * Identity URI - the full identity URI of the logged in user
     * Identity provider - identity provider providing identity service
     * Identity access token - a verifiable token that is linked to the logged-in identity
-    * Identity access secret - a secret that can be used in combination to the "identity access token" to provide proof of previous successful login
-    * Identity access expiry - the window in which the access key is valid
+    * Identity access secret - a secret passphrase that can be used in combination to the "identity access token" to provide proof of previous successful login
+    * Identity access expiry - the window with sufficient long into-the-future time frame in which the access key long term credentials are valid
   * Lock box information (optional, if known)
       * Lockbox domain - if lockbox domain is known in advance, this is the domain for the lockbox to use
       * Lockbox key - this is client side base-64 encoded lockbox key.
@@ -3464,15 +3473,15 @@ This notification is sent from the inner browser window to the outer window as a
 
 ### Security Considerations
 
-The lockbox key should be decrypted locally in the JavaScript using something unavailable in the server, for example the user's password. Other information should be combined to create the encryption/decryption key to ensure two unique users with the same password do not share the same encryption key.
+The lockbox key should be decrypted locally in the JavaScript using something unavailable in the server, for example the user's password. Other information should be combined to create the encryption / decryption key to ensure two unique users with the same password do not share the same encryption key.
 
 An example formula might look like:
 
-lockbox-key = decrypt(`<lockbox-key-encrypted>`, iv), where key= hmac(key_strectch(`<user-password>`), `<user-id>`), iv=hash(`<user-salt>`)
+lockbox-key = decrypt(key, `<lockbox-key-encrypted>`), where key = hmac(key_strectch(`<user-password>`), `<user-id>`), iv = hash(`<user-salt>`)
 
 Key stretching should be employed whenever using a weaker user generated non-cryptographically strong password. See: http://en.wikipedia.org/wiki/Key_stretching
 
-By using information not stored on a server, this ensures that should the server be hacked that the servers do not contain the correct information to decrypt the lockbox key. The downside is that should the password change the encryption key will need to be decrypted with the existing user password then re-encrypted using the new password. Further, if the old password is lost then the lockbox key is also lost.
+By using information not stored on a server, this ensures that should the server be hacked that the servers do not contain the correct information to decrypt the lockbox key. The downside is that should the password change the encryption key will need to be decrypted with the existing user password then re-encrypted using the new password. Further, if the old password is lost then the lockbox key is also lost (and thus all associated content can no longer be decrypted).
 
 ### Example
 
