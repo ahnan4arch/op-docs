@@ -1297,21 +1297,7 @@ All request types and results use a simplified JSON format. The messages are sen
 
 Every request must include the federated domain which the request is being processed and the application ID associated with the request (the result/reply should use the application ID of the original request). Every request type must include an ID and a handler service and method being invoked (to assist with message handling, processing and routing). The ID must be cryptographically strong and random thus checks to see which data channel the response comes on is not required. Every result message must mirror the request type's ID and include a timestamp to assist with detecting network time problems (whereas the timestamp is optional on request types).
 
-Even though all requests / responses are written in human readable form in this document, all requests / responses are sent on the wire in their Open Peer canonical form using the algorithm for the canonicalization of JSON signatures as specified in this document. This allows any clients or servers receive JSON requests that have non-compliant JSON parsers/generators to be able to easily validate signatures even if they cannot convert from raw JSON to canonical JSON easily. Further, this ensures the wire format is optimal on the wire since the canonical form is fairly compact (although if compression is applied in a higher layer then the wire savings might become moot).
-
-Open Peer JSON signatures are used to verify signatures within the JSON. The canonical form of JSON is as follows (unless otherwise specified within the JSON signature): http://openpeer.org/2012/12/14/jsonsig#rsa-sha1
-
-This algorithm allows only JSON objects to be signed. The digest value is sha1(`<message>`), where the message is the canonical version of the JSON object written to a string. The object must be rendered to a string as if it were a standalone rendered JSON object where the final message is in the format: {"name":{...}}
-
-If the rendered object doesn't have a string part in the JSON lexical string:value pairing (as it's a value- only) then the object name is based upon the parent array's/object string in its string:value pair (or the parent's parent as need be). This canonical rendered string requires absolutely no white space between tokens. All strings must be in normalized to UTF-8 format with only these escape sequences used: \" \\ \f \n \r \b
-
-Unicode escape sequences are converted to UTF-8 format. Number sequences must not have unnecessary leading or trailing zeros. Numbers are rendered "as is", i.e. in the format they are put inside the original JSON package where the signature is applied.
-
-Any object's string:value pairing that begin with "$" in the string part are placed in the order they appear in the JSON package where the signature is applied before any other string:value pairs inside the object. Next any object containing a string:value pair who's lexical string name is "#text" is placed after those strings starting with "$". Finally, all remaining string:value pairs follow in the order they appear in the JSON package where the signature is applied.
-
-The "$", "#text" and 'other' ordering is used to ensure the implementations which wish to process the JSON in XML form can still render back/forth from XML to JSON and still be capable of generating signatures properly. The "$" prefix was chosen specifically because it is a non special variable name in JavaScript where JSON has been most prominently adopted but yet still denotes a special character for the sake of JSON/XML conversions.
-
-JSON objects that have member string:value pairs that start with "$" in their string parts are only allowed to contain string, number, true, false or null values. JSON objects that have a member string:value pair with the string part equal to "#text" can only have a string as the corresponding value. This restriction is put into Open Peer to allow for easy JSON/XML conversions.
+Even though all requests / responses are written in human readable form in this document, on-the-wire requests and responses should be written for favor of size efficiency. The recommended method is the Open Peer canonical form using the algorithm for the canonicalization of JSON signatures as specified in this document. This ensures the wire format is optimal on the wire since the canonical form is fairly compact (although if a compression algorithm is applied to the message at a higher layer then the wire savings might become moot).
 
 All base64 encoding / decoding routines must use standard / common encoding scheme, without line breaks and with padding used for unused bytes.
 
@@ -1343,6 +1329,178 @@ For a server to support Open Peer cross-origin requests it must:
 
         Access-Control-Allow-Credentials: true
         Access-Control-Allow-Origin: *
+
+
+General Encryption Rules
+------------------------
+
+Open Peer uses the following definitions (unless otherwise specified):
+
+  * public key - a RSA compatible public key encoded as X.509 DER encoding (BER decoding) format
+  * private key - a RSA compatible encoded as "SubjectPublicKeyInfo" PKCS #1 format.
+  * signature key - a key defined or referenced from within a signature (see JSON Signatures).
+  * key - a binary value key or passphase used as input into encrypt / decrypt routines which may pre-pass through hash / hmac algorithms before being utilized.
+  * IV - the initialization vector for an encryption / decryption algorithm, always 16 bytes long.
+  * passhrase - a cryptographically generated string using limited subset of the visible ASCII characters, or a user input passphrase. Each character in a passphrase is given a security strength of 5 bits. Thus a passphrase input into a "SHA1" algorithm should contain a minimal "(20 x 8) / 5 = 32" characters; a passhrase used for AES should contain a minimal "(32 x 8) / 5 = 52" characters; a passphrased used for IV calculation should contain a minimal "(16 x 8) / 5 = 26" characters;
+  * salt - binary cryptographically random data
+  * salt string - passphrase compatible cryptographically random data
+
+Open Peer uses the following definitions for algorithms (unless otherwise specified):
+
+  * hash(...) - the input can be binary, a passphrase, or a string when used for validation purposes. The algorithm used is "SHA1" for validation [output 20 bytes binary], "SHA256" when used as input for encrypt(...) / decrypt(...) [outputs 32 bytes binary], and "MD5" when used for IV calculation [outputs 16 bytes binary].
+  * hmac(key, value) - the key can be binary, a passphrase, or a string depending on the input context of the key's input value or calculated value. The hmac algorithm used is "SHA1" for validation [output 20 bytes binary], "SHA256" when used as input for encrypt(...) / decrypt(...) [outputs 32 bytes binary], and "MD5" when used for IV calculation [outputs 16 bytes binary].
+  * encrypt(...) - a key used for encryption / decryption using AES Rijndael 128 algorithm in CFB mode with a key size always set to 32 bytes, and IV of 16 bytes, 16 byte block size and a feedback size of 16 bytes (default for OpenSSL / CryptoPP). Care must be taken to never encrypt two different pieces of information with the same key and IV as this exposes a technique that can be exploited to calculate the original secret encryption key.
+  * encrypt(hash(...)) - Same algorithm as encrypt(...) but the hash uses "SHA256" instead of "SHA1".
+  * encrypt(hmac(...)) - Same algorithm as encrypt(...) but the hash uses hmac with "SHA256" instead of "SHA1".
+  * decrypt(hash(...)) - Same algorithm as encrypt(...) but the hash uses "SHA256" instead of "SHA1".
+  * decrypt(hmac(...)) - Same algorithm as encrypt(...) but the hash uses hmac with "SHA256" instead of "SHA1".
+  * base64(...) - Coverts from raw binary input to base 64 encoding. This is the default encoding for binary values of variable or long length.
+  * decode64(...) - Converts from a base 64 encoded string to raw binary
+  * hex(...) - Converts from binary to a hex encoded string
+  * bin(...) - Converts from a hex encoded string to binary
+  * sign(key, value) - Using the private key specified, sign the value, returns a binary result. Care must be taken when using sign to never sign directly information given from an untrusted party. If untrusted data must be signed, the signature must always use a computed hashed version of the untrusted data.
+  * verify(key, value) - Using the public key specified, verify the binary value which was the result of a previous signature
+  * key_stretch(...) - takes a user inputted string and applies a repetitive hash in a loop to strengthen the key not by adding cryptographic bits of security but to ensure that brute force attacks on the value take a minimum amount of CPU time to compute the attack value. User input values should always be combined with unique salt to ensure the same two inputted values do not result in the same result (to prevent hash table lookup results on user values).
+
+
+
+JSON Signatures
+---------------
+
+### Algorithm ###
+
+Open Peer JSON signatures are used to verify signatures within the JSON. The signatures contain a data part, a signature part and a bundle to encapsulate the two parts together.
+
+The signature output typically looks something like this:
+
+    {
+      dataBundle {
+        "data" : {
+          "$id": "4bf7fff50ef9bb07428af6294ae41434da175538"
+        },
+        "signature": {
+          "reference": "#4bf7fff50ef9bb07428af6294ae41434da175538",
+          "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+          "digestValue": "jeirjLr...ta6skoV5/A8Q38Gj4j323=",
+          "digestSigned": "DE...fGM~C0/Ez=",
+          "key": {
+            "$id": "9bdd14dda3f...dd174b5d5bd2",
+            "domain": "example.org",
+            "service": "finder"
+          }
+        }
+      }
+
+The signature contains a unique reference ID to the data that is signed, which establishes a clear relation to the signed JSON object. The algorithm is specified for compatibility, and must be used in preference to the default algorithms in use inside the message where signature is present. This ensures the signature can be copied from message to message while retaining validation.
+
+The digest value is calculated as follows: digest = hash(canonical(`<data-object>`))
+The digest value is output into JSON as follows: base64(`<digest>`)
+
+The canonical form of JSON is always used to ensure the output written on the wire is always reassembled with exact ordering, white spacing rules, and escape sequence rules. This ensures maximum compatibility. The JSON object being signed must be rendered to a string as if it were a standalone rendered JSON object where the final message is in the format: {"name":{...}}
+
+The digest signed is calculated as follows: digestSigned = base64(privateKeySign(`<digest>`))
+
+When verifying this algorithm's signature the digest value is recalculated using the following: verficationDigest = hash(canonical(`<data-object>`))
+
+The binary verification digest has value is compared against the decode64(`<signature-digest-value>`) and must be byte-for-byte equal.
+
+The key used to verify the signature comes from they "key" specified in the signature. This key can be the full public key or a descriptive reference to which public key was used.
+
+The signature verification is as follows: publicKeySignVerify(decode64(`<digest-signed>`))
+
+
+### Signature Key containing x509 Public Key ###
+
+This form of signature contains the full X.509 DER encoding (BER decoding) format encoded as base 64 in the signature and thus does not need to be externally referenced or resolved.
+
+An example:
+
+    "signature": {
+      "reference": "#4bf7fff50ef9bb07428af6294ae41434da175538",
+      "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+      "digestValue": "jeirjLr...ta6skoV5/A8Q38Gj4j323=",
+      "digestSigned": "DE...fGM~C0/Ez=",
+      "key": { "x509Data": "MIIDCCA0+gA...lVN" }
+    }
+
+
+### Signature Key Referenced from Certificates Get ###
+
+This form of signature contains a reference to a domain where the "Certificates Get" can be used to obtain the set of keys used within the signature. The "$id" in the key maps to the ID representing the certificate and the "service" maps to the service whose signature was used to create the signature.
+
+An example:
+
+    "signature": {
+      "reference": "#4bf7fff50ef9bb07428af6294ae41434da175538",
+      "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+      "digestValue": "jeirjLr...ta6skoV5/A8Q38Gj4j323=",
+      "digestSigned": "DE...fGM~C0/Ez=",
+      "key": {
+        "$id": "9bdd14dda3f...dd174b5d5bd2",
+        "domain": "example.org",
+        "service": "finder"
+      }
+    }
+
+
+### Signature Key Referenced from Peer URI ###
+
+This form of signature references the peer URI for the public peer file file that can be used to verify the signature. The public peer file (section "A") must be available to verify this form of signature.
+
+An example:
+
+    "signature": {
+      "reference": "#4bf7fff50ef9bb07428af6294ae41434da175538",
+      "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+      "digestValue": "jeirjLr...ta6skoV5/A8Q38Gj4j323=",
+      "digestSigned": "DE...fGM~C0/Ez=",
+      "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
+    }
+
+
+### Signature Key Referenced by Fingerprint ###
+
+This form of signature references the hash fingerprint of the raw public key (i.e. not base64 encoded) that can be used to verify the signature. This is used in situations where the public key is expected to be known in advanced and thus is a method to ensure the signature was generated from that expected public key. The fingerprint is calculated using: fingerprint = hex(hash(`<public-key>`))
+
+An example:
+
+    "signature": {
+      "reference": "#4bf7fff50ef9bb07428af6294ae41434da175538",
+      "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+      "digestValue": "jeirjLr...ta6skoV5/A8Q38Gj4j323=",
+      "digestSigned": "DE...fGM~C0/Ez=",
+      "key": { "fingerprint": "1dcc8f8bd79e214f0eb7fc6c9fb8df0812171ca3" }
+    }
+
+
+Open Peer Default Signature Algorithm
+-------------------------------------
+
+This is the default algorithm that must be supported by all implementations to allow for JSON signatures:
+http://openpeer.org/2012/12/14/jsonsig#rsa-sha1
+
+This is a namespace URL only and not a URI reference to a valid document definition. If the signature algorithm is omitted this algorithm must be applied, but all clients should always output their signature algorithm as part of the signature.
+
+The hash algorithm used is sha1. The signature public key / private keys are RSA compatible.
+
+This algorithms uses the canonical form whose rules are described in the next sub-section.
+
+### Canonical JSON ###
+
+The canonical form of JSON is always used to ensure the output written on the wire is always reassembled with exact ordering, white spacing rules, and escape sequence rules. This ensures maximum compatibility. The JSON object being signed must be rendered to a string as if it were a standalone rendered JSON object where the final message is in the format: {"name":{...}}
+
+The canonical rules as described below are for this algorithm:
+http://openpeer.org/2012/12/14/jsonsig#rsa-sha1
+
+If the rendered object doesn't have a string part in the JSON lexical string:value pairing (as it's a value- only) then the object name is based upon the parent array's/object string in its string:value pair (or the parent's parent as need be). This canonical rendered string requires absolutely no white space between tokens. All strings must be in normalized to UTF-8 format with only these escape sequences used: \" \\ \f \n \r \b
+
+Unicode escape sequences are converted to UTF-8 format. Number sequences must not have unnecessary leading or trailing zeros. Numbers are rendered "as is", i.e. in the format they are put inside the original JSON package where the signature is applied.
+
+Any object's string:value pairing that begin with "$" in the string part are placed in the order they appear in the JSON package where the signature is applied before any other string:value pairs inside the object. Next any object containing a string:value pair who's lexical string name is "#text" is placed after those strings starting with "$". Finally, all remaining string:value pairs follow in the order they appear in the JSON package where the signature is applied.
+
+The "$", "#text" and 'other' ordering is used to ensure the implementations which wish to process the JSON in XML form can still render back/forth from XML to JSON and still be capable of generating signatures properly. The "$" prefix was chosen specifically because it is a non special variable name in JavaScript where JSON has been most prominently adopted but yet still denotes a special character for the sake of JSON/XML conversions.
+
+JSON objects that have member string:value pairs that start with "$" in their string parts are only allowed to contain string, number, true, false or null values. JSON objects that have a member string:value pair with the string part equal to "#text" can only have a string as the corresponding value. This restriction is put into Open Peer to allow for easy JSON/XML conversions.
 
 
 General Result Error Code Reasons
