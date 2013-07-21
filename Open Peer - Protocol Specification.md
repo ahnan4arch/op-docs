@@ -1426,8 +1426,10 @@ Open Peer uses the following definitions for use with the "http://meta.openpeer.
   * decode64(...) - Converts from a base 64 encoded string to raw binary
   * hex(...) - Converts from binary to a hex encoded string [always lowercase hex]
   * bin(...) - Converts from a hex encoded string to binary
-  * sign(key, value) - Using the private key specified, sign the value, returns a binary result. Care must be taken when using sign to never sign directly information given from an untrusted party. If untrusted data must be signed, the signature must always use a computed hashed version of the untrusted data.
-  * verify(key, value) - Using the public key specified, verify the binary value which was the result of a previous signature
+  * sign(key, value) - Using the private key specified, sign the value, returns a binary result. Care must be taken when using sign to never sign directly information given from an untrusted party. If untrusted data must be signed, the signature must always use a computed hashed version of the untrusted data. The signer should use a "Signature Scheme with Appendix (SSA)".
+  * verify(key, value) - Using the public key specified, verify the binary value which was the result of a previous signature. The verifier should use a "Signature Scheme with Appendix (SSA)".
+  * rsa_encrypt(key, value) - Using either the public or private key specified, encrypt the data. The algorithm should use "Optimal Asymmetric Encryption Padding (OAEP)" used with a SHA1 hash being used.
+  * rsa_decrypt(key, value) - Using either the public or private key specified, decrypt the data. The algorithm should use "Optimal Asymmetric Encryption Padding (OAEP)" used with a SHA1 hash being used.
   * key_stretch(...) - takes a user inputted string and applies a repetitive hash in a loop to strengthen the key not by adding cryptographic bits of security but to ensure that brute force attacks on the value take a minimum amount of CPU time to compute the attack value. User input values should always be combined with unique salt to ensure the same two inputted values do not result in the same result (to prevent hash table lookup results on user values). For more on key stretching, see http://en.wikipedia.org/wiki/Key_stretching
 
 
