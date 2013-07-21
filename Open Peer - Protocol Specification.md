@@ -3526,11 +3526,11 @@ This request is sent from the outer browser window to the inner window as a post
     * Identity URI - the full identity URI of the logged in user
     * Identity provider - identity provider providing identity service
     * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":lockbox-update")
-    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
+    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":lockbox-update"))
+    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof short term credentials are considered valid
   * Lock box information
     * Lockbox domain - if lockbox domain is known in advance, this is the domain for the lockbox to use
-    * Lockbox key - this is client side base-64 encoded lockbox key
+    * Lockbox key - this is base-64 encoded lockbox key
 
 ### Returns
 
@@ -3538,7 +3538,9 @@ Success or failure.
 
 ### Security Considerations
 
-The lockbox key should be encrypted locally in JavaScript before being sent a server. This ensures the server does not contain the correct information to be able to decrypt the lockbox key. See "Identity Access Complete"
+The lockbox key should be encrypted locally in JavaScript before being sent a server. This ensures the server does not contain the correct information to be able to decrypt the lockbox key. See "Identity Access Complete".
+
+The lockbox key should only be sent to trusted identity providers, which will act on the best interest of the user to protect the lockbox key.
 
 ### Example
 
@@ -3591,8 +3593,8 @@ This request proves that an identity access is valid and can be used to validate
   * Purpose - reason for validation (each service using this validation should have a unique purpose string)
   * Identity information
     * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":" + `<purpose>`)
-    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
+    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":" + `<purpose>`))
+    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof short term credentials are considered valid
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
 
@@ -3651,15 +3653,15 @@ This request proves that an identity login is valid and can be used to validate 
     * Lockbox account ID - the assigned account ID for the lockbox
     * Lockbox domain - this is the domain for the lockbox to use
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":identity-lookup-update")
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret Identity information
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":identity-lookup-update"))
+    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
   * identity bundle information
     * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-lookup-update")
-    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
-    * Stable ID - a stable ID representing the user regardless of which identity is being used or the current peer contact ID, stable ID = hash("stable-id:" + `<lockbox-domain>` + ":" + `<lockbox-account-id>`)
+    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-lookup-update"))
+    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof short term credentials are considered valid
+    * Stable ID - a stable ID representing the user regardless of which identity is being used or the current peer contact ID, stable ID = hex(hash("stable-id:" + `<lockbox-domain>` + ":" + `<lockbox-account-id>`))
     * Public peer file- the public peer file associated with the contact ID
-    * Priority / weight - SRV like priority and weighting system to gauge which identity discovered to be associated to the same peer contact have highest priority
+    * Priority / weight - SRV like priority and weighting system to gage which identity discovered to be associated to the same peer contact have highest priority
     * signed by public peer file specified (only if peer file is being set, otherwise no "identityBundle" will be present)
 
 ### Returns
