@@ -242,45 +242,57 @@ Section "A" (packaged and signed by identity's private key)
   * Public peer file creation date
   * Public peer file expiry date
   * Salt signed by salt service's key
-  * Extension authorized-peer data
+  * "other" custom data as desired
   * Peer's public key (in signature)
 
 Section "B" (packaged and signed by identity's private key)
 -----------------------------------------------------------
 
-  * Peer Contact's full URI (to know how to locate the peer universally) that do not reveal any identities. Peer's contact ID is calculated as follows: hash value of section "A", i.e. tolower(hexEncode(hash("contact:" + `<public-peer-section-A>`))). When the input <public-peer- file-section-A is used in the hash, the same canonical algorithm method as the signature in section "A". The input into the algorithm is the entire section "A" bundle including the certificate signing the section bundle.
-  * Find secret (must be known by peer attempting to initiate a finder connection to another peer). This is a simple random string and is not encoded into base-64.
-  * Extension authorized-peer data
+  * Peer Contact's full URI (to know how to locate the peer universally but does not directly reveal any identities). Peer's contact ID is calculated as follows: hex(hash("contact:" + `<public-peer-section-A-JSON-object>`)). When the input `<public-peer-file-section-A-JSON-object>` is used in the hash, the same canonical algorithm method as the signature in section "A". The input into the algorithm is the entire section "A" bundle including the certificate signing the section bundle. Thus the input canonical sequence will always start start with the exact phrase (followed by the remaining information): {"sectionBundle":{"section":{"$id":"A",
+  * Find secret passphrase (must be known by peer attempting to initiate a finder connection to another peer).
+  * "other" custom data as desired
+  * signed by public key in section "A" and referenced by peer URI
+
 
 Section "C" (packaged and signed by identity's private key)
 -----------------------------------------------------------
 
-  * Peer Contact's full URI (to know how to locate the peer universally).
+  * Peer Contact's full URI (to know how to locate the peer universally). See Section "B" for calculation.
   * Any/all asserted public identities
-  * Extension authorized-peer data
+  * "other" custom data as desired
+  * signed by public key in section "A" and referenced by peer URI
 
 The public key is used as a way to send the peer privately encrypted data from another source. As long as the other source has the correct public key it is possible to establish direct secure communication by exchanging keys using public / private keys as the encryptions method.
 
-The salt is used in Section "A" to establish randomness into the files that is not forgeable or controllable by the creator of the file this ensuring that hashes are dispersed based on randomness being present.
+The salt is used in Section "A" to establish randomness into the files that cannot be forged or controllable by the creator of the file this ensuring that peer URI hashes are dispersed evenly based on combined local and remote cryptographic randomness being present.
 
-Asserted identities are used to prove the owner of the peer file is whom they claim to be.
+Asserted identities are used to prove the ownership change of the peer file. These identities can also be found externally to the peer file to allow for the peer to remain anonymous unless until the peer decides otherwise.
 
-Extension data is arbitrary for future extension of the peer file.
+Other customer data is arbitrary for future extension of the peer file.
 
-The peer's contact ID is used to prove that Section "B" and Section "C" correlates properly to section "A" and isn't two or three distinct files being glued together as a forgery.
+The peer's contact ID and signatures in Section "B" and Section "C" are used to prove this public peer file is not two or three distinct files being glued together as a forgery.
+
 
 Security Considerations
 -----------------------
 
-The Section "A" bundle must contain salt that has been signed by the salt service whose certificate is still within the window of validity. Further the Section "A" bundle must be signed by a self-signed certificate whose certificate is included in the signature of the bundle. This ensures the integrity of the Section "A" bundle and ensures anyone who has Section "A" knows the public key for the peer.
+When verifying Section "A":
 
-Section "B" includes a finder secret that other peers will use to find the peer to which the peer file belongs.
+  * the salt must not be expired (or the peer file is expired)
+  * the salt must be signed by the domain whose certificate is found using "Certificates Get" for the domain and the salt signing key must still be valid.
+  * the Section "A" bundle must be signed by a public key whose public key value is included in the signature of the bundle
 
-Asserted Identities contained within section "C" can be verified whenever verification is needed. Verification is dependent on the identity assertion type.
+When verifying Section "B" / Section "C":
 
-The integrity of Section "B" and Section "C" should be verified by ensuring that the public key contained in Section "A" signed these sections. The URIs in these sections are not verified as it's up to the client generating the URIs to generate resources that are accurate to the network and up to other peers to ensure they are contacting identities they should be contacting.
+  * the domain used in the peer URI must match the domain used in the signature of the signed salt
+  * the "contact ID" part of the peer URI must match the following calculation: hex(hash("contact:" + `<public-peer-section-A-JSON-object>`))
+  * the signature must be signed by the public key contained in Section "A"
+  * the reference peer URI in the signature must be the same URI as defined within the section
+
+The identities contained within section "C" can be verified using the standard verification methods used to validate identities (see the "Identity Validation" section).
 
 Only elements contained within the signed sections are ever considered as part of the file. All other elements are erroneous and should be discarded or ignored and when present. In Section "A", erroneous elements outside the protection of a signature should never be used as part of the calculation of the contact ID.
+
 
 Example Public Peer File
 -------------------------
@@ -1390,12 +1402,11 @@ Open Peer uses the following definitions for use with the "http://meta.openpeer.
   * decrypt(hmac(...)) - Same algorithm as encrypt(...) but the hash uses hmac with "SHA256" instead of "SHA1".
   * base64(...) - Coverts from raw binary input to base 64 encoding. This is the default encoding for binary values of variable or long length.
   * decode64(...) - Converts from a base 64 encoded string to raw binary
-  * hex(...) - Converts from binary to a hex encoded string
+  * hex(...) - Converts from binary to a hex encoded string [always lowercase hex]
   * bin(...) - Converts from a hex encoded string to binary
   * sign(key, value) - Using the private key specified, sign the value, returns a binary result. Care must be taken when using sign to never sign directly information given from an untrusted party. If untrusted data must be signed, the signature must always use a computed hashed version of the untrusted data.
   * verify(key, value) - Using the public key specified, verify the binary value which was the result of a previous signature
   * key_stretch(...) - takes a user inputted string and applies a repetitive hash in a loop to strengthen the key not by adding cryptographic bits of security but to ensure that brute force attacks on the value take a minimum amount of CPU time to compute the attack value. User input values should always be combined with unique salt to ensure the same two inputted values do not result in the same result (to prevent hash table lookup results on user values).
-
 
 
 JSON Signatures
@@ -1505,6 +1516,62 @@ An example:
       "digestSigned": "DE...fGM~C0/Ez=",
       "key": { "fingerprint": "1dcc8f8bd79e214f0eb7fc6c9fb8df0812171ca3" }
     }
+
+
+Identity Validation
+-------------------
+
+An identity proof bundle contains information required to protect a peer URI from being fraudulently associated to an identity, and an identity from becoming fraudulently associated to a peer URI.
+
+The first step in identity protection is for the peer URI to assert itself as the identity and then for an identity provider to validate the assertion by signing the assertion given by the peer URI.
+
+An example identity proof bundle:
+
+    "identityProofBundle": {
+      "identityProof": {
+        "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
+        "contactProofBundle": {
+          "contactProof": {
+            "$id": "2d950c960b52c32a4766a148e8a39d0527110fee",
+            "stableID": "123456",
+            "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
+            "uri": "identity://domain.com/alice",
+            "created": 54593943,
+            "expires": 65439343
+          },
+          "signature": {
+            "reference": "#2d950c960b52c32a4766a148e8a39d0527110fee",
+            "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "digestValue": "Wm1Sa...lptUT0=",
+            "digestSigned": "ZmRh...2FzZmQ=",
+            "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
+          }
+        }
+      },
+      "signature": {
+        "reference": "#b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
+        "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+        "digestValue": "IUe324koV5/A8Q38Gj45i4jddX=",
+        "digestSigned": "MDAwMDAwMGJ5dGVzLiBQbGVhc2UsIGQ=",
+        "key": {
+          "$id": "b7ef37...4a0d58628d3",
+          "domain": "domain.com",
+          "service": "identity"
+        }
+      }
+    }
+
+The identity URI being validated is contained within the "contactProof" JSON object.
+
+The following steps must be perform to prove an identity is associated with a peer URI:
+
+  * the current date (within the "contactProof") must be beyond the creation date (a small window is allowed for small clock variations)
+  * the current date (within the "contactProof") must not be beyond the expiry date
+  * peer URI (within the "contactProof") must match the peer URI being associated
+  * the signature on the "contactProof" must be signed by the public key from the public peer file associated with the peer URI
+  * the signature on the "identityProof" must be signed by the domain from the identity URI being validated and the referenced certificate obtained and checked from performing a "Certificated Get" on the domain; alternatively if the identity URI is of a legacy type, an identity lookup must be performed on the identity and provider of the identity returned by by the lookup must match the domain referenced in the signature
+
+An identity lookup should be performed on the identity to obtain the latest identity proof thus only the latest identity proof should be considered valid.
 
 
 Open Peer Default Signature Algorithm
