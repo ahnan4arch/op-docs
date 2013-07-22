@@ -5388,7 +5388,6 @@ The requesting peer must validate the result in the following ways:
         }
       }
     }
-
 .
 
     {
@@ -5459,6 +5458,7 @@ The client must have an established peer session to issue this request.
         "$method": "peer-keep-alive"
       }
     }
+.
 
     {
       "result": {
