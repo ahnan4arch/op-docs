@@ -46,7 +46,7 @@ This request is sent from the outerframe to the inner frame to fetch identity cr
     * Identity URI - the full identity URI of the logged in user
     * Identity provider - identity provider providing identity service
     * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":rolodex-credentials-get")
+    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":rolodex-credentials-get"))
     * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
 
 ### Returns
@@ -81,6 +81,7 @@ The exact meaning of the rolodex server token is arbitrary between the identity 
     
       }
     }
+.
 
     {
       "result": {
@@ -113,14 +114,14 @@ This request is sent by the client application to get access to the rolodex serv
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Identity information
     * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":rolodex-access")
+    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":rolodex-access"))
     * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
   * Rolodex information
     * server token - given by the identity service that only has meaning to the rolodex service
   * Grant information
-    * grant ID - the grant ID that has been given namespace access to the rolodex namespace, i.e. "https://openpeer.org/permission/rolodex"
+    * grant ID - the grant ID that has been given namespace access to the rolodex namespace, i.e. "https://meta.openpeer.org/permission/rolodex"
 
 ### Returns
 
@@ -178,6 +179,7 @@ Upon seeing an unknown grant ID used in conjunction with a the identity where pr
     
       }
     }
+.
 
     {
       "result": {
@@ -219,7 +221,7 @@ This request proves that the grant ID challenge is proven valid by way of the na
   * rolodex information
     * server token - given by the identity service that only has meaning to the rolodex service
     * rolodex access token - as returned from the "rolodex access" request
-    * Proof of 'rolodex access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<rolodex-access-secret>`, "rolodex-access-validate:" + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<rolodex-access-token>` + ":rolodex-namespace-grant-challenge-validate")
+    * Proof of 'rolodex access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<rolodex-access-secret>`, "rolodex-access-validate:" + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<rolodex-access-token>` + ":rolodex-namespace-grant-challenge-validate"))
     * Expiry of the proof for the 'rolodex access secret' - a window in which access secret proof is considered valid
   * Grant service challenge as issued by the rolodex service bundled with signature as returned from the namespace grant service
 
@@ -281,6 +283,7 @@ The rolodex service will validate that the proof bundle is correct and if the ch
         }
       }
     }
+.
 
     {
       "result": {
@@ -306,7 +309,7 @@ This request is sent by the client application to get updates to the contact lis
   * rolodex information
     * server token - given by the identity service that only has meaning to the rolodex service
     * rolodex access token - as returned from the "rolodex access" request
-    * Proof of 'rolodex access secret' - proof required to validate that the 'identity access secret' is known, proof = hmac(`<rolodex-access-secret>`, "rolodex-access-validate:" + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<rolodex-access-token>` + ":rolodex-contacts-get")
+    * Proof of 'rolodex access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<rolodex-access-secret>`, "rolodex-access-validate:" + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<rolodex-access-token>` + ":rolodex-contacts-get"))
     * Expiry of the proof for the 'rolodex access secret' - a window in which access secret proof is considered valid
     * version - a version string as previously returned from the rolodex update request representing the delta information last obtained from the rolodex service
     * refresh - request the contact list be refreshed immediately
@@ -366,6 +369,7 @@ If the result is an error result with error code "424" i.e. "Failed Rolodex Toke
     
       }
     }
+.
 
     {
       "result": {
