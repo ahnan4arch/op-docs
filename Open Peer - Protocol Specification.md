@@ -5389,6 +5389,8 @@ The requesting peer must validate the result in the following ways:
       }
     }
 
+.
+
     {
       "result": {
         "$id": "abc123",
