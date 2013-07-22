@@ -2547,7 +2547,7 @@ If the lockbox key hash does not match for the account but the identity access p
         "$handler": "identity-lockbox",
         "$method": "lockbox-access",
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "identity": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
@@ -2674,7 +2674,7 @@ Success or failure.
         "$handler": "identity-lockbox",
         "$method": "lockbox-access-validate",
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "purpose": "whatever",
         "lockbox": {
           "$id": "123456",
@@ -2730,7 +2730,7 @@ The lockbox service will validate that the proof bundle is correct and if the ch
         "$handler": "identity-lockbox",
         "$method": "lockbox-namespace-grant-challenge-validate",
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
@@ -2822,7 +2822,7 @@ If all the identities associated to the lockbox are removed then the lockbox acc
         "$handler": "identity-lockbox",
         "$method": "lockbox-identities-update",
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
@@ -2915,7 +2915,7 @@ No value names within the same namespace URL should be identical.
         "$handler": "identity-lockbox",
         "$method": "lockbox-content-get",
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
@@ -3000,7 +3000,7 @@ No value names within the same permission URL should be identical. The salt stri
         "$handler": "identity-lockbox",
         "$method": "lockbox-content-set",
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
@@ -3552,7 +3552,7 @@ The lockbox key should only be sent to trusted identity providers, which will ac
         "$handler": "identity",
         "$method": "identity-access-lockbox-update",
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "identity": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
@@ -3614,7 +3614,7 @@ Success or failure.
         "$handler": "identity",
         "$method": "identity-access-validate",
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "purpose": "whatever",
         "identity": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
@@ -3682,7 +3682,7 @@ The server must validate the lockbox access and the identity access to complete 
         "$handler": "identity",
         "$method": "identity-lookup-update",
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
           "$id": "123456",
           "domain": "domain.com",
@@ -3745,7 +3745,7 @@ The server must validate the lockbox access and the identity access to complete 
         "$handler": "identity",
         "$method": "identity-lookup-update",
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "identity": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
@@ -3811,7 +3811,7 @@ List of services available to peer contact services, containing:
         "$handler": "peer",
         "$method": "peer-services-get",
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
@@ -4919,16 +4919,13 @@ This request is forwarded from the requesting peer's finder to the replying peer
 
 ### Security Considerations
 
-The server attaches a route message to know which peer connection to send any reply back. The route identifier for the peer connection should be cryptographically random.
-
-In theory, a malicious peer later responding the Peer Location Find Request could change the route in the Peer Location Find Reply and cause the message to erroneously be delivered to the wrong peer attached to a finder. However, even if the malicious peer managed to misdirect to the wrong peer the reply would get dropped since request never matched any request previously sent out by that peer. The worst-case scenario is a malicious client could waste the bandwidth and processing power of another finder. Since the only way to possibly know this route in advance is by the malicious peer having established communication with targeted peer previously, the offending malicious peer already could waste the processing power and bandwidth of the targeted peer by sending bogus Peer Location Find Requests. Hence adding protection against this attack does not achieve any lessening in vulnerability.
+Application ID should be stripped before forwarding this request.
 
 ### Example
 
     {
       "request": {
         "$domain": "domain.com",
-        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
@@ -4953,33 +4950,17 @@ This request is forwarded from the replying peer's finder to the replying peer.
 
 ### Security Consideration
 
-The peer finder will add the route where it received the Peer Location Find Request from before sending it to the peer receiving the request. Thus when the reply comes in the reply will be directed back alone the path it was sent.
-
-A malicious peer in theory could change the route in the Peer Location Find Reply to another peer finder on the way back by inserting a misdirected route thus wasting the peer finder's bandwidth and CPU (if this happen the Peer Location Find Reply would eventually get dropped thus is not a security whole).
-
-Protecting against this attack is not worthwhile since a malicious peer could waste the peer's bandwidth and CPU by sending requests to the attacked peer finder directly.
-
-A peer finder should keep track of the request to response ratio (i.e. the number of Peer Location Find Requests sent to a peer versus the number of Peer Location Find Replies received from a peer) within windows in which requests were sent. If Peer Location Find Replies are received outside the normal boundaries or outside the window of Peer Location Find Requests, this could be a peer attempting to attack another peer finder using a its peer finder as a proxy by sending bogus Peer Location Find Replies that never had requests.
-
 ### Example
 
     {
       "request": {
         "$domain": "domain.com",
-        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
     
         "findProofBundle" : {
           ...
-        },
-    
-        "routes": {
-          "route": [
-            { "$id": "27f2e2cfc87d1f77d44afde730bfa15a" },
-            { "$id": "79434b37a8bb8408fca8c16b89e4faca" }
-          ]
         }
       }
     }
@@ -4990,13 +4971,13 @@ Peer Location Find Reply (E)
 
 ### Purpose
 
-This reply is sent directly from the replying peer to the requesting peer's finder (by the replying peer creating a direct connection from the replying peer to the requesting peer's finder).
+This reply is sent directly from the replying peer to the requesting peer's finder (by the replying peer creating a direct connection from the replying peer to the requesting peer's finder and using the relay credentials to create a "channel-map" with the requesting peer).
 
 ### Outputs
 
   * Digest value from signature sent in original request - the reply location might not have the ability to validate the signature of the request but the reply location must validate the signature's hash value is correct and copy this value back to the original requester bundled in its own signed package (since the requester knows the original value and must have the public peer file of the reply location to validate the reply's bundle). This allows the requester to validate the original request remained non-tampered throughout and ignore replies where tampering might have occurred.
   * Context - this identifier is combined with the remote peer's context to form the "requester:reply" context ID for the MLS layer as well as the userFrag for ICE negotiation.
-  * Peer secret - this key is the password used for ICE negotiation
+  * Peer secret - this key passphrase is the password used for ICE negotiation, as it's sent over MLS directly to the receiving peer there's no need to encrypt it
   * Location details
     * Location ID of requesting location
     * Contact ID of requesting location
@@ -5100,7 +5081,7 @@ This reply is forwarded from the requesting peer's finder to the requesting peer
 
 ### Security Considerations
 
-This is an internal communication from peer finder to peer finder. The receiving peer finder must ensure the final route maps to a connection and drop the message if it does not match an active connection.
+This request must be sent over a secure channel with MLS.
 
 ### Example
 
@@ -5121,8 +5102,8 @@ This is an internal communication from peer finder to peer finder. The receiving
 
 
 
-Peer Location Find Request (single point to multipoint when challenged)
------------------------------------------------------------------------
+Peer Location Find Request (single point to multipoint)
+-------------------------------------------------------
 
 ### Request Flow
 
@@ -5130,7 +5111,7 @@ Peer Location Find Request (single point to multipoint when challenged)
 
 The request is identical to "single point to single point" except the request would fork to the two Finders responsible for the two different locations of "bob@bar.com". While above shows one request fork completing before the other request fork begins, in reality the requests would fork simultaneously. Given that another location exists for "bob@bar.com", the request start out identical but the routes would diverge and the resulting reply would be complete different.
 
-For the sake of simplicity, Peer Location Find Request/Reply A-H are not repeated.
+For the sake of simplicity, Peer Location Find Request/Reply A-F are not repeated.
 
 Peer Location Find Request (G)
 ------------------------------
@@ -5152,7 +5133,6 @@ Same as Peer Location Find Request (C)
     {
       "request": {
         "$domain": "domain.com",
-        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
@@ -5184,7 +5164,6 @@ Same as Peer Location Find Request (D)
     {
       "request": {
         "$domain": "domain.com",
-        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
@@ -5216,7 +5195,6 @@ Same as Peer Location Find Reply (E)
     {
       "reply": {
         "$domain": "domain.com",
-        "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
@@ -5285,7 +5263,7 @@ Peer Location Find Reply (J)
 
 ### Purpose
 
-This is the forwarded reply from the contacted peer to the contacting peer.
+This is the forwarded reply from the requesting peer's finder to the requesting peer.
 
 ### Outputs
 
@@ -5320,35 +5298,44 @@ Peer Identify Request
 
 ### Purpose
 
-This request notifies the contacted peer of the original requesting peer's identifying information. This request must be the first request sent from the peer that initiated the connection (i.e. the requesting peer) to the peer that received the connection (i.e. the contacted peer).
+This request notifies the peer that responded to the find reply of the original requesting peer's identifying information. This request must be the first request sent from the peer that initiated the find request to the peer that replied to the find request.
 
 ### Inputs
 
   * Contact of the initiating contact peer
   * Client nonce
-  * Expiry of the request
-  * Find secret as obtained from the Section "B" of the public peer file for the receiving peer - peer should reject peer unless this is present or unless the peer is in a common conversation thread with the peer)
+  * Expiry of the request - the expiry window for this short term credentials must be long enough to factor any looks-ups the replying peer might wish to perform before sending a result
+  * Find secret as obtained from the Section "B" of the public peer file for the replying peer - peer should reject peer unless this is present or unless the peer is in a common conversation thread with the peer)
   * Fingerprint - the fingerprint of the certificate used by the requesting peer's transport
-  * The location information of initiating peer
-  * The public peer file of the contacting peer - section A at minimal
-  * Signed by initiating peer's private key
+  * The location information of requesting peer
+  * The public peer file of the requesting peer - section A at minimal
+  * Signed by requesting peer's private key
 
 ### Outputs
 
   * Digest value - the value of the digest from the signature of the requesting peer's "peer identify proof bundle"
-  * Fingerprint - the finger print if the certificate used by the receiving peer's transport
-  * Location of the receiving peer
-  * Signed by responding peer's private key
+  * Fingerprint - the fingerprint if the certificate used by the receiving peer's transport
+  * Location of the replying peer
+  * Signed by replying peer's private key
 
 ### Security Considerations
 
-The requesting peer must send this request over a secure channel. The fingerprints for the transport layer's secure channel must match the fingerprint specified by the remote party's proof bundle or the channel might be compromised. The public peer file sent by the requesting peer must be validated by the receiving peer as well as the associated proof bundle. The digest value inside the result's proof bundle must match the digest value as sent in the signature of the request by the requesting party. The proof bundle of the receiving peer must be validated byt the requesting peer.
+The requesting peer must send this request over a secure channel.
 
-The requesting peer must choose an expiry window long enough as reasonable for the contacted peer to verify that it wants to allow the initiating peer to connect but no longer. The window must allow for the time to fetch contact information about the peer and verify the identities of the peer from a 3rd party as well as potential access rights. Without this window, if the Peer Identify Request was accidentally sent to a malicious connected peer by the requesting peer, the malicious contacted peer could connect with the real receiving peer and replay the Peer Identify Request message. However, as long as the requesting peer verifies the receiving peer's fingerprint and proof signature matches what is expected then this replay attack should not be possible (unless the contacted peer's private key has already been compromised).
+The replying peer must validate the request in the following ways:
 
-The contacted peer must verify this is the first request it receives from the requesting peer. The contacted peer may disallow anonymous connections and require a verifiable pre-known identity associated to the requester's public peer file. The contacted peer must verify the find secret matches the find secret in its own Section "B" of its public peer file (to insure this was not a replay of a request sent to a different peer).
+  * the find secret matches the find secret of it's own public peer file
+  * the request has not expired
+  * the nonce has not been seen before (the nonce must be remembered for a reasonable period of time, or at maximum until the expiry time of the request)
+  * the finger print matches the fingerprint of the requesting peer's transport channel
+  * the validity of the public peer file provided
+  * the signature on the request matches the public peer file provided
 
-The contacted peer must verify the request has not expired and should verify the one time key has not been used before. The signature on the bundle must be verified to ensure the requesting peer signed it.
+The requesting peer must validate the result in the following ways:
+
+  * the signature on the result matches the peer it requested to find
+  * the digest value in the result matches the digest value from the original signature on the request
+  * the fingerprint in the result matches the fingerprint of the replying's peers transport
 
 ### Example
 
@@ -5362,7 +5349,7 @@ The contacted peer must verify the request has not expired and should verify the
           "peerIdentityProof": {
             "$id": "ec065f4b46a22872f85f6ba5addf1e2",
     
-            "clientNonce": "759cef14b626c9bacc9a52253fd68da29d5b6491",
+            "nonce": "759cef14b626c9bacc9a52253fd68da29d5b6491",
             "expires": 574732832,
     
             "findSecret": "YjAwOWE2YmU4OWNlOTdkY2QxNzY1NDA5MGYy",
