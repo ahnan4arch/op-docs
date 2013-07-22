@@ -1185,7 +1185,7 @@ The "0" package contains the following:
     * Nonce - this nonce should be validated as having only been seen once by the receiving client
     * Expiry - a time-stamp and this package must be verified as valid before the expiry or it's considered invalid
     * Context - this identifier allows the stream to correlate with other upper layers and the meaning is externally defined / negotiated
-    * Algorithms - preference ordered set of algorithms supported by the client
+    * Algorithms - preference ordered set of algorithms supported by the client; once an algorithm is marked as supported it cannot be removed from subsequent "0" package updates.
     * List of keys, with each key containing:
       * key ID - this corresponds to the algorithm selection ID of which key to use in any subsequent decryption
       * algorithm - the algorithm to use when decrypting payloads using this key ID
@@ -1198,14 +1198,6 @@ For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm, the following algorithm
   * hmacIntegrityKey - the initial secret key input string, base64(rsa_encrypt(`<remote-public-key>`, `<integrity-passphrase>`))
 
 When the mandatory key is used, the AES CFB is initialized with these values and will continue to encrypt payloads using this keying until a new "0" package arrives. Once a new "0" package arrives all keying material is reset and forgotten and the algorithms with new keying information for subsequent messages are used for messages in a stream. The hmac is calculated using the following algorithm, hmac(`<integrity-passphrase>`, `<encrypted-message>`)). The AES key and integrity passphrase remains the same until a new "0" package is sent, but the IV is changed for every message. The next IV used for the keying selected is calculated based upon the hash of the previous IV for the selected keying and previous hmac integrity value, next_iv = hash(hex(`<previous-iv>`) + ":" + hex(`<previous-integrity-hmac>`)).
-
-Any sensitive data contained in the "0" package must be encrypted using the public key of the receiving party. Thus the key, iv, and hmacIntegrityKey must be encrypted. The entire package must be signed by the public key of the party sending the "0" package and the receiver must validate this package's signature before it assumes any of the data sent in the package is considered valid and / or trustworthy.
-
-The receiving party must verify the signature used in the sender's "0" package and all subsequent "0" packages. The first "0" package must include the x509 certificate of the sending party, unless the key is guaranteed to be known in advanced by the receiving party in which case a reference to they public key may be used. The subsequent "0" packages must use the same key as the first package, thus the x509 certificate should not need to be included again, and a signature key reference in future signatures should be used (as determined to be easiest resolvable for the remote party). The "0" package must be the first package sent on the wire in either direction. The public key used in this exchange need not be the same public key used by a higher layer, such as the public peer file's certificate.
-
-All keying information and salts must be generated using cryptographically random algorithms only.
-
-The algorithms used for encrypting must be limited to the algorithms known to be supported by the remote party, but the mandatory algorithm must always be considered a valid algorithm available in any minimal implementation.
 
 Example of the "0" package is JSON in place text with the following data in the bundle:
 
@@ -1264,6 +1256,24 @@ Example of the "0" package is JSON in place text with the following data in the 
       }
     }
 
+### Security Considerations ###
+
+Any sensitive data contained in the "0" package must be encrypted using the public key of the receiving party. Thus the key, iv, and hmacIntegrityKey must be encrypted. The entire package must be signed by the public key of the party sending the "0" package and the receiver must validate this package's signature before it assumes any of the data sent in the package is considered valid and / or trustworthy.
+
+All keying information and salts must be generated using cryptographically random algorithms only.
+
+The algorithms used for encrypting must be limited to the algorithms known to be supported by the remote party, but the mandatory algorithm must always be considered a valid algorithm available in any minimal implementation.
+
+The public key used in this exchange need not be the same public key used by a higher layer, such as the public peer file's certificate.
+
+The receiving party must verify the following:
+
+  * The receiving party must verify the signature used in the sender's "0" package and all subsequent "0" packages.
+  * The first "0" package must include the x509 certificate of the sending party (unless the receiving party is guaranteed to be able to resolve the signature key reference immediately)
+  * he subsequent "0" packages must use the same signature key as the first package (thus the x509 certificate should not need to be included again)
+  * A signature key reference in future "0" package signatures is used
+  * The "0" package must is the first message received on the wire.
+  * The algorithm presented is a known algorithm (as previously announced)
 
 ### JSON over MLS naming ###
 
@@ -1755,6 +1765,7 @@ The request nor the response should have an ID associated with the request / res
         "$method": "services-get"
       }
     }
+.
 
     {
       "result": {
@@ -1944,6 +1955,7 @@ The request nor the response should have an ID associated with the request / res
         "$method": "services-get"
       }
     }
+.
 
     {
       "result": {
@@ -2010,6 +2022,7 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
         "servers": 2
       }
     }
+.
 
     {
       "result": {
@@ -2133,6 +2146,7 @@ The client must ensure the server has an HTTPS certificate that was issued by a 
         "$method": "certificates-get"
       }
     }
+.
 
     {
       "result": {
@@ -2254,6 +2268,7 @@ Success or failure.
         }
       }
     }
+.
 
     {
       "result": {
@@ -2586,6 +2601,7 @@ If the lockbox key hash does not match for the account but the identity access p
     
       }
     }
+.
 
     {
       "result": {
@@ -2684,6 +2700,7 @@ Success or failure.
         }
       }
     }
+.
 
     {
       "result": {
@@ -2769,6 +2786,7 @@ The lockbox service will validate that the proof bundle is correct and if the ch
         }
       }
     }
+.
 
     {
       "result": {
@@ -2851,6 +2869,7 @@ If all the identities associated to the lockbox are removed then the lockbox acc
         }
       }
     }
+.
 
     {
       "result": {
@@ -2935,6 +2954,7 @@ No value names within the same namespace URL should be identical.
     
       }
     }
+.
 
     {
       "result": {
@@ -3025,6 +3045,7 @@ No value names within the same permission URL should be identical. The salt stri
     
       }
     }
+.
 
     {
       "result": {
@@ -3096,6 +3117,7 @@ List of resulting identities that resolve in the order requested as follows:
         }
       }
     }
+.
 
     {
       "result": {
@@ -3196,6 +3218,7 @@ List of resulting identities that resolve in the order requested as follows:
         }
       }
     }
+.
 
     {
       "result": {
@@ -3366,6 +3389,7 @@ This notification is allowed to be sent more than once to the outer frame as nee
         }
       }
     }
+.
 
     {
       "result": {
@@ -3567,6 +3591,7 @@ The lockbox key should only be sent to trusted identity providers, which will ac
         }
       }
     }
+.
 
     {
       "result": {
@@ -3626,6 +3651,7 @@ Success or failure.
         }
       }
     }
+.
 
     {
       "result": {
@@ -3723,6 +3749,7 @@ The server must validate the lockbox access and the identity access to complete 
         }
       }
     }
+.
 
     {
       "result": {
@@ -3756,6 +3783,7 @@ The server must validate the lockbox access and the identity access to complete 
         }
       }
     }
+.
 
     {
       "result": {
@@ -3820,6 +3848,7 @@ List of services available to peer contact services, containing:
     
       }
     }
+.
 
     {
       "result": {
@@ -3907,6 +3936,7 @@ The client should verify signature was generated by the certificate was issued b
         "salts": 2
       }
     }
+.
 
     {
       "result": {
@@ -4048,6 +4078,7 @@ The "all" or "some" permissions for relationships that allow a contact to receiv
         }
       }
     }
+.
 
     {
       "result": {
@@ -4145,6 +4176,7 @@ The "publish to relationships" section is only returned if the contact requestin
         }
       }
     }
+.
 
     {
       "result": {
@@ -4231,6 +4263,7 @@ If the document version or lineage is specified then the document version and li
         }
       }
     }
+.
 
     {
       "result": {
@@ -4299,6 +4332,7 @@ The server only allows subscriptions where permissions allow.
         }
       }
     }
+.
 
     {
       "result": {
@@ -4390,6 +4424,7 @@ Clients should consider documents with newer lineage to be "newer" regardless of
         }
       }
     }
+.
 
     {
       "result": {
@@ -4497,6 +4532,7 @@ If a Section-B of the public peer file is not present, the peer does not wish to
         }
       }
     }
+.
 
     {
       "result": {
@@ -4572,6 +4608,7 @@ If the client is done with the current session it may immediately disconnect aft
         }
       }
     }
+.
 
     {
       "result": {
@@ -4624,6 +4661,7 @@ Since the client and server are the only entities that know the session ID, the 
         "$method": "session-keep-alive"
       }
     }
+.
 
     {
       "result": {
@@ -4679,6 +4717,7 @@ Map a channel in the multiplex stream to a remote party. This request must be is
         }
       }
     }
+.
 
     {
       "result": {
