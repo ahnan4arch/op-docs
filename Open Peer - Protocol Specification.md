@@ -1184,20 +1184,33 @@ The "0" package contains the following:
 
     * Nonce - this nonce should be validated as having only been seen once by the receiving client
     * Expiry - a time-stamp and this package must be verified as valid before the expiry or it's considered invalid
-    * Context - this identifier allows the stream to correlate with other upper layers and the meaning is externally defined / negotiated
+    * Context - (optional) this identifier allows the stream to correlate with other upper layers and the meaning is externally defined / negotiated
+    * Encoding - the encoding technique used for this package
+      * type - "pki" or "passphrase" - if "pki" then it's using public key encryption, if "passphrase" then the encoding is done with a passphrase / algorithm externally defined (typically correlated via the context)
+      * fingerprint - if "pki" the fingerprint of the remote party's public key used to encrypt this data
+      * algorithm - if "passphrase" is used, the algorithm to decode the keying materials
+      * proof - if "passphrase" is used, this field provides proof the correct decoding key is used to decrypt the stream
     * Algorithms - preference ordered set of algorithms supported by the client; once an algorithm is marked as supported it cannot be removed from subsequent "0" package updates.
     * List of keys, with each key containing:
-      * key ID - this corresponds to the algorithm selection ID of which key to use in any subsequent decryption
-      * algorithm - the algorithm to use when decrypting payloads using this key ID
+      * key index - this corresponds to the algorithm selection index of which key to use in any subsequent decryption
+      * algorithm - the algorithm to use when decrypting payloads using this key index
       * algorithm input data - each algorithm requires its own set of keying information required for decryption, which is contained here. All sensitive data is encrypted using the public key of the remote party
 
-For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm, the following algorithm input information is used:
+For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with "pki", the following algorithm input information is used:
 
-  * key - the 32 byte AES key, base64(rsa_encrypt(`<remote-public-key>`, `<32-byte-aes-key>`))
+  * secret - the 32 byte AES key, base64(rsa_encrypt(`<remote-public-key>`, `<32-byte-aes-key>`))
   * iv - the 16 byte AES initialization vector, base64(rsa_encrypt(`<remote-public-key>`, `<16-byte-aes-iv>`))
   * hmacIntegrityKey - the initial secret key input string, base64(rsa_encrypt(`<remote-public-key>`, `<integrity-passphrase>`))
 
-When the mandatory key is used, the AES CFB is initialized with these values and will continue to encrypt payloads using this keying until a new "0" package arrives. Once a new "0" package arrives all keying material is reset and forgotten and the algorithms with new keying information for subsequent messages are used for messages in a stream. The hmac is calculated using the following algorithm, hmac(`<integrity-passphrase>`, `<encrypted-message>`)). The AES key and integrity passphrase remains the same until a new "0" package is sent, but the IV is changed for every message. The next IV used for the keying selected is calculated based upon the hash of the previous IV for the selected keying and previous hmac integrity value, next_iv = hash(hex(`<previous-iv>`) + ":" + hex(`<previous-integrity-hmac>`)).
+For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with a "passphrase", the following can be used to encode/decode the input information:
+
+  * secret - the 32 byte AES key, hex(`<salt>`) + ":" + base64(encrypt(`<32-byte-aes-key>`)), where key = hmac(`<external-passphrase>`, "keying:" + `<nonce>`), iv = `<salt>`
+  * iv - the 16 byte AES initialization vector, hex(`<salt>`) + ":" + base64(encrypt(`<16-byte-aes-iv>`)), where key = hmac(`<external-passphrase>`, "keying:" + `<nonce>`), iv = `<salt>`
+  * hmacIntegrityKey - the initial secret key input string, hex(`<salt>`) + ":" + base64(encrypt(`<integrity-passphrase>`)), where key = hmac(`<external-passphrase>`, "keying:" + `<nonce>`), iv = `<salt>`
+
+  The proof for correct keying material is calculated as follows: proof = hex(hmac(`<external-passphrase>`, "keying:" + `<nonce>`))
+
+When the mandatory key is used, the AES CFB is initialized with these values and will continue to encrypt payloads using this keying until a new "0" package arrives. Once a new "0" package arrives all keying material is reset and forgotten and the algorithms with new keying information for subsequent messages are used for messages in a stream. The hmac is calculated using the following algorithm, hmac(`<integrity-passphrase>`, "integrity:" + hex(hash(`<decrypted-message>`)) + ":" hex(`<iv>`)). The AES key and integrity passphrase remains the same until a new "0" package is sent, but the IV is changed for every message. The next IV used for the keying selected is calculated based upon the hash of the previous IV for the selected keying and previous hmac integrity value, next_iv = hash(hex(`<previous-iv>`) + ":" + hex(`<previous-integrity-hmac>`)).
 
 Example of the "0" package is JSON in place text with the following data in the bundle:
 
@@ -1208,6 +1221,18 @@ Example of the "0" package is JSON in place text with the following data in the 
           "nonce": "11a9960ebfe2287c1e235aceb912d8d54532be05",
           "context": "8c7de9247c0c6ba629c61eed5bb1878b37b8234d:cabc3aaea9caa97a77e30a6b011c734b5cb011fd",
           "expires": "348498329",
+    
+          "encoding": {
+            "type": "pki",
+            "fingerprint": "a634858f530ada1c77d26fcd32ed75914ae863b9",
+    
+            "-or-": "",
+    
+            "type": "passphrase",
+            "algorithm": "http://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
+            "proof": "a634858f530ada1c77d26fcd32ed75914ae863b9",
+          },
+    
           "algorithms": {
             "algorithm": [
               "http://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
@@ -1217,28 +1242,28 @@ Example of the "0" package is JSON in place text with the following data in the 
           "keys": {
             "key": [
               {
-                "$id": 1,
+                "index": 1,
                 "algorithm": "http://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
                 "inputs": {
-                  "key": "Y21wclpXd...HFjbXgzWlhKbA==",
+                  "secret": "Y21wclpXd...HFjbXgzWlhKbA==",
                   "iv": "Y21wclpXd...HFjbXgzWlhKbA==",
                   "hmacIntegrityKey": "VjFSSmVHUXlUbk5qU...aHVaV3hrYzJGRmRHbFJWREE1"
                 }
               },
               {
-                "$id": 2,
+                "index": 2,
                 "algorithm": "http://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
                 "inputs": {
-                  "key": "WTIxd2NscFhkSEZq...YlhneldsaEtiQT09",
+                  "secret": "WTIxd2NscFhkSEZq...YlhneldsaEtiQT09",
                   "iv": "V1RJeGQyTnNjRmhrTGk...bGhuZWxkc2FFdGlRVDA5",
                   "hmacIntegrityKey": "ZmpGU1NtVkhVW...MQ=="
                 }
               },
               {
-                "$id": 3,
+                "index": 3,
                 "algorithm": "http://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-16-16-16-md5-md5",
                 "inputs": {
-                  "key": "Wm1wR1d4Vlltc...mtwWFVrVkZNUT09",
+                  "secret": "Wm1wR1d4Vlltc...mtwWFVrVkZNUT09",
                   "iv": "V20xd1IxZDRWbGx...dGVnJWa1pOVVQwOQ==",
                   "hmacIntegrityKey": "VjIweGQxSXhaRFJX...WUXdPUT09"
                 }
