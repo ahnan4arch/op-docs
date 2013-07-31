@@ -1182,7 +1182,7 @@ The "0" package contains the following:
 
   * Signed keying bundle including:
 
-    * sequence number - for every "0" package, this sequence number starts at 0 and creases by 1 for each "0" package received
+    * sequence number - for every "0" package, this sequence number starts at 0 and increases by 1 for each "0" package received
     * Nonce - this nonce should be validated as having only been seen once by the receiving client
     * Expiry - a time-stamp and this package must be verified as valid before the expiry or it's considered invalid
     * Context - (optional) this identifier allows the stream to correlate with other upper layers and the meaning is externally defined / negotiated
