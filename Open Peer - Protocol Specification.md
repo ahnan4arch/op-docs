@@ -4717,8 +4717,9 @@ Map a channel in the multiplex stream to a remote party. This request must be is
 
    * channel number - channel number to allocate
    * nonce - a client defined one time use value
+   * context - a context ID representing the context ID of the issuer of the request
    * relay access token - token as returned during peer finder session create (to connect to this session)
-   * relay access secret proof - proof = hex(hash("proof:" + `<client-nonce>` + ":" + `<channel-number>` + ":" hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<context>` + ":" + `<expires>` + ":" + `<relay-access-token>` + ":channel-map"))))
+   * relay access secret proof - proof = hex(hash("proof:" + `<client-nonce>` + ":" + `<context>` + ":" + `<channel-number>` + ":" + `<expires>` + ":" + hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<relay-access-token>` + ":channel-map"))))
    * access secret proof expiry - expiry time of the access secret proof
 
 ### Outputs
@@ -4802,7 +4803,7 @@ This is the request to find a peer that includes the proof of permission to cont
       * host - host where to connect to the finder relay
       * port - port to connect to the finder relay
       * access token - token as returned during peer finder session create
-      * access secret proof (encrypted) - encrypted version of access secret proof, proof = base64(encrypt(`<key>`, hex(hmac(`<access-secret>`, "finder-relay-access-validate:" + `<context>` + ":" + `<expires>` + ":" + `<access-token>` + ":channel-map")))), where key = hmac(`<peer-secret>`, "proof:" + `<access-token>`), iv = hash(`<access-token>`)
+      * access secret proof (encrypted) - encrypted version of access secret proof, proof = base64(encrypt(`<key>`, hex(hmac(`<access-secret>`, "finder-relay-access-validate:" + `<access-token>` + ":channel-map")))), where key = hmac(`<peer-secret>`, "proof:" + `<access-token>`), iv = hash(`<peer-secret>` + ":" + `<access-token>`)
       * access secret proof expiry - expiry time of the access secret proof
   * Signed by requesting peer
 
