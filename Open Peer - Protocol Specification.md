@@ -4719,7 +4719,7 @@ Map a channel in the multiplex stream to a remote party. This request must be is
    * nonce - a client defined one time use value
    * context - a context ID representing the context ID of the issuer of the request
    * relay access token - token as returned during peer finder session create (to connect to this session)
-   * relay access secret proof - proof = hex(hash("proof:" + `<client-nonce>` + ":" + `<context>` + ":" + `<channel-number>` + ":" + `<expires>` + ":" + hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<relay-access-token>` + ":channel-map"))))
+   * proof of relay access secret proof = hex(hash("proof:" + `<client-nonce>` + ":" + `<context>` + ":" + `<channel-number>` + ":" + `<expires>` + ":" + hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<relay-access-token>` + ":channel-map"))))
    * access secret proof expiry - expiry time of the access secret proof
 
 ### Outputs
