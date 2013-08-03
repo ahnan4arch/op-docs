@@ -1374,19 +1374,18 @@ The following names apply when multiplexing JSON signaling over a multiplexed ch
   * multiplexed-json-mls/tls-web-socket - JSON signaling using MLS over secure web sockets
 
 
-General Request, Reply, Notify and Result Formation Rules
-=========================================================
+General Request, Notify and Result Formation Rules
+==================================================
 
 Open Peer has four types of messages:
 
   * request - the request types requires a "result" as a response to the request whose ID matches the request.
   * result - a result is in response to a request whose ID must match the request
-  * reply - this is a special case "reply" to a request during the find where the finder returns an immediate result to the request but each peer location can give its own reply with the same ID as the request subsequently
   * notify - this is a special type of request whose result is ignored and not required (and no response is presumed to occur with a notify type)
 
 All request types and results use a simplified JSON format. The messages are sent either over HTTPS/TLS/MLS/Message or over RUDP/UDP or SCP protocols. Alternative protocols are acceptable so long as they maintain the integrity and public / private key aspects of these protocols.
 
-Every request must include the federated domain which the request is being processed and the application ID associated with the request (the result / reply should use the application ID of the original request). Every request type must include an ID and a handler service and method being invoked (to assist with message handling, processing and routing). The ID must be cryptographically strong and random thus checks to see which data channel the response comes on is not required. Every result message must mirror the request type's ID and include a time-stamp to assist with detecting network time problems (whereas the timestamp is optional on request types).
+Every request must include the federated domain which the request is being processed and the application ID associated with the request (the result should use the application ID of the original request). Every request type must include an ID and a handler service and method being invoked (to assist with message handling, processing and routing). The ID must be cryptographically strong and random thus checks to see which data channel the response comes on is not required. Every result message must mirror the request type's ID and include a time-stamp to assist with detecting network time problems (whereas the timestamp is optional on request types).
 
 Even though all requests / responses are written in human readable form in this document, on-the-wire requests and responses should be written for favor of size efficiency. The recommended method is the Open Peer canonical form using the algorithm for the canonicalization of JSON signatures as specified in this document. This ensures the wire format is optimal on the wire since the canonical form is fairly compact (although if a compression algorithm is applied to the message at a higher layer then the wire savings might become moot).
 
@@ -4968,7 +4967,7 @@ This is the result to the request and it returns a list of locations that the pe
 
 ### Security Considerations
 
-Since the request was successfully issued, the information contained in the details section of the Peer Location Register Request of the peer being contacted is returned to the requester. The requester will then know how many locations will be contacted and where to expect a reply.
+Since the request was successfully issued, the information contained in the details section of the Peer Location Register Request of the peer being contacted is returned to the requester. The requester will then know how many locations will be contacted and where to expect a notification reply.
 
 ### Example
 
@@ -5078,12 +5077,12 @@ This request is forwarded from the replying peer's finder to the replying peer.
     }
 
 
-Peer Location Find Reply (E)
-----------------------------
+Peer Location Find Reply Notification (E)
+-----------------------------------------
 
 ### Purpose
 
-This reply is sent directly from the replying peer to the requesting peer's finder (by the replying peer creating a direct connection from the replying peer to the requesting peer's finder and using the relay credentials to create a "channel-map" with the requesting peer).
+This reply notification is sent directly from the replying peer to the requesting peer's finder (by the replying peer creating a direct connection from the replying peer to the requesting peer's finder and using the relay credentials to create a "channel-map" with the requesting peer).
 
 ### Outputs
 
@@ -5113,7 +5112,7 @@ This request must be sent over a secure channel with MLS.
 ### Example
 
     {
-      "reply": {
+      "notify": {
         "$domain": "domain.com",
         "$appid": "xyz123",
         "$id": "abc123",
@@ -5180,8 +5179,8 @@ This request must be sent over a secure channel with MLS.
 
 
 
-Peer Location Find Reply (F)
-----------------------------
+Peer Location Find Reply Notification (F)
+-----------------------------------------
 
 ### Purpose
 
@@ -5198,7 +5197,7 @@ This request must be sent over a secure channel with MLS.
 ### Example
 
     {
-      "reply": {
+      "notify": {
         "$domain": "domain.com",
         "$appid": "xyz123",
         "$id": "abc123",
@@ -5287,8 +5286,8 @@ Same as Peer Location Find Request (D)
     }
 
 
-Peer Location Find Reply (I)
-----------------------------
+Peer Location Find Reply Notification (I)
+-----------------------------------------
 
 ### Purpose
 
@@ -5305,7 +5304,7 @@ Same as Peer Location Find Reply (E)
 ### Example
 
     {
-      "reply": {
+      "notify": {
         "$domain": "domain.com",
         "$id": "abc123",
         "$handler": "peer-finder",
@@ -5370,8 +5369,8 @@ Same as Peer Location Find Reply (E)
     }
 
 
-Peer Location Find Reply (J)
-----------------------------
+Peer Location Find Reply Notification (J)
+-----------------------------------------
 
 ### Purpose
 
@@ -5383,12 +5382,12 @@ This is the forwarded reply from the requesting peer's finder to the requesting 
  
 ### Security Considerations
 
-Same as Peer Location Find Reply (F)
+Same as Peer Location Find Reply Notification (F)
 
 ### Example
 
     {
-      "reply": {
+      "notify": {
         "$id": "abc123",
         "$handler": "peer-finder",
         "$method": "peer-location-find",
@@ -5410,7 +5409,7 @@ Peer Identify Request
 
 ### Purpose
 
-This request notifies the peer that responded to the find reply of the original requesting peer's identifying information. This request must be the first request sent from the peer that initiated the find request to the peer that replied to the find request.
+This request notifies the peer that responded to the find reply notification of the original requesting peer's identifying information. This request must be the first request sent from the peer that initiated the find request to the peer that replied to the find request.
 
 ### Inputs
 
