@@ -4761,6 +4761,49 @@ Map a channel in the multiplex stream to a remote party. This request must be is
     }
 
 
+Channel Map Notify
+------------------
+
+### Purpose
+
+This notification is sent from the finder server to a client with a session whose credential were used in a channel map request by another client. This notification gives context for a channel about to be received on a different channel.
+
+### Inputs
+
+   * channel number - channel number that the finder will allocate for use with the incoming channel
+   * nonce - a finder server defined one time use value
+   * context - a context ID representing the context ID of the issuer of the request
+   * relay access token - token as returned during peer finder session create (to connect to this session)
+   * proof of relay access secret proof = hex(hash("proof:" + `<client-nonce>` + ":" + `<context>` + ":" + `<channel-number>` + ":" + `<expires>` + ":" + hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<relay-access-token>` + ":channel-map-notify"))))
+   * access secret proof expiry - expiry time of the access secret proof
+
+### Outputs
+
+
+### Security Considerations
+
+### Example
+
+    {
+      "notify": {
+        "$domain": "domain.com",
+        "$appid": "xyz123",
+        "$id": "abc123",
+        "$handler": "peer-finder",
+        "$method": "channel-map",
+    
+        "channel": 5,
+        "nonce": "6771816e06b7b6f5d24f0d65df018dd256a31027",
+        "relay": {
+          "context": "3b5db5880803d91f2ba9ca522c558fd1c545c28e",
+          "accessToken": "9d934822ccca53ac6e16e279830f4ffe3cfe1d0e",
+          "accessSecretProof": "SSByZWFsbHk...gaGF0ZSBTRFA=",
+          "accessSecretProofExpires": 3884383
+        }
+      }
+    }
+
+
 Peer Location Find Request (single point to single point)
 ---------------------------------------------------------
 
