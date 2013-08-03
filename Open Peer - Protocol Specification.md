@@ -4716,9 +4716,10 @@ Map a channel in the multiplex stream to a remote party. This request must be is
 
    * channel number - channel number to allocate
    * nonce - a client defined one time use value
-   * context - a context ID representing the context ID of the issuer of the request
+   * localContext - a context ID representing the context ID of the issuer of the request
+   * remoteContext - a context ID representing the context ID of the remote relay where this request is being connected
    * relay access token - token as returned during peer finder session create (to connect to this session)
-   * proof of relay access secret proof = hex(hash("proof:" + `<client-nonce>` + ":" + `<context>` + ":" + `<channel-number>` + ":" + `<expires>` + ":" + hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<relay-access-token>` + ":channel-map"))))
+   * proof of relay access secret proof = hex(hash("proof:" + `<client-nonce>` + ":" + `<local-context>` + ":" + `<channel-number>` + ":" + `<expires>` + ":" + hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<relay-access-token>` + ":" + `<remote-context>` + ":channel-map"))))
    * access secret proof expiry - expiry time of the access secret proof
 
 ### Outputs
@@ -4739,7 +4740,8 @@ Map a channel in the multiplex stream to a remote party. This request must be is
         "channel": 5,
         "nonce": "6771816e06b7b6f5d24f0d65df018dd256a31027",
         "relay": {
-          "context": "3b5db5880803d91f2ba9ca522c558fd1c545c28e",
+          "localContext": "a497f346db82ae34c2d9b7f62e34b9757d211bef",
+          "remoteContext": "3b5db5880803d91f2ba9ca522c558fd1c545c28e",
           "accessToken": "9d934822ccca53ac6e16e279830f4ffe3cfe1d0e",
           "accessSecretProof": "SSByZWFsbHk...gaGF0ZSBTRFA=",
           "accessSecretProofExpires": 3884383
@@ -4771,13 +4773,13 @@ This notification is sent from the finder server to a client with a session whos
 
    * channel number - channel number that the finder will allocate for use with the incoming channel
    * nonce - a finder server defined one time use value
-   * context - a context ID representing the context ID of the issuer of the request
+   * localContext - the context ID representing the local session's context ID from where the relay access credentials were granted
+   * remoteContext - a context ID representing the local context ID of the party party that issued the Channel Map Request
    * relay access token - token as returned during peer finder session create (to connect to this session)
-   * proof of relay access secret proof = hex(hash("proof:" + `<client-nonce>` + ":" + `<context>` + ":" + `<channel-number>` + ":" + `<expires>` + ":" + hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<relay-access-token>` + ":channel-map-notify"))))
+   * proof of relay access secret proof = hex(hash("proof:" + `<client-nonce>` + ":" + `<remote-context>` + ":" + `<channel-number>` + ":" + `<expires>` + ":" + hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<relay-access-token>` + ":" + `<local-context>` + ":channel-map-notify"))))
    * access secret proof expiry - expiry time of the access secret proof
 
 ### Outputs
-
 
 ### Security Considerations
 
@@ -4794,7 +4796,8 @@ This notification is sent from the finder server to a client with a session whos
         "channel": 5,
         "nonce": "6771816e06b7b6f5d24f0d65df018dd256a31027",
         "relay": {
-          "context": "3b5db5880803d91f2ba9ca522c558fd1c545c28e",
+          "localContext": "3b5db5880803d91f2ba9ca522c558fd1c545c28e",
+          "remoteContext": "a497f346db82ae34c2d9b7f62e34b9757d211bef",
           "accessToken": "9d934822ccca53ac6e16e279830f4ffe3cfe1d0e",
           "accessSecretProof": "SSByZWFsbHk...gaGF0ZSBTRFA=",
           "accessSecretProofExpires": 3884383
@@ -4845,7 +4848,7 @@ This is the request to find a peer that includes the proof of permission to cont
       * host - host where to connect to the finder relay
       * port - port to connect to the finder relay
       * access token - token as returned during peer finder session create
-      * access secret proof (encrypted) - encrypted version of access secret proof, proof = base64(encrypt(`<key>`, hex(hmac(`<access-secret>`, "finder-relay-access-validate:" + `<access-token>` + ":channel-map")))), where key = hmac(`<peer-secret>`, "proof:" + `<access-token>`), iv = hash(`<peer-secret>` + ":" + `<access-token>`)
+      * access secret proof (encrypted) - encrypted version of access secret proof, proof = base64(encrypt(`<key>`, hex(hmac(`<access-secret>`, "finder-relay-access-validate:" + `<access-token>` + ":" + `<context>` + ":channel-map")))), where key = hmac(`<peer-secret>`, "proof:" + `<access-token>`), iv = hash(`<peer-secret>` + ":" + `<access-token>`)
       * access secret proof expiry - expiry time of the access secret proof
   * Signed by requesting peer
 
@@ -5087,7 +5090,7 @@ This reply notification is sent directly from the replying peer to the requestin
 ### Outputs
 
   * Digest value from signature sent in original request - the reply location might not have the ability to validate the signature of the request but the reply location must validate the signature's hash value is correct and copy this value back to the original requester bundled in its own signed package (since the requester knows the original value and must have the public peer file of the reply location to validate the reply's bundle). This allows the requester to validate the original request remained non-tampered throughout and ignore replies where tampering might have occurred.
-  * Context - this identifier is combined with the remote peer's context to form the "requester:reply" context ID for the MLS layer as well as the userFrag for ICE negotiation.
+  * Context - this identifier is combined with the remote peer's context to form the "requester" / "reply" context ID pairing for the MLS layer as well as the userFrag for ICE negotiation.
   * Peer secret - this key passphrase is the password used for ICE negotiation, as it's sent over MLS directly to the receiving peer there's no need to encrypt it
   * Location details
     * Location ID of requesting location
