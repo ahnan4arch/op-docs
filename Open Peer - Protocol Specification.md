@@ -4826,8 +4826,10 @@ This is the request to find a peer that includes the proof of permission to cont
   * Client nonce - cryptographically random onetime use string
   * Find secret proof - i.e. hex(hmac(`<find-secret-from-remote-public-peer-file-section-B>`, "proof:" + `<client-nonce>` + ":" + expires))
   * Find proof expires
-  * Context - the is the requester's part of the context ID. This identifier is combined with the remote peer's context to form the "requester:reply" context ID for the MLS layer as well as the userFrag for ICE negotiation.
+  * Context - the is the requester's part of the context ID. This identifier is combined with the remote peer's context to form the "requester" / "reply" context ID for MLS
   * Peer secret (encrypted) - peer secret is a random passphrase which is then encrypted using the public key of the peer receiving the find request - this key is password used for ICE negotiation, peer secret encrypted = base64(rsa_encrypt(`<remote-public-peer-file-public-key>`, `<peer-secret>`))
+  * ICE username frag - the username fragment for ICE negotiation
+  * ICE password encrypted - the password passphrase for ICE negotiation, encrypted data = hex(`<iv>`) + ":" + encrypt(`<key>`, `<ice-password>`), where key = hash(`<peer-secret>`), iv = `<random>`
   * Location details
     * Location ID of requesting location
     * Contact ID of requesting location
@@ -4848,7 +4850,7 @@ This is the request to find a peer that includes the proof of permission to cont
       * host - host where to connect to the finder relay
       * port - port to connect to the finder relay
       * access token - token as returned during peer finder session create
-      * access secret proof (encrypted) - encrypted version of access secret proof, proof = base64(encrypt(`<key>`, hex(hmac(`<access-secret>`, "finder-relay-access-validate:" + `<access-token>` + ":" + `<context>` + ":channel-map")))), where key = hmac(`<peer-secret>`, "proof:" + `<access-token>`), iv = hash(`<peer-secret>` + ":" + `<access-token>`)
+      * access secret proof (encrypted) - encrypted version of access secret proof, encrypted proof = hex(`<iv>`) + ":" + encrypt(`<key>`, `<proof>`), where proof = hex(hmac(`<access-secret>`, "finder-relay-access-validate:" + `<access-token>` + ":" + `<context>` + ":channel-map")), key = hash(`<peer-secret>`), iv = `<random>`
       * access secret proof expiry - expiry time of the access secret proof
   * Signed by requesting peer
 
@@ -4885,6 +4887,9 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
             "context": "3b5db5880803d91f2ba9ca522c558fd1c545c28e",
             "peerSecretEncrypted": "ODVkMmY4ZjJiMjBlNTVkZ...0MmQzZjE0NDgzNTY3YzE5NzFkMw==",
     
+            "iceUsernameFrag": "b92f7c1f6285d230796bb89bca57bcf9",
+            "icePasswordEncrypted": "497787ddfd19843eb04479d67198010e:NDk3Nzg3...ZWIwNDQ3OWQ2NzE5ODAxMGU=",
+    
             "location": {
               "$id": "5a693555913da634c0b03139ec198bb8bad485ee",
               "contact": "peer://domain.com/541244886de66987ba30cf8d19544b7a12754042",
@@ -4905,7 +4910,7 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
                     "host": "100.200.10.20",
                     "port": 32113,
                     "accessToken": "9d934822ccca53ac6e16e279830f4ffe3cfe1d0e",
-                    "accessSecretProofEncrypted": "U0RQIHN1Y2t...zIHJlbGFseSBiYWQ="
+                    "accessSecretProofEncrypted": "8b29fe4c606e370df6704ed0abb4e2b2:U0RQIHN1Y2t...zIHJlbGFseSBiYWQ="
                   }
                   {
                     "class": "ice",
@@ -5089,8 +5094,10 @@ This reply notification is sent directly from the replying peer to the requestin
 ### Outputs
 
   * Digest value from signature sent in original request - the reply location might not have the ability to validate the signature of the request but the reply location must validate the signature's hash value is correct and copy this value back to the original requester bundled in its own signed package (since the requester knows the original value and must have the public peer file of the reply location to validate the reply's bundle). This allows the requester to validate the original request remained non-tampered throughout and ignore replies where tampering might have occurred.
-  * Context - this identifier is combined with the remote peer's context to form the "requester" / "reply" context ID pairing for the MLS layer as well as the userFrag for ICE negotiation.
-  * Peer secret - this key passphrase is the password used for ICE negotiation, as it's sent over MLS directly to the receiving peer there's no need to encrypt it
+  * Context - this identifier is combined with the remote peer's context to form the "requester" / "reply" context ID pairing for MLS
+  * Peer secret - this key passphrase is the password used to encrypt data in the reverse direction (as it's sent over MLS directly to the receiving peer there's no need to encrypt it)
+  * ICE username frag - the username fragment for ICE negotiation
+  * ICE password - the password passphrase for ICE negotiation
   * Location details
     * Location ID of requesting location
     * Contact ID of requesting location
@@ -5128,6 +5135,9 @@ This request must be sent over a secure channel with MLS.
     
             "context": "a497f346db82ae34c2d9b7f62e34b9757d211bef",
             "peerSecret": "402a95986e81cfacb1d0668f240713f4ca556d73",
+    
+            "iceUsernameFrag": "219d07d37faee86a5a866ff3e363b790b3b98fbb",
+            "icePassword": "ed84448d05fde7f6b12442df3d07e169583226b4",
     
             "location": {
               "$id": "1f77425b06b33bfc1d9932a0716f3f2c92ec0e5",
