@@ -4903,10 +4903,9 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
                     "transport": "multiplexed-json-mls/tcp",
                     "type": "relay",
                     "host": "100.200.10.20",
-                    "port": "port",
+                    "port": 32113,
                     "accessToken": "9d934822ccca53ac6e16e279830f4ffe3cfe1d0e",
-                    "accessSecretProofEncrypted": "U0RQIHN1Y2t...zIHJlbGFseSBiYWQ=",
-                    "accessSecretProofExpires": 3884383
+                    "accessSecretProofEncrypted": "U0RQIHN1Y2t...zIHJlbGFseSBiYWQ="
                   }
                   {
                     "class": "ice",
