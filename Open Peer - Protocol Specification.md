@@ -3714,9 +3714,15 @@ This request proves that an identity login is valid and can be used to validate 
     * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-lookup-update"))
     * Expiry of the proof for the 'identity access secret' - a window in which access secret proof short term credentials are considered valid
     * Stable ID - a stable ID representing the user regardless of which identity is being used or the current peer contact ID, stable ID = hex(hash("stable-id:" + `<lockbox-domain>` + ":" + `<lockbox-account-id>`))
-    * Public peer file- the public peer file associated with the contact ID
+    * Identity URI - the full identity URI of the logged in user
+    * Identity provider - identity provider providing identity service
+    * Public peer file - the public peer file associated with the contact ID
     * Priority / weight - SRV like priority and weighting system to gage which identity discovered to be associated to the same peer contact have highest priority
-    * signed by public peer file specified (only if peer file is being set, otherwise no "identityBundle" will be present)
+    * contact proof bundle - signed bundle to be incorporated as part of the identity proof returned from identity-lookup
+      * stable ID - same value as passed into identity information (as part of the signed bundle)
+      * contact - the peer URI for the public peer file specified
+      * Identity URI - the full identity URI of the logged in user
+      * signed by public peer file specified (only if peer file is being set, otherwise no "identityBundle" will be present)
 
 ### Returns
 
@@ -3724,7 +3730,14 @@ Success or failure.
 
 ### Security Considerations
 
-The server must validate the lockbox access and the identity access to complete the update. The server must verify the stable ID has been calculated correctly.
+The server must validate the following:
+
+  * the identity access token/secret proof are valid
+  * the lockbox access and the identity access (via the lockbox-access-validate request)
+  * the stable IDs have been calculated correctly
+  * the identity URIs match those of the identity access token
+  * the contact URI matches the public peer file
+  * the contact proof bundle is signed correctly by the private key associated with the public peer file
 
 ### Example Association
 
