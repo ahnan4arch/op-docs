@@ -3745,7 +3745,6 @@ The server must validate the lockbox access and the identity access to complete 
           "accessSecretProofExpires": 43843298934
         },
         "identity": {
-          "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
           "accessSecretProofExpires": 43843298934,
