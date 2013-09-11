@@ -53,6 +53,8 @@ This request is sent from the outerframe to the inner frame to fetch identity cr
 
   * Rolodex server token - the access token to be used with the rolodex service. The server must ensure the token has a sufficient validity timeframe left for the rolodex service before returning to the client.
 
+If the Rolodex service is not supported for the particular identity a 404 error code will be returned for the result.
+
 ### Security Considerations
 
 As this request is optional, the client can detect if this request is available prior to sending by detecting if the "rolodex" service is available via the "Bootstrapper Service Requests -> Services Get Request". If the rolodex is listed for the identity provider's Bootstrapper Service then this request is allowed to be sent to the identity provider as part of the "Identity Access" sequence between the outer/inner frame messaging.
@@ -98,6 +100,25 @@ The exact meaning of the rolodex server token is arbitrary between the identity 
     
       }
     }
+
+If the identity doesn't support the Rolodex service the following is rerturned:
+
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$handler": "identity",
+        "$method": "identity-access-rolodex-credentials-get",
+        "$timestamp": 439439493,
+        "$id": "xyz123",
+    
+        "error": {
+          "$id": 404,
+          "#text": "Not Found"
+        }
+      }
+    }
+
 
 Rolodex Service Requests
 ========================
