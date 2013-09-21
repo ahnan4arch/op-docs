@@ -4788,7 +4788,7 @@ This notification is sent from the finder server to a client with a session whos
    * localContext - the context ID representing the local session's context ID from where the relay access credentials were granted
    * remoteContext - a context ID representing the local context ID of the party party that issued the Channel Map Request
    * relay access token - token as returned during peer finder session create (to connect to this session)
-   * proof of relay access secret proof = hex(hash("proof:" + `<client-nonce>` + ":" + `<remote-context>` + ":" + `<channel-number>` + ":" + `<expires>` + ":" + hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<relay-access-token>` + ":" + `<local-context>` + ":channel-map-notify"))))
+   * proof of relay access secret proof = hex(hash("proof:" + `<client-nonce>` + ":" + `<remote-context>` + ":" + `<channel-number>` + ":" + `<expires>` + ":" + hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<relay-access-token>` + ":" + `<local-context>` + ":channel-map"))))
    * access secret proof expiry - expiry time of the access secret proof
 
 ### Outputs
