@@ -4916,7 +4916,7 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
               "candidates": {
                 "candidate": [
                   {
-                    "namespace": "finder-relay",
+                    "namespace": "http://meta.openpeer.org/candidate/finder-relay",
                     "transport": "multiplexed-json-mls/tcp",
                     "type": "relay",
                     "host": "100.200.10.20",
@@ -4925,7 +4925,7 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
                     "accessSecretProofEncrypted": "8b29fe4c606e370df6704ed0abb4e2b2:U0RQIHN1Y2t...zIHJlbGFseSBiYWQ="
                   }
                   {
-                    "namespace": "ice",
+                    "namespace": "http://meta.openpeer.org/candidate/ice",
                     "transport": "json-mls/rudp",
                     "type": "srflx",
                     "foundation": "2130706431",
@@ -4938,7 +4938,7 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
                     }
                   },
                   {
-                    "namespace": "ice",
+                    "namespace": "http://meta.openpeer.org/candidate/ice",
                     "transport": "json-mls/rudp",
                     "type": "host",
                     "foundation": "1694498815",
@@ -5165,7 +5165,7 @@ This request must be sent over a secure channel with MLS.
               "candidates": {
                 "candidate": [
                   {
-                    "namespace": "ice",
+                    "namespace": "http://meta.openpeer.org/candidate/ice",
                     "transport": "json-mls/rudp",
                     "type": "srflx",
                     "foundation": "2130706431",
@@ -5178,7 +5178,7 @@ This request must be sent over a secure channel with MLS.
                     }
                   },
                   {
-                    "namespace": "ice",
+                    "namespace": "http://meta.openpeer.org/candidate/ice",
                     "transport": "json-mls/rudp",
                     "type": "host",
                     "foundation": "1694498815",
@@ -5358,7 +5358,7 @@ Same as Peer Location Find Reply (E)
               "candidates": {
                 "candidate": [
                   {
-                    "namespace": "ice",
+                    "namespace": "http://meta.openpeer.org/candidate/ice",
                     "transport": "json-mls/rudp",
                     "foundation": "43848384",
                     "ip": "75.43.32.12",
@@ -5370,7 +5370,7 @@ Same as Peer Location Find Reply (E)
                     }
                   },
                   {
-                    "namespace": "ice",
+                    "namespace": "http://meta.openpeer.org/candidate/ice",
                     "transport": "json-mls/rudp",
                     "foundation": "43243242",
                     "ip": "192.168.10.200",
