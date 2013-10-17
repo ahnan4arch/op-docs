@@ -10,6 +10,11 @@ const WAITFOR = require("waitfor");
 const PORT = process.env.PORT || 8080;
 const MODE = "view";
 
+var serviceUid = false;
+if (FS.existsSync(PATH.join(__dirname, "../service.json"))) {
+    serviceUid = JSON.parse(FS.readFileSync(PATH.join(__dirname, "../service.json"))).uid;
+}
+
 
 exports.main = function(callback) {
 
@@ -17,6 +22,13 @@ exports.main = function(callback) {
 
     return exports.getDocs(function(err, docs) {
         if (err) return callback(err);
+
+        app.use(function(req, res, next) {
+            if (serviceUid) {
+                res.setHeader("x-service-uid", serviceUid);
+            }
+            return next();
+        });
 
         // Github post-commit URL
         // @see https://help.github.com/articles/post-receive-hooks
