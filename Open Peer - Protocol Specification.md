@@ -5151,6 +5151,8 @@ This request must be sent over a secure channel with MLS.
             "iceUsernameFrag": "219d07d37faee86a5a866ff3e363b790b3b98fbb",
             "icePassword": "ed84448d05fde7f6b12442df3d07e169583226b4",
     
+            "final": false,
+    
             "location": {
               "$id": "1f77425b06b33bfc1d9932a0716f3f2c92ec0e5",
               "contact": "peer://domain.com/541244886de66987ba30cf8d19544b7a12754042",
