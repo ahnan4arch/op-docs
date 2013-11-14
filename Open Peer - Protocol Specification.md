@@ -19,7 +19,7 @@ Performing peer-to-peer approach to signaling has been notoriously difficult for
 
   1. Without a publicly addressable intermediate 'server' machine to initiate communication, two peers behind firewalls are never able to communicate with each other. Thus, a peer network almost always requires some sort of rendezvous and relay servers to initiate contact between peers behind firewalls (and firewalls tend to be used more frequently than not for end users).
 
-  2. Automatically promoting the few publicly addressable home machines into rendezvous and relay servers is not the best option. Average users tend to not want to have their home/work machines to be automatically promoted to rendezvous and relay servers since it consumes their bandwidth and costs them to relay traffic for others who "leech" off their bandwidth. This cost factor causes end users to intentionally shutdown protocols that promote end user machines into servers. Over time, the number of average users willing to have their machines operate as servers for the benefit of those leeching decreases relative to the number of those whom leech off those servers until the entire system collapses with a too great server/leech ratio. As an example, Skype's network collapsed for this very reason and they were forced to setup their own super nodes to handle the load.
+  2. Automatically promoting the few publicly addressable home machines into rendezvous and relay servers is not the best option. Average users tend to not want to have their home/work machines to be automatically promoted to rendezvous and relay servers since it consumes their bandwidth and costs them to relay traffic for others who "leech" off their bandwidth. This cost factor causes end users to intentionally shutdown protocols that promote end user machines into servers. Over time, the number of average users willing to have their machines operate as servers for the benefit of those leeching decreases relative to the number of those whom leech off those servers until the entire system collapses with a too great server / leech ratio. As an example, Skype's network collapsed for this very reason and they were forced to setup their own super nodes to handle the load.
 
   3. Some peer-to-peer networks require ports to be opened on a firewall to operate. Where possible, peers will register themselves with UPnP to open the ports when the firewall automatically. Unfortunately, many firewalls lack the ability to automatically open ports or actively disallow this feature for fear that this opens the network to security holes. If opening ports automatically is not possible then users are required to open ports manually. Thus only the technically savvy can perform this task and such peer networks tend to be limited to those who are technically savvy. This is not a universal solution since it assumes too much technical ability and responsibility of the end user.
 
@@ -2273,10 +2273,12 @@ This request notification is sent from the inner frame to the outer window as a 
     * true - notify the login window is ready to receive messages
   * Visibility:
     * true - notify the login window needs visibility
+  * Redirect
+    * a URL the outer page must redirect to immediately
 
 ### Returns
 
-Success or failure.
+Success or failure. In the case of redirection, the result is not guaranteed to be delivered to the inner window due to timing considerations but having redirection completed is considered proof that the result was successful.
 
 ### Security Considerations
 
@@ -2292,7 +2294,8 @@ Success or failure.
     
         "browser": {
           "ready": true,
-          "visibility": true
+          "visibility": true,
+          "redirect": "https://grantservice.com/validate"
         }
       }
     }
@@ -2324,6 +2327,9 @@ Once the browser window receives notification that it is ready, this request is 
     * Name - a human readable friendly name for the product
     * Image - a human visual image for the brand that must be square in shape.
     * Agent URL - a web page that can be rendered in a browser to obtain more information about the agent
+    * nonce - a one time use value as input into hashes
+    * access token - application's identifier with the grant service
+    * proof of 'application access secret' - proof that a passphrase the application has with the grant service is known, proof = hex(hmac(<agent-access-secret>, "application-access-validate:" + <client-nonce> + ":" + <expires> + ":" + <agent-access-token> + ":" + "namespace-grant-start"))
   * List of grant service challenges containing:
     * ID - a challenge ID that the server generated which the client application will have to authorize
     * Name - a human readable name for the service requesting the challenge
@@ -2346,6 +2352,8 @@ None.
 
 ### Security Considerations
 
+The server must verify that all nonce values have never been seen previously within the expiry window and none of the proofs have expired. If the agent has already been granted permission to the namespaces in question then the grant should be implied and auto-granted. If the agent and the grant challenge URL share the same domain then an auto-grant should be applied.
+
 ### Example
 
     {
@@ -2360,7 +2368,12 @@ None.
           "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
           "name": "hookflash",
           "image": "https://hookflash.com/brandsquare.png",
-          "url": "https://hookflash.com/agentinfo/"
+          "url": "https://hookflash.com/agentinfo/",
+    
+          "nonce": "c8574fef7e5655264ed92e307bb1c336",
+          "accessToken": "7bf8320b4f3068885b925074fe5af4f8",
+          "accessSecretProof": "cbed2026e4f534ab06c15a4c535f4461e52e7883",
+          "accessSecretProofExpires": "43737344"
         },
     
         "namespaceGrantChallenges": {
@@ -2388,7 +2401,7 @@ None.
               "name": "Provider Identity Service",
               "image": "https://provider.com/identity/identity.png",
               "url": "https://provider.com/identity/",
-    
+        
               "namespaces": {
                 "namespace": [
                   {
@@ -2536,7 +2549,7 @@ This request obtains access to a lockbox. Access is granted by way of login proo
   * Lockbox information
     * Lockbox domain - the domain hosting the lockbox
     * Lockbox account ID - (optional, if known) the assigned account ID for the lockbox
-    * Lockbox key "hash" - (optional) hash of the lockbox key, hex(hash(`lockbox-key`)). If this hash specified matches the hash in the database associated with the account ID then this hash can be used to login to the lockbox account (by specifying the lockbox account ID). If validated identity information is present and the hash value does not match the hash value in the database then all the content values stored in the lockbox must be deleted (but the associated identities and the namespace grants can stay). This type of scenario can happen if a user's password was reset (where the lockbox key was lost in the process).
+    * Lockbox passphrase "hash" - (optional) hash of the lockbox passphrase, hex(hash(`lockbox-passphrase`)). If this hash specified matches the hash in the database associated with the account ID then this hash can be used to login to the lockbox account (by specifying the lockbox account ID). If validated identity information is present and the hash value does not match the hash value in the database then all the content values stored in the lockbox must be deleted (but the associated identities and the namespace grants can stay). This type of scenario can happen if a user's password was reset (where the lockbox passphrase was lost in the process).
     * Lockbox reset flag - (optional) if specified and true, a new lockbox must be created for the identity specified (and an identity must be specified must be granted access) and this identity must become unassociated with any other existing lockbox accounts. If this identity was previously the only associated identity with a previous lockbox account then the previous lockbox account can be deleted entirely.
   * Agent
     * User agent - the user agent identification for the product, typically "name/version (os/system)"
@@ -2556,13 +2569,14 @@ This request obtains access to a lockbox. Access is granted by way of login proo
     * Lockbox access secret - a secret passphrase that can be used in combination to the "lockbox access token" to provide proof of previous successful login
     * Lockbox access expiry - the window in which the access key is valid (and should be sufficiently in the distant future for use as a long term key)
     * Lockbox domain - the domain hosting the lockbox
-    * Lockbox key "hash" - hash of the lockbox key as previously passed in and associated to the lockbox account.
+    * Lockbox passphrase "hash" - hash of the lockbox passphrase as previously passed in and associated to the lockbox account.
   * Grant service challenge (optional, if challenge is required)
     * ID - a challenge ID that the server generated which the client application will have to authorize
     * Name - a human readable name for the service requesting the challenge
     * Image - a branded image representing the service requesting the challenge
     * URL - a browser URL where the user can go to obtain more information about this service requesting the challenge
     * Domains - a list of domains the service will accept trusted signatures as proof
+    * Namespace URL - the namespace URL is the ID where the data is stored, access was requested but access was not previously granted
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored, access was requested and access was previously granted
     * Updated - time-stamp (or version number) of when entries in the namespace were last updated
@@ -2572,13 +2586,13 @@ This request obtains access to a lockbox. Access is granted by way of login proo
 
 ### Security Considerations
 
-Access to the lockbox does not grant access to the contents of the lockbox. The lockbox key must be obtained through an alternative method. Upon the server seeing namespaces used in conjunction with a grant ID where the namespace has not previously been granted, the lockbox will issue a "grant service challenge" to verify the user wishes to grant access to all those namespaces.
+Access to the lockbox does not grant access to the contents of the lockbox. The lockbox passphrase must be obtained through an alternative method. Upon the server seeing namespaces used in conjunction with a grant ID where the namespace has not previously been granted, the lockbox will issue a "grant service challenge" to verify the user wishes to grant access to all those namespaces.
 
-The server will validate the identity login via the identity service to access the account or validate the client has the correct lockbox key hash to access the account. An identity that has a different provider is considered a different identity. Thus an identity is deemed unique by its identity and its identity provider combined.
+The server will validate the identity login via the identity service to access the account or validate the client has the correct lockbox passphrase hash to access the account. An identity that has a different provider is considered a different identity. Thus an identity is deemed unique by its identity and its identity provider combined.
 
 If the lockbox reset flag is specified then a new account is created based on the identity and the existing account remains associated to the old identities, or the old account is removed if no other identities remain associated.
 
-If the lockbox key hash does not match for the account but the identity access passed into the account is valid and matches the account ID used then all data in all namespaces for the account must be wiped out. The lockbox key hash must become updated with the new key hash.
+If the lockbox passphrase hash does not match for the account but the identity access passed into the account is valid and matches the account ID used then all data in all namespaces for the account must be wiped out. The lockbox passphrase hash must become updated with the new key hash.
 
 ### Example
 
@@ -2655,6 +2669,17 @@ If the lockbox key hash does not match for the account but the identity access p
           "image": "https://provider.com/lockbox/lockbox.png",
           "url": "https://provider.com/lockbox/",
           "domains": "trust.com,trust2.com"
+    
+          "namespaces": {
+            "namespace": [
+              {
+                "$id": "https://domain.com/pemissionname"
+              },
+              {
+                "$id": "https://other.com/pemissionname"
+              }
+            ]
+          }
         },
     
         "namespaces": {
@@ -2763,7 +2788,7 @@ Success or failure.
 
 ### Security Considerations
 
-The lockbox service will validate that the proof bundle is correct and if the challenge ID is suitably proven for the grant ID previously specified. Once correctly proven, the lockbox will allow the grant ID access to those namespaces for the lockbox account specified.
+The lockbox service will validate that the proof bundle is correct and if the challenge ID is suitably proven for the grant ID previously specified. The lockbox must ensure the grant challenge bundle URL is the same URL specified in the original challenge bundle. Once correctly proven, the lockbox will allow the grant ID access to those namespaces for the lockbox account specified.
 
 ### Example
 
@@ -2946,7 +2971,7 @@ This request retrieves data contained in the lockbox.
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored
     * Updated - time-stamp (or version number) of when entries in the namespace were last updated
-    * List of values, each value encrypted with: encrypted value = `<salt-string>` + ":" + base64(key, value), where key = hmac(`<lockbox-key>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv = hash(`<salt-string>`)
+    * List of values, each value encrypted with: encrypted value = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<value>`), where key = hmac(`<lockbox-passphrase>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv = hash(`<salt-string>`)
 
 ### Security Considerations
 
@@ -3030,7 +3055,7 @@ This request retrieves data contained in the lockbox.
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored
-    * List of values, each value encrypted with: encrypted value = `<salt-string>` + ":" + base64(key, value), where key = hmac(`<lockbox-key>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv = hash(`<salt-string>`), or a value of "-" to remove a value. The values are merged together with existing values or the values are removed if they contain a value of "-".
+    * List of values, each value encrypted with: encrypted value = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<value>`)), where key = hmac(`<lockbox-passphrase>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv = hash(`<salt-string>`), or a value of "-" to remove a value. The values are merged together with existing values or the values are removed if they contain a value of "-".
 
 ### Returns
 
@@ -3359,6 +3384,67 @@ List of resulting identities that resolve in the order requested as follows:
 Identity Service Requests
 =========================
 
+
+Identity Access Validate Request
+--------------------------------
+
+### Purpose
+
+This request proves that an identity access is valid and can be used to validate an identity access is successful by way of a 3rd party.
+
+### Inputs
+
+  * Client nonce - a onetime use nonce, i.e. cryptographically random string
+  * Purpose - reason for validation (each service using this validation should have a unique purpose string)
+  * Identity information
+    * Identity access token - as returned from the "identity access complete" request
+    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":" + `<purpose>`))
+    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof short term credentials are considered valid
+    * Original identity URI
+    * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
+
+### Returns
+
+Success or failure.
+
+### Security Considerations
+
+### Example
+
+    {
+      "request": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "identity",
+        "$method": "identity-access-validate",
+    
+        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "purpose": "whatever",
+        "identity": {
+          "accessToken": "a913c2c3314ce71aee554986204a349b",
+          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+          "accessSecretProofExpires": 43843298934,
+    
+          "uri": "identity://domain.com/alice",
+          "provider": "domain.com"
+        }
+      }
+    }
+.
+
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "identity",
+        "$method": "identity-access-validate",
+        "$timestamp": 439439493
+      }
+    }
+
+
 Identity Access Inner Frame (web-page)
 --------------------------------------
 
@@ -3392,10 +3478,12 @@ This request notification is sent from the inner frame to the outer frame as a p
     * true - notify the login window is ready to receive messages
   * Visibility:
     * true - notify the login window needs visibility
+  * Redirect
+    * a URL the outer page must redirect to immediately
 
 ### Returns
 
-Success or failure.
+Success or failure. In the case of redirection, the result is not guaranteed to be delivered to the inner window due to timing considerations but having redirection completed is considered proof that the result was successful.
 
 ### Security Considerations
 
@@ -3413,7 +3501,8 @@ This notification is allowed to be sent more than once to the outer frame as nee
     
         "browser": {
           "ready": true,
-          "visibility": true
+          "visibility": true,
+          "redirect": "https://identity-service.com/login"
         }
       }
     }
@@ -3516,24 +3605,35 @@ This notification is sent from the inner browser window to the outer window as a
     * Identity access token - a verifiable token that is linked to the logged-in identity
     * Identity access secret - a secret passphrase that can be used in combination to the "identity access token" to provide proof of previous successful login
     * Identity access expiry - the window with sufficient long into-the-future time frame in which the access key long term credentials are valid
+    * Identity encrypted relogin key - the relogin key only has meaning to the identity service and it's encrypted, encrypted value = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<relogin-key>`)), where key = hmac(<encryption-passphrase-upon-grant-proof>, "identity:" + <identity-uri> + ":identityReloginKey"), iv = hash(<salt-string>)
   * Lock box information (optional, if known)
-      * Lockbox domain - if lockbox domain is known in advance, this is the domain for the lockbox to use
-      * Lockbox key - this is client side base-64 encoded lockbox key.
-      * Lockbox reset flag - this flag is used if the lockbox must be reset with a new password and all data within to be flushed.
+     * Lockbox domain - if lockbox domain is known in advance, this is the domain for the lockbox to use
+     * Twice encrypted lockbox passphrase - this is a lockbox passphrase which is encrypted twice, twice-encrypted-lockbox-passphrase = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<encrypted-lockbox-passphrase>`)), where key = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":lockboxKey"), iv = hash(`<salt-string>`), where encrypted-lockbox-passphrase = `<inner-salt-string>` + base64(encrypt(`<inner-key>`, `<lockbox-passphrase>`), inner-key = hmac(`<server-encryption-passphrase>`), "identity:" + `<identity-uri>`), iv=hash(`<inner-salt-string>`)
+     * Lockbox reset flag - this flag is used if the lockbox must be reset with a new password and all data within to be flushed.
+  * Encrypted server encryption passphrase - the passphrase used to encrypt sensitive information from the server (e.g. so that the server doesn't know the lockbox passphrase) encrypted using the encryption-passphrase-upon-grant-proof, where encrypted-server-encryption-passphrase = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<server-encrypted-passphrase>`)), where key = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":serverEncryptionKey"), iv = hash(`<salt-string>`)
+  * Grant service challenge (optional, if challenge is required)
+    * ID - a challenge ID that the server generated which the client application will have to authorize
+    * Name - a human readable name for the service requesting the challenge
+    * Image - a branded image representing the service requesting the challenge
+    * URL - a browser URL where the user can go to obtain more information about this service requesting the challenge
+    * Domains - a list of domains the service will accept trusted signatures as proof
+    * Namespace URLs - the list of URLs that require permission to continue
+  * Encryption passphrase upon grant proof (optional, if challenge is not required) - the outer passphrase used to decrypt the lockbox passphrase which has been twice encrypted.
 
 ### Returns
 
 ### Security Considerations
 
-The lockbox key should be decrypted locally in the JavaScript using something unavailable in the server, for example the user's password. Other information should be combined to create the encryption / decryption key to ensure two unique users with the same password do not share the same encryption key.
+The server encryption passphrase should be calculated locally in the JavaScript using something unavailable in the server, for example the user's password. Other information should be combined to create the encryption / decryption key to ensure two unique users with the same password do not share the same encryption key.
 
-An example formula might look like:
-
-lockbox-key = decrypt(key, `<lockbox-key-encrypted>`), where key = hmac(key_strectch(`<user-password>`), `<user-id>`), iv = hash(`<user-salt>`)
+An example formula for creating a "server-encryption-passphrase" might look like:
+server-encryption-passphrase = hex(hmac(key_strectch(`<user-password>`), `<user-id>`)), iv = hash(`<user-salt>`)
 
 Key stretching should be employed whenever using a weaker user generated non-cryptographically strong password. See: http://en.wikipedia.org/wiki/Key_stretching
 
-By using information not stored on a server, this ensures that should the server be hacked that the servers do not contain the correct information to decrypt the lockbox key. The downside is that should the password change the encryption key will need to be decrypted with the existing user password then re-encrypted using the new password. Further, if the old password is lost then the lockbox key is also lost (and thus all associated content can no longer be decrypted).
+By using information not stored on a server, this ensures that should the server be hacked that the servers do not contain the correct information to decrypt the lockbox passphrase. The downside is that should the password change the encryption key will need to be decrypted with the existing user password then re-encrypted using the new password. Further, if the old password is lost then the lockbox passphrase is also lost (and thus all associated content can no longer be decrypted).
+
+If the identity provider was not provided a relogin key it must challenge the agent with a grant challenge. This is to ensure the user is aware the agent is seeking access to their secure information in an untrusted environment like a website. If a relogin key was provided the "encryption passphrase upon grant proof" can be provided immediately without a grant challenge since the only way an agent could have obtained that is upon a providing previous proof.
 
 ### Example
 
@@ -3552,110 +3652,69 @@ By using information not stored on a server, this ensures that should the server
     
           "uri": "identity://domain.com/alice",
           "provider": "domain.com",
-          "reloginKey": "d2922f33a804c5f164a55210fe193327de7b2449-5007999b7734560b2c23fe81171af3e3-4c216c23"
+          "reloginKeyEncrypted": "11087e19d84cf0b736b02b847248f283964efb9d:ZDI5MjJmMzNhO...MmMyM2ZlODExNzFhZjNlMy00YzIxNmMyMw=="
         },
     
         "lockbox": {
           "domain": "domain.com",
-          "key": "V20x...IbGFWM0J5WTIxWlBRPT0=",
+          "keyEncrypted": "14900c10d3484e5bbdb0af34cde041cd00d4c214:V20x...IbGFWM0J5WTIxWlBRPT0=",
           "reset": false
-        }
-      }
-    }
-
-
-Identity Access Lockbox Update Request
---------------------------------------
-
-### Purpose
-
-This request is sent from the outer browser window to the inner window as a posted message to indicate that the login process has completed.
-
-### Inputs
-
-  * Client one time use nonce (cryptographically random string)
-  * Identity information
-    * Identity URI - the full identity URI of the logged in user
-    * Identity provider - identity provider providing identity service
-    * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":lockbox-update"))
-    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof short term credentials are considered valid
-  * Lock box information
-    * Lockbox domain - if lockbox domain is known in advance, this is the domain for the lockbox to use
-    * Lockbox key - this is base-64 encoded lockbox key
-
-### Returns
-
-Success or failure.
-
-### Security Considerations
-
-The lockbox key should be encrypted locally in JavaScript before being sent a server. This ensures the server does not contain the correct information to be able to decrypt the lockbox key. See "Identity Access Complete".
-
-The lockbox key should only be sent to trusted identity providers, which will act on the best interest of the user to protect the lockbox key.
-
-### Example
-
-    {
-      "request": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "identity",
-        "$method": "identity-access-lockbox-update",
-    
-        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
-        "identity": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934,
-       
-          "uri": "identity://domain.com/alice",
-          "provider": "domain.com"
         },
-        "lockbox": {
-          "domain": "domain.com",
-          "key": "V20x...IbGFWM0J5WTIxWlBRPT0="
-        }
+    
+        "serverEncryptionKeyEncrypted": "18439df4b73835aeaec4ae05810b811498db6760:MTg0MzlkZjRiNzM4MzVh...ODEwYjgxMTQ5OGRiNjc2MA==",
+    
+        "namespaceGrantChallenge": {
+          "$id": "1f15433f56f9c6decf9c17c95078fe1c",
+          "name": "Identity Service",
+          "image": "https://identity.com/identity/identity.png",
+          "url": "https://identity.com/identity/",
+          "domains": "trust.com,trust2.com",
+    
+          "namespaces": {
+            "namespace": [
+              {
+                "$id": "https://what.com/pemissionname"
+              },
+              {
+                "$id": "https://where.com/pemissionname"
+              }
+            ]
+          }
+        },
+    
+        "-or-": "",
+    
+        "encryptionKeyUponGrantProof": "0e232cbc3628a4ba7fefe553f1cb85797a79e3c4"
+    
       }
     }
-.
-
-    {
-      "result": {
-        "$domain": "provider.com",
-        "$appid": "xyz123",
-        "$id": "abd23",
-        "$handler": "identity",
-        "$method": "identity-access-lockbox-update",
-        "$timestamp": 439439493
-      }
-    }
 
 
-Identity Access Validate Request
---------------------------------
+Identity Namespace Grant Challenge Validate Request
+---------------------------------------------------
 
 ### Purpose
 
-This request proves that an identity access is valid and can be used to validate an identity access is successful by way of a 3rd party.
+This request proves that the grant ID challenge is proven valid by way of the namespace grant service. By providing this proof the identity service can be certain that a web application in an untrusted environment obtained user consent to access private information.
 
 ### Inputs
 
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
-  * Purpose - reason for validation (each service using this validation should have a unique purpose string)
-  * Identity information
+  * Identity information information
     * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":" + `<purpose>`))
+    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-namespace-grant-challenge-validate"))
     * Expiry of the proof for the 'identity access secret' - a window in which access secret proof short term credentials are considered valid
-    * Original identity URI
-    * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
+  * Grant service challenge as issued by the lockbox service bundled with signature as returned from the namespace grant service
 
 ### Returns
 
-Success or failure.
+Upon success:
+
+  * Encryption passphrase upon grant proof - the outer passphrase used to decrypt the lockbox passphrase which has been twice encrypted.
 
 ### Security Considerations
+
+The identity service will validate that the proof bundle is correct and if the challenge ID is suitably proven for the grant ID previously specified. The identity service must ensure the grant challenge bundle URL is the same URL specified in the original challenge bundle. Once correctly proven, the identity service will allow the application access to the key needed to decrypt sensitive information.
 
 ### Example
 
@@ -3664,19 +3723,47 @@ Success or failure.
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "identity",
-        "$method": "identity-access-validate",
+        "$handler": "identity-lockbox",
+        "$method": "lockbox-namespace-grant-challenge-validate",
     
-        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
-        "purpose": "whatever",
+        "nonce": "b7d4da923dffcee835906a167878f062d6d30143",
         "identity": {
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934,
+          "accessSecretProofExpires": 43843298934
+        },
     
-          "uri": "identity://domain.com/alice",
-          "provider": "domain.com"
+        "namespaceGrantChallengeBundle:" {
+          "namespaceGrantChallenge": {
+            "$id": "1f15433f56f9c6decf9c17c95078fe1c",
+            "name": "Provider Identity Service",
+            "image": "https://provider.com/identity/identity.png",
+            "url": "https://provider.com/identity/",
+    
+            "namespaces": {
+              "namespace": [
+                {
+                  "$id": "https://what.com/pemissionname"
+                },
+                {
+                  "$id": "https://where.com/pemissionname"
+                }
+              ]
+            }
+          },
+          "signature": {
+            "reference": "#1f15433f56f9c6decf9c17c95078fe1c",
+            "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "digestValue": "IUe324k...oV5/A8Q38Gj45i4jddX=",
+            "digestSigned": "MDAwMDAw...MGJ5dGVzLiBQbGVhc2UsIGQ=",
+            "key": {
+              "$id": "b7ef37...4a0d58628d3",
+              "domain": "provider.com",
+              "service": "namespace-grant"
+            }
+          }
         }
+    
       }
     }
 .
@@ -3686,11 +3773,15 @@ Success or failure.
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "identity",
-        "$method": "identity-access-validate",
-        "$timestamp": 439439493
+        "$handler": "identity-lockbox",
+        "$method": "lockbox-namespace-grant-challenge-validate",
+        "$timestamp": 439439493,
+    
+        "encryptionKeyUponGrantProof": "0e232cbc3628a4ba7fefe553f1cb85797a79e3c4"
+    
       }
     }
+
 
 
 Identity Lookup Update Request
@@ -3709,7 +3800,8 @@ This request proves that an identity login is valid and can be used to validate 
     * Lockbox access token - a verifiable token that is linked to the lockbox
     * Proof of 'lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":identity-lookup-update"))
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
-  * identity bundle information
+    * Lockbox passsphrase encrypted - the lockbox passphrase encrypted to protect the server from knowing the lockbox passphrase, where encrypted-lockbox-passphrase = `<salt-string>` + base64(encrypt(`<key>`, `<lockbox-passphrase>`), key = hmac(`<server-encryption-passphrase>`), "identity:" + `<identity-uri>`), iv=hash(`<salt-string>`)
+  * Identity bundle information
     * Identity access token - as returned from the "identity access complete" request
     * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-lookup-update"))
     * Expiry of the proof for the 'identity access secret' - a window in which access secret proof short term credentials are considered valid
@@ -3719,10 +3811,10 @@ This request proves that an identity login is valid and can be used to validate 
     * Public peer file - the public peer file associated with the contact ID
     * Priority / weight - SRV like priority and weighting system to gage which identity discovered to be associated to the same peer contact have highest priority
     * contact proof bundle - signed bundle to be incorporated as part of the identity proof returned from identity-lookup
-      * stable ID - same value as passed into identity information (as part of the signed bundle)
-      * contact - the peer URI for the public peer file specified
+      * Stable ID - same value as passed into identity information (as part of the signed bundle)
+      * Contact - the peer URI for the public peer file specified
       * Identity URI - the full identity URI of the logged in user
-      * signed by public peer file specified (only if peer file is being set, otherwise no "identityBundle" will be present)
+      * Signed by public peer file specified (only if peer file is being set, otherwise no "identityBundle" will be present)
 
 ### Returns
 
@@ -3752,15 +3844,19 @@ The server must validate the following:
         "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
           "$id": "123456",
-          "domain": "domain.com",
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
-        },
-        "identity": {
+    
           "accessToken": "a913c2c3314ce71aee554986204a349b",
           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
           "accessSecretProofExpires": 43843298934,
+    
+          "domain": "domain.com",
+          "keyEncrypted": "V20x...IbGFWM0J5WTIxWlBRPT0="
+        },
+    
+        "identity": {
+          "accessToken": "43cf3836c3ed86bbc00c0d0d8e02f8b2",
+          "accessSecretProof": "3a1db4981bd4f52510d7475e014c1fe1db2236a3",
+          "accessSecretProofExpires": 48383843,
     
           "uri": "identity://domain.com/alice",
           "provider": "domain.com",
