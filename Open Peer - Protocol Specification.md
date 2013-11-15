@@ -2327,9 +2327,10 @@ Once the browser window receives notification that it is ready, this request is 
     * Name - a human readable friendly name for the product
     * Image - a human visual image for the brand that must be square in shape.
     * Agent URL - a web page that can be rendered in a browser to obtain more information about the agent
-    * nonce - a one time use value as input into hashes
-    * access token - application's identifier with the grant service
-    * proof of 'application access secret' - proof that a passphrase the application has with the grant service is known, proof = hex(hmac(<agent-access-secret>, "application-access-validate:" + <client-nonce> + ":" + <expires> + ":" + <agent-access-token> + ":" + "namespace-grant-start"))
+    * Nonce - a one time use value as input into hashes
+    * Access token - application's identifier with the grant service
+    * Proof of 'application access secret' - proof that a passphrase the application has with the grant service is known, proof = hex(hmac(<agent-access-secret>, "application-access-validate:" + <client-nonce> + ":" + <expires> + ":" + <agent-access-token> + ":" + "namespace-grant-start"))
+    * Log - log level to output to logger, where values "none", "basic", "detail", "debug", "trace", "insane", default is "none"
   * List of grant service challenges containing:
     * ID - a challenge ID that the server generated which the client application will have to authorize
     * Name - a human readable name for the service requesting the challenge
@@ -2364,7 +2365,7 @@ The server must verify that all nonce values have never been seen previously wit
         "$handler": "namespace-grant",
         "$method": "namespace-grant-start",
     
-        "agent": {
+        "agent": {          
           "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
           "name": "hookflash",
           "image": "https://hookflash.com/brandsquare.png",
@@ -2374,6 +2375,8 @@ The server must verify that all nonce values have never been seen previously wit
           "accessToken": "7bf8320b4f3068885b925074fe5af4f8",
           "accessSecretProof": "cbed2026e4f534ab06c15a4c535f4461e52e7883",
           "accessSecretProofExpires": "43737344"
+    
+          "log": "trace"
         },
     
         "namespaceGrantChallenges": {
@@ -3533,6 +3536,7 @@ Once the browser window receives notification that it is ready, this request is 
     * Name - a human readable friendly name for the product
     * Image - a human visual image for the brand that must be square in shape.
     * Agent URL - a web page that can be rendered in a browser to obtain more information about the agent
+    * Log - log level to output to logger, where values "none", "basic", "detail", "debug", "trace", "insane", default is "none"
   * Base identity URI - base URI for identity (or full identity if known in advance)
   * Identity relogin key (optional) - a key to automatically relogin to an identity service when possible without prompting the user for a password and the meaning of the key is specific to the identity provider (the key is self-contained and includes all the information it needs to relogin but may not be capable of performing the relogin in which case the user will go through the normal login process)
   * Browser information
@@ -3573,7 +3577,9 @@ Once the inner frame receives this notification it is allowed to replace the out
           "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
           "name": "hookflash",
           "image": "https://hookflash.com/brandsquare.png",
-          "url": "https://hookflash.com/agentinfo/"
+          "url": "https://hookflash.com/agentinfo/",
+    
+          "log": "basic"
         },
     
         "identity": {
@@ -3618,7 +3624,7 @@ This notification is sent from the inner browser window to the outer window as a
     * URL - a browser URL where the user can go to obtain more information about this service requesting the challenge
     * Domains - a list of domains the service will accept trusted signatures as proof
     * Namespace URLs - the list of URLs that require permission to continue
-  * Encryption passphrase upon grant proof (optional, if challenge is not required) - the outer passphrase used to decrypt the lockbox passphrase which has been twice encrypted.
+  * Encryption passphrase upon grant proof (optional, if challenge is not required) - the outer passphrase used to decrypt the sensitive information from the identity service
 
 ### Returns
 
@@ -3710,11 +3716,18 @@ This request proves that the grant ID challenge is proven valid by way of the na
 
 Upon success:
 
-  * Encryption passphrase upon grant proof - the outer passphrase used to decrypt the lockbox passphrase which has been twice encrypted.
+  * Encryption passphrase upon grant proof - the passphrase used to decrypt sensitive information from the identity service
 
 ### Security Considerations
 
-The identity service will validate that the proof bundle is correct and if the challenge ID is suitably proven for the grant ID previously specified. The identity service must ensure the grant challenge bundle URL is the same URL specified in the original challenge bundle. Once correctly proven, the identity service will allow the application access to the key needed to decrypt sensitive information.
+The identity service must validate:
+
+ * the nonce has not been seen before
+ * the proof bundle is correct
+ * the grant ID was the same ID as previously specified in the challenge for this login scenario (hint: this ID can have encoded or hashed information incorporated in its value for stateless validation)
+ * the grant challenge bundle URL and permission URLs are the same URLs as specified in the original bundle
+
+Once correctly proven, the identity service will allow the application access to the key needed to decrypt sensitive login information.
 
 ### Example
 
@@ -3815,6 +3828,7 @@ This request proves that an identity login is valid and can be used to validate 
       * Contact - the peer URI for the public peer file specified
       * Identity URI - the full identity URI of the logged in user
       * Signed by public peer file specified (only if peer file is being set, otherwise no "identityBundle" will be present)
+  * Encryption passphrase upon grant proof - the passphrase was used to decrypt sensitive information from the identity provider
 
 ### Returns
 
@@ -3830,6 +3844,7 @@ The server must validate the following:
   * the identity URIs match those of the identity access token
   * the contact URI matches the public peer file
   * the contact proof bundle is signed correctly by the private key associated with the public peer file
+  * the encryption key upon grant proof was the same as generated by the identity service thus proving the client has the correct keying material (hint: encryption key can have other hashed or encoded information as part of the passphrase to ensure stateless server validation of the key)
 
 ### Example Association
 
@@ -3882,7 +3897,10 @@ The server must validate the following:
               "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
             }
           }
-        }
+        },
+    
+        "encryptionKeyUponGrantProof": "0e232cbc3628a4ba7fefe553f1cb85797a79e3c4"
+    
       }
     }
 .
@@ -3916,7 +3934,10 @@ The server must validate the following:
     
           "uri": "identity://domain.com/alice",
           "provider": "domain.com"      
-        }
+        },
+    
+        "encryptionKeyUponGrantProof": "0e232cbc3628a4ba7fefe553f1cb85797a79e3c4"
+    
       }
     }
 .
