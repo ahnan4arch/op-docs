@@ -238,7 +238,7 @@ A Public Peer File should contain the extension of ".peer"
 Section "A" (packaged and signed by identity's private key)
 -----------------------------------------------------------
 
-  * Algorithm to use for all hash computations and encryptions related to contents of the peer file (note: this does not apply to signed JSON signatures which have their own method to describe algorithms and key selection), the default algorithm is http://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5 (see the General Validation / Encryption Rules section).
+  * Algorithm to use for all hash computations and encryptions related to contents of the peer file (note: this does not apply to signed JSON signatures which have their own method to describe algorithms and key selection), the default algorithm is https://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5 (see the General Validation / Encryption Rules section).
   * Public peer file creation date
   * Public peer file expiry date
   * Salt signed by salt service's key
@@ -248,7 +248,7 @@ Section "A" (packaged and signed by identity's private key)
 Section "B" (packaged and signed by identity's private key)
 -----------------------------------------------------------
 
-  * Peer contact's full URI (to know how to locate the peer universally but does not directly reveal any identities). Peer's contact ID part of the full peer URI is calculated as follows: hex(hash("contact:" + `<public-peer-section-A-JSON-object>`)), where the hash algorithm used is "SHA256" for the default "http://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5" namespace. When the input `<public-peer-file-section-A-JSON-object>` is used in the hash, the same canonical algorithm method as the signature in section "A". The input into the algorithm is the entire section "A" bundle including the certificate signing the section bundle. Thus the input canonical sequence will always start start with the exact phrase (followed by the remaining information): {"sectionBundle":{"section":{"$id":"A",
+  * Peer contact's full URI (to know how to locate the peer universally but does not directly reveal any identities). Peer's contact ID part of the full peer URI is calculated as follows: hex(hash("contact:" + `<public-peer-section-A-JSON-object>`)), where the hash algorithm used is "SHA256" for the default "https://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5" namespace. When the input `<public-peer-file-section-A-JSON-object>` is used in the hash, the same canonical algorithm method as the signature in section "A". The input into the algorithm is the entire section "A" bundle including the certificate signing the section bundle. Thus the input canonical sequence will always start start with the exact phrase (followed by the remaining information): {"sectionBundle":{"section":{"$id":"A",
   * Find secret passphrase (must be known by peer attempting to initiate a finder connection to another peer).
   * "other" custom data as desired
   * signed by public key in section "A" and referenced by peer URI
@@ -285,7 +285,7 @@ When verifying Section "A":
 When verifying Section "B" / Section "C":
 
   * the domain used in the peer URI must match the domain used in the signature of the signed salt
-  * the "contact ID" part of the peer URI must match the following calculation: hex(hash("contact:" + `<public-peer-section-A-JSON-object>`)), where the hash algorithm used is "SHA256" for the default "http://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5" namespace.
+  * the "contact ID" part of the peer URI must match the following calculation: hex(hash("contact:" + `<public-peer-section-A-JSON-object>`)), where the hash algorithm used is "SHA256" for the default "https://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5" namespace.
   * the signature must be signed by the public key contained in Section "A"
   * the reference peer URI in the signature must be the same URI as defined within the section
 
@@ -304,7 +304,7 @@ Example Public Peer File
           {
             "section": {
               "$id": "A",
-              "algorithm": "http://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5",
+              "algorithm": "https://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5",
               "created": 54593943,
               "expires": 65439343,
               "saltBundle": {
@@ -314,7 +314,7 @@ Example Public Peer File
                 },
                 "signature": {
                   "reference": "#cf9c4688b014e13d8bdd2655912ffd3253f53768",
-                  "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                  "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
                   "digestValue": "ODMxNmI3Mjd...MzIzYzk5Nzc0ZGY5MQ==",
                   "digestSigned": "DEfGM~C...0/Ez=",
                   "key": {
@@ -327,7 +327,7 @@ Example Public Peer File
             },
             "signature": {
               "reference": "#A",
-              "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+              "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
               "digestValue": "OzIyMmI3NG...WJlOTY4NmJiOWQwYzkwZGYwMTI=",
               "digestSigned": "G4Fwe...0E/YT=",
               "key": { "x509Data": "MIID5jCCA0+gA...lVN" }
@@ -342,7 +342,7 @@ Example Public Peer File
             },
             "signature": {
               "reference": "#B",
-              "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+              "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
               "digestValue": "MWU4ODQwM2ZlOTQ...IzNDAyZTE0OWZkYg==",
               "digestSigned": "MC0...E~LE=",
               "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
@@ -369,7 +369,7 @@ Example Public Peer File
                         },
                         "signature": {
                           "reference": "#2d950c960b52c32a4766a148e8a39d0527110fee",
-                          "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                          "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
                           "digestValue": "Wm1Sa...lptUT0=",
                           "digestSigned": "ZmRh...2FzZmQ=",
                           "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
@@ -378,7 +378,7 @@ Example Public Peer File
                     },
                     "signature": {
                       "reference": "#b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
-                      "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                      "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
                       "digestValue": "IUe324koV5/A8Q38Gj45i4jddX=",
                       "digestSigned": "MDAwMDAwMGJ5dGVzLiBQbGVhc2UsIGQ=",
                       "key": {
@@ -402,7 +402,7 @@ Example Public Peer File
                         },
                         "signature": {
                           "reference": "#353c7684dcf8683540a9d9e9da00a91591864d73",
-                          "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                          "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
                           "digestValue": "TXpV...R1EzTXc9PQ==",
                           "digestSigned": "MzUz...2NGQ3Mw==",
                           "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
@@ -411,7 +411,7 @@ Example Public Peer File
                     },
                     "signature": {
                       "reference": "#0a9b2290343734118469e36d88276ffa6277d196",
-                      "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                      "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
                       "digestValue": "IUe324koV5/A8Q38Gj45i4jddX=",
                       "digestSigned": "MDAwMDAwMGJ5dGVzLiBQbGVhc2UsIGQ=",
                       "key": {
@@ -426,7 +426,7 @@ Example Public Peer File
             },
             "signature": {
               "reference": "#C",
-              "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+              "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
               "digestValue": "UrXLDLBIta6sk...oV5/A8Q38GEw44=",
               "digestSigned": "MC0...E~LE=",
               "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
@@ -452,12 +452,12 @@ Section "A"
 
 This section is used to prove association to the public peer file and provide a method to validate the "private peer file secret passphase" before it is used in decryption algorithms.
 
-  * Algorithm to use for all hash computations and encryptions related to contents of the private peer file and this algorithm must match the related public peer file (note: this does not apply to signed JSON signatures which have their own method to describe algorithms and key selection), the default algorithm is http://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5 (see the General Validation / Encryption Rules section).
+  * Algorithm to use for all hash computations and encryptions related to contents of the private peer file and this algorithm must match the related public peer file (note: this does not apply to signed JSON signatures which have their own method to describe algorithms and key selection), the default algorithm is https://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5 (see the General Validation / Encryption Rules section).
   * Peer contact's full URI (see public peer file Section "B" for calculation)
   * Binary salt, encoded as: base64(`<binary-salt>`)
   * 'Private Peer File secret passphrase' proof, result = hex(hmac(`<private-peer-file-secret-passphrase>`, "proof:" + `<peer-contact-id>`))
     * note: `<peer-contact-id>` is only the contact ID part of the full peer URI whose calculation is described in Section "B" of the public peer file
-    * note: the hmac algorithm uses SHA256 rather than SHA1 for the default http://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5
+    * note: the hmac algorithm uses SHA256 rather than SHA1 for the default https://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5
   * Signed by the private key
 
 
@@ -519,13 +519,13 @@ Example Private Peer File
             "section": {
               "$id": "A",
               "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
-              "algorithm": "http://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5",
+              "algorithm": "https://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5",
               "salt": "YzY4NWUxMGU4M2ZjNzVkZWQzZTljYWMyNzUzZDAwNGM4NzE5Yjg1",
               "secretProof": "2ee79fea96b0c3d021aed9b26d309481cc14e492"
             },
             "signature": {
               "reference": "#A",
-              "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+              "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
               "digestValue": "j6lw...x3rvEPO0vKtMup4NbeVu8nk=",
               "digestSigned": "G4Fwe...0E/YT=",
               "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
@@ -541,7 +541,7 @@ Example Private Peer File
             },
             "signature": {
               "reference": "#B",
-              "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+              "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
               "digestValue": "UrXLDLB...Ita6skoV5/A8Q38GEw44=",
               "digestSigned": "MC0...E~LE=",
               "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
@@ -1167,7 +1167,7 @@ Open Peer connections can take advantage of this situation by utilizing the pre-
 The format for the unidirectional message is as follows:
 
   * Message Size [4 bytes in network order] - The length of the raw encrypted message, including encryption headers and integrity footers
-  * Encryption key algorithm selection (16 bits network byte order, upper 8 bits reserved and must be set to "0") - When negotiating, each number represents selected keys / algorithm pair for use by the number chosen but "0" is used to represent a key / algorithm negotiation. Every "0" key causes a reset of all encryption algorithms in progress to substitute with the values specified in the "0" package. Each key / algorithm selected is selected from the supported keys / algorithms offered to the remote party, but can only be amongst the algorithms the remote party supports. As such, there is one mandated algorithm to ensure compatibility, "http://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5", where the AES (Rijndael- 128) in CFB mode with a 32 byte key size, 16 byte block size, 16 byte feedback size, SHA1-HMAC integrity protection, and an md5 hash IV sequence calculation.
+  * Encryption key algorithm selection (16 bits network byte order, upper 8 bits reserved and must be set to "0") - When negotiating, each number represents selected keys / algorithm pair for use by the number chosen but "0" is used to represent a key / algorithm negotiation. Every "0" key causes a reset of all encryption algorithms in progress to substitute with the values specified in the "0" package. Each key / algorithm selected is selected from the supported keys / algorithms offered to the remote party, but can only be amongst the algorithms the remote party supports. As such, there is one mandated algorithm to ensure compatibility, "https://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5", where the AES (Rijndael- 128) in CFB mode with a 32 byte key size, 16 byte block size, 16 byte feedback size, SHA1-HMAC integrity protection, and an md5 hash IV sequence calculation.
   * Data bundle, consisting of:
     * integrity header of the data encrypted using the algorithm / key selected (algorithm specific)
     * JSON message encrypted using the algorithm / key selected
@@ -1187,10 +1187,13 @@ The "0" package contains the following:
     * Expiry - a time-stamp and this package must be verified as valid before the expiry or it's considered invalid
     * Context - (optional) this identifier allows the stream to correlate with other upper layers and the meaning is externally defined / negotiated
     * Encoding - the encoding technique used for this package
-      * type - "pki" or "passphrase" - if "pki" then it's using public key encryption, if "passphrase" then the encoding is done with a passphrase / algorithm externally defined (typically correlated via the context)
-      * fingerprint - if "pki" the fingerprint of the remote party's public key used to encrypt this data
-      * algorithm - if "passphrase" is used, the algorithm to decode the keying materials
-      * proof - if "passphrase" is used, this field provides proof the correct decoding key is used to decrypt the stream
+      * type - `pki`, `agreement` or `passphrase` - if "pki" then it's using public key encryption, if `agreement` then it's encoded using special key agreement based on a namespace, if "passphrase" then the encoding is done with a passphrase / algorithm externally defined (typically correlated via the context)
+      * fingerprint - if `pki` (or `agreement` where a public key is involved) the fingerprint of the remote party's public key used to encrypt this data, the fingerprint of the public key is hash = hash(`<public-key-der-encoded>`) and for Diffie-Hellman keys it's computed as hash = hmac(`<ephemeral-key`, `<static-key>`) when using the namespace `https://meta.openpeer.org/dh/modp/2048`
+      * key - if `agreement` value = `<encoded-namespace>` + ":" + `<....namespace-dependent...>`
+        * encoded namespace - `<encoded-namespace>` = base64(`<namespace-uri>`)
+        * if namespace is `https://meta.openpeer.org/dh/modp/2048` what follows is `<namespace-dependent>` = base64(`<encoding-peer-static-public-key>`) + ":" + base64(`<encoding-peer-ephemeral-public-key>`) based upon a Diffie-Hellman MODP P, Q and G are defined as hex integer values as defined in Diffie-Hellman MODP Namespace Definitions section. Alternative namespace `1024`, `1538`, `3072`, `4096`, `6144`, `8192` are available too. The agreed key becomes converted into a `passphrase` which is calculated as passphrase = hex(`<agreed-key>`).
+      * algorithm - if `passphrase` is used, the algorithm to decode the keying materials
+      * proof - if `passphrase` is used, this field provides proof the correct decoding key is used to decrypt the stream
     * Algorithms - preference ordered set of algorithms supported by the client; once an algorithm is marked as supported it cannot be removed from subsequent "0" package updates.
     * List of keys, with each key containing:
       * key index - this corresponds to the algorithm selection index of which key to use in any subsequent decryption
@@ -1232,22 +1235,28 @@ Example of the "0" package is JSON in place text with the following data in the 
     
             "-or-": "",
     
+            "type": "agreement",
+            "fingerprint": "cfdc7852457086040262d764c60bdf3e79c24438",
+            "key": "eW91ciBtb3RoZXIgd...2VhcnMgYXJteSBib290cw==",
+    
+            "-or-": "",
+    
             "type": "passphrase",
-            "algorithm": "http://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
-            "proof": "a634858f530ada1c77d26fcd32ed75914ae863b9",
+            "algorithm": "https://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
+            "proof": "a634858f530ada1c77d26fcd32ed75914ae863b9"
           },
     
           "algorithms": {
             "algorithm": [
-              "http://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
-              "http://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-16-16-16-md5-md5"
+              "https://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
+              "https://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-16-16-16-md5-md5"
             ]
           },
           "keys": {
             "key": [
               {
                 "index": 1,
-                "algorithm": "http://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
+                "algorithm": "https://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
                 "inputs": {
                   "secret": "Y21wclpXd...HFjbXgzWlhKbA==",
                   "iv": "Y21wclpXd...HFjbXgzWlhKbA==",
@@ -1256,7 +1265,7 @@ Example of the "0" package is JSON in place text with the following data in the 
               },
               {
                 "index": 2,
-                "algorithm": "http://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
+                "algorithm": "https://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
                 "inputs": {
                   "secret": "WTIxd2NscFhkSEZq...YlhneldsaEtiQT09",
                   "iv": "V1RJeGQyTnNjRmhrTGk...bGhuZWxkc2FFdGlRVDA5",
@@ -1265,7 +1274,7 @@ Example of the "0" package is JSON in place text with the following data in the 
               },
               {
                 "index": 3,
-                "algorithm": "http://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-16-16-16-md5-md5",
+                "algorithm": "https://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-16-16-16-md5-md5",
                 "inputs": {
                   "secret": "Wm1wR1d4Vlltc...mtwWFVrVkZNUT09",
                   "iv": "V20xd1IxZDRWbGx...dGVnJWa1pOVVQwOQ==",
@@ -1277,7 +1286,7 @@ Example of the "0" package is JSON in place text with the following data in the 
         },
         "signature": {
           "reference": "#f25f588141f7232e40b1529667b8ea626d078d20",
-          "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+          "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
           "digestValue": "OzIyMmI3NG...WJlOTY4NmJiOWQwYzkwZGYwMTI=",
           "digestSigned": "G4Fwe...0E/YT=",
           "key": {  "x509Data": "MIID5jCCA0+gA...lVN" }
@@ -1294,6 +1303,10 @@ All keying information and salts must be generated using cryptographically rando
 The algorithms used for encrypting must be limited to the algorithms known to be supported by the remote party, but the mandatory algorithm must always be considered a valid algorithm available in any minimal implementation.
 
 The public key used in this exchange need not be the same public key used by a higher layer, such as the public peer file's certificate.
+
+The sending party must respect the following:
+  
+  * Using the `agreement` type with a Diffie-Hellman key namespace can only be used if the remote Diffie-Hellman public keying material was pre-known by the encoder before encoding the package.
 
 The receiving party must verify the following:
 
@@ -1314,6 +1327,44 @@ The following names apply when signaling JSON over MLS:
   * json-mls/tls - JSON signaling using MLS over TLS
   * json-mls/web-socket - JSON signaling using MLS over web sockets
   * json-mls/tls-web-socket - JSON signaling using MLS over secure web sockets
+
+### Diffie-Hellman MODP Namespace Definitions ###
+
+#### https://meta.openpeer.org/dh/modp/1024 ####
+
+The MOPD
+
+      P =
+    
+        E81724A6683F5C98638A243EA698DC03D7CE089AE426D286
+        0D506A34FDD0F9E9FBC8285A822377553F342FDA4EE14F5B
+        5CA5014F6B0638F5B8B3A904A639C6B7ACE6E0462770954D
+        34AC065C115813C67152DE611FC2ED388962A9E73EF29C33
+        E9C6D568B045F69F5D9C8582CFBA0B20DE5D25B21FB79E95
+        F60640287BF711C6E79B7ACFC12DA9812F6073A21EC7559F
+        C3E46B502F2BAFE28657A2676D71FB9BCA4197D45A5AE690
+        17E1E62F4D484E1151F485DC217560342F5DA4CD9A87996A
+        2D006595D95D9C82316A87F57E4F0A3C2465A3BC5034013A
+        DAACEC2242BA8BED1B21141E975CA90448EF413CCEF88CF4
+        D8BFB21630714239B6FFC58296CC0243
+    
+      Q =
+    
+        740B9253341FAE4C31C5121F534C6E01EBE7044D72136943
+        06A8351A7EE87CF4FDE4142D4111BBAA9F9A17ED2770A7AD
+        AE5280A7B5831C7ADC59D482531CE35BD673702313B84AA6
+        9A56032E08AC09E338A96F308FE1769C44B154F39F794E19
+        F4E36AB45822FB4FAECE42C167DD05906F2E92D90FDBCF4A
+        FB0320143DFB88E373CDBD67E096D4C097B039D10F63AACF
+        E1F235A81795D7F1432BD133B6B8FDCDE520CBEA2D2D7348
+        0BF0F317A6A42708A8FA42EE10BAB01A17AED266CD43CCB5
+        168032CAECAECE4118B543FABF27851E1232D1DE281A009D
+        6D567611215D45F68D908A0F4BAE54822477A09E677C467A
+        6C5FD90B1838A11CDB7FE2C14B660121
+    
+      G = 03
+     
+
 
 Multiplexed Streams
 -------------------
@@ -1423,7 +1474,7 @@ General Validation / Encryption Rules
 -------------------------------------
 
 The default algorithm used for messaging security attributes is namespaced as:
-http://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5
+https://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5
 
 This algorithm does not have to be written into each JSON message and is the mandatory supported algorithm to support.
 
@@ -1452,7 +1503,7 @@ Open Peer uses the following definitions (unless otherwise specified):
   * salt string - passphrase compatible cryptographically random data
 
 
-Open Peer uses the following definitions for use with the "http://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5" algorithms (unless otherwise specified):
+Open Peer uses the following definitions for use with the "https://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5" algorithms (unless otherwise specified):
 
   * hash(...) - the input can be binary, a passphrase, or a string when used for validation purposes. The algorithm used is "SHA1" for validation [output 20 bytes binary], "SHA256" when used as input for encrypt(...) / decrypt(...) [outputs 32 bytes binary], and "MD5" when used for IV calculation [outputs 16 bytes binary].
   * hmac(key, value) - the key can be binary, a passphrase, or a string depending on the input context of the key's input value or calculated value. The hmac algorithm used is "SHA1" for validation [output 20 bytes binary], "SHA256" when used as input for encrypt(...) / decrypt(...) [outputs 32 bytes binary], and "MD5" when used for IV calculation [outputs 16 bytes binary].
@@ -1488,7 +1539,7 @@ The signature output typically looks something like this:
         },
         "signature": {
           "reference": "#4bf7fff50ef9bb07428af6294ae41434da175538",
-          "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+          "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
           "digestValue": "jeirjLr...ta6skoV5/A8Q38Gj4j323=",
           "digestSigned": "DE...fGM~C0/Ez=",
           "key": {
@@ -1525,7 +1576,7 @@ An example:
 
     "signature": {
       "reference": "#4bf7fff50ef9bb07428af6294ae41434da175538",
-      "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+      "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
       "digestValue": "jeirjLr...ta6skoV5/A8Q38Gj4j323=",
       "digestSigned": "DE...fGM~C0/Ez=",
       "key": { "x509Data": "MIIDCCA0+gA...lVN" }
@@ -1540,7 +1591,7 @@ An example:
 
     "signature": {
       "reference": "#4bf7fff50ef9bb07428af6294ae41434da175538",
-      "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+      "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
       "digestValue": "jeirjLr...ta6skoV5/A8Q38Gj4j323=",
       "digestSigned": "DE...fGM~C0/Ez=",
       "key": {
@@ -1559,7 +1610,7 @@ An example:
 
     "signature": {
       "reference": "#4bf7fff50ef9bb07428af6294ae41434da175538",
-      "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+      "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
       "digestValue": "jeirjLr...ta6skoV5/A8Q38Gj4j323=",
       "digestSigned": "DE...fGM~C0/Ez=",
       "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
@@ -1574,7 +1625,7 @@ An example:
 
     "signature": {
       "reference": "#4bf7fff50ef9bb07428af6294ae41434da175538",
-      "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+      "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
       "digestValue": "jeirjLr...ta6skoV5/A8Q38Gj4j323=",
       "digestSigned": "DE...fGM~C0/Ez=",
       "key": { "fingerprint": "1dcc8f8bd79e214f0eb7fc6c9fb8df0812171ca3" }
@@ -1604,7 +1655,7 @@ An example identity proof bundle:
           },
           "signature": {
             "reference": "#2d950c960b52c32a4766a148e8a39d0527110fee",
-            "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
             "digestValue": "Wm1Sa...lptUT0=",
             "digestSigned": "ZmRh...2FzZmQ=",
             "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
@@ -1613,7 +1664,7 @@ An example identity proof bundle:
       },
       "signature": {
         "reference": "#b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
-        "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+        "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
         "digestValue": "IUe324koV5/A8Q38Gj45i4jddX=",
         "digestSigned": "MDAwMDAwMGJ5dGVzLiBQbGVhc2UsIGQ=",
         "key": {
@@ -1641,7 +1692,7 @@ Open Peer Mandated Signature Algorithm
 --------------------------------------
 
 This is the default mandated algorithm that must be supported by all implementations to allow for JSON signatures:
-http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1
+https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1
 
 This is a namespace URL only and not a URI reference to a valid document definition. If the signature algorithm is omitted this algorithm must be applied, but all clients should always output their signature algorithm as part of the signature.
 
@@ -1655,7 +1706,7 @@ This algorithms uses the canonical form whose rules are described in the next su
 The canonical form of JSON is always used to ensure the output written on the wire is always reassembled with exact ordering, white spacing rules, and escape sequence rules. This ensures maximum compatibility. The JSON object being signed must be rendered to a string as if it were a standalone rendered JSON object where the final message is in the format: {"name":{...}}
 
 The canonical rules as described below are for this algorithm:
-http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1
+https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1
 
 If the rendered object doesn't have a string part in the JSON lexical string:value pairing (as it's a value- only) then the object name is based upon the parent array's/object string in its string:value pair (or the parent's parent as need be). This canonical rendered string requires absolutely no white space between tokens. All strings must be in normalized to UTF-8 format with only these escape sequences used: \" \\ \f \n \r \b
 
@@ -1778,11 +1829,13 @@ The client must ensure the server has an HTTPS certificate that was issued by a 
 
 The server does not need to know or verify a client's intentions.  
 
-A 302-redirect error response can be returned by this response to allow the request to be redirected to another server. This allows this service to be easily hosted as needed.  
+A 302-redirect error response can be returned by this response to allow the request to be redirected to another server. This allows this service to be easily hosted as needed. After a 302 redirect the URL that is hit will be issued a POST request.
 
 The request nor the response should have an ID associated with the request / response and does not need to include an time-stamp. This is the only request in the system that has this exception. This allows for a hard-coded file to be uploaded on a server as the response to any request on the system to allow for easy service delegation without installing any server side scripting.
 
 ### Example
+
+The request portion is only sent after a 302-redirect whereupon it is sent in a POST request, otherwise it is omitted since this request is to be sent as a HTTPS GET request.
 
     {
       "request": {
@@ -2087,7 +2140,7 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
               },
               "signature": {
                 "reference": "#4bf7fff50ef9bb07428af6294ae41434da175538",
-                "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
                 "digestValue": "jeirjLr...ta6skoV5/A8Q38Gj4j323=",
                 "digestSigned": "DE...fGM~C0/Ez=",
                 "key": {
@@ -2119,7 +2172,7 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
               },
               "signature": {
                 "reference": "#a7f0c5df6d118ee2a16309bc8110bce009f7e318",
-                "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
                 "digestValue": "YTdmMGM1ZGY2Z...DExOGVlMmExNjMwJjZTAwOWY3ZTMxOA==",
                 "digestSigned": "OjY2OjZl...OjZhOjcyOjY2OjcyOjcyIChsZW5ndGg9OSk=",
                 "key": {
@@ -2196,7 +2249,7 @@ The client must ensure the server has an HTTPS certificate that was issued by a 
               },
               "signature": {
                 "reference": "#4bf7fff50ef9bb07428af6294ae41434da175538",
-                "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
                 "digestValue": "jeirjLrta6skoV5/A8Q38Gj4j323=",
                 "digestSigned": "DEf...GM~C0/Ez=",
                 "key": {
@@ -2215,7 +2268,7 @@ The client must ensure the server has an HTTPS certificate that was issued by a 
               },
               "signature": {
                 "reference": "#9bdd14...dda3fddd5bd2",
-                "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
                 "digestValue": "amVpcmpMcn...RhNnNrb1Y1L0E4UTM4R2o0ajMyMz0=",
                 "digestSigned": "YW1WcGNtcE1jb...lJoTm5OcmIxWTFMMEU0VVRNNFIybzBhak15TXowPQ==",
                 "key": {
@@ -2374,7 +2427,7 @@ The server must verify that all nonce values have never been seen previously wit
           "nonce": "c8574fef7e5655264ed92e307bb1c336",
           "accessToken": "7bf8320b4f3068885b925074fe5af4f8",
           "accessSecretProof": "cbed2026e4f534ab06c15a4c535f4461e52e7883",
-          "accessSecretProofExpires": "43737344"
+          "accessSecretProofExpires": "43737344",
     
           "log": "trace"
         },
@@ -2484,7 +2537,7 @@ The resulting proof bundles will only contain challenges that have been approved
               },
               "signature": {
                 "reference": "#20651257fecbe8436cea6bfd3277fec1223ebd63",
-                "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
                 "digestValue": "IUe324k...oV5/A8Q38Gj45i4jddX=",
                 "digestSigned": "MDAwMDAw...MGJ5dGVzLiBQbGVhc2UsIGQ=",
                 "key": {
@@ -2514,7 +2567,7 @@ The resulting proof bundles will only contain challenges that have been approved
               },
               "signature": {
                 "reference": "#1bbca957f2cb2802480b81c16b1f76176b762340",
-                "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
                 "digestValue": "ZnNhZnNkZ...GtsYWxzZmQNCg==",
                 "digestSigned": "Wm5OaFpuTmtabk5...Vd4elptUU5DZz09=",
                 "key": {
@@ -2830,7 +2883,7 @@ The lockbox service will validate that the proof bundle is correct and if the ch
           },
           "signature": {
             "reference": "#20651257fecbe8436cea6bfd3277fec1223ebd63",
-            "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
             "digestValue": "IUe324k...oV5/A8Q38Gj45i4jddX=",
             "digestSigned": "MDAwMDAw...MGJ5dGVzLiBQbGVhc2UsIGQ=",
             "key": {
@@ -3317,7 +3370,7 @@ List of resulting identities that resolve in the order requested as follows:
                     },
                     "signature": {
                       "reference": "#2d950c960b52c32a4766a148e8a39d0527110fee",
-                      "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                      "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
                       "digestValue": "Wm1Sa...lptUT0=",
                       "digestSigned": "ZmRh...2FzZmQ=",
                       "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
@@ -3326,7 +3379,7 @@ List of resulting identities that resolve in the order requested as follows:
                 },
                 "signature": {
                   "reference": "#b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
-                  "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                  "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
                   "digestValue": "IUe324koV5/A8Q38Gj45i4jddX=",
                   "digestSigned": "MDAwMDAwMGJ5dGVzLiBQbGVhc2UsIGQ=",
                   "key": {
@@ -3766,7 +3819,7 @@ Once correctly proven, the identity service will allow the application access to
           },
           "signature": {
             "reference": "#1f15433f56f9c6decf9c17c95078fe1c",
-            "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
             "digestValue": "IUe324k...oV5/A8Q38Gj45i4jddX=",
             "digestSigned": "MDAwMDAw...MGJ5dGVzLiBQbGVhc2UsIGQ=",
             "key": {
@@ -3891,7 +3944,7 @@ The server must validate the following:
             },
             "signature": {
               "reference": "#2d950c960b52c32a4766a148e8a39d0527110fee",
-              "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+              "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
               "digestValue": "Wm1Sa...lptUT0=",
               "digestSigned": "ZmRh...2FzZmQ=",
               "key": { "uri": "peer://example.com/ab43bd44390dabc329192a392bef1" }
@@ -4113,7 +4166,7 @@ The client should verify signature was generated by the certificate was issued b
               },
               "signature": {
                 "reference": "#f2e2ba4ba900e3b78d0d8524f0888f2b57d1bf91",
-                "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
                 "digestValue": "IUe324ko...V5/A8Q38Gj45i4jddX=",
                 "digestSigned": "DEf...GM~C0/Ez=",
                 "key": {
@@ -4130,7 +4183,7 @@ The client should verify signature was generated by the certificate was issued b
               },
               "signature": {
                 "reference": "#35959a33d4eafac97b9d068cba32a8c6c6fd463a",
-                "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
                 "digestValue": "4Jee4kfd/oV5Af8Q3g48Gjg4n5iw4jzd8k=",
                 "digestSigned": "Ttzf...eky5D/GM~C0=",
                 "key": {
@@ -4681,7 +4734,7 @@ If a Section-B of the public peer file is not present, the peer does not wish to
           },
           "signature": {
             "reference": "#6fc5c4ea068698ab31b6b6f75666808f",
-            "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
             "digestValue": "IUe324k...oV5/A8Q38Gj45i4jddX=",
             "digestSigned": "MDAwMDAw...MGJ5dGVzLiBQbGVhc2UsIGQ=",
             "key": { "uri": "peer://example.com/920bd1d88e4cc3ba0f95e24ea9168e272ff03b3b" }
@@ -4714,7 +4767,7 @@ If a Section-B of the public peer file is not present, the peer does not wish to
           },
           "signature": {
             "reference": "#edbd821123e9cfedf0285a95989ac461",
-            "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
             "digestValue": "NTRmZDRmNjBjYmJi...xMjdmYWQ4ODk0MQ==",
             "digestSigned": "TlRSbVpEUm1....GMwT1RjeE1qZG1ZV1E0T0RrME1RPT0=",
             "key": { "fingerprint": "54fd4f60cbbbf0077ec33c6447497127fad88941" }
@@ -4956,8 +5009,11 @@ This is the request to find a peer that includes the proof of permission to cont
   * Find secret proof - i.e. hex(hmac(`<find-secret-from-remote-public-peer-file-section-B>`, "proof:" + `<client-nonce>` + ":" + expires))
   * Find proof expires
   * Context - the is the requester's part of the context ID. This identifier is combined with the remote peer's context to form the "requester" / "reply" context ID for MLS
-  * Peer secret (encrypted) - peer secret is a random passphrase which is then encrypted using the public key of the peer receiving the find request - this key is password used for ICE negotiation, peer secret encrypted = base64(rsa_encrypt(`<remote-public-peer-file-public-key>`, `<peer-secret>`))
-  * ICE username frag - the username fragment for ICE negotiation
+  * Peer secret (encrypted) - peer secret contains all the keying materials needed to decrypt the ICE passwords and establish shared keying between clients and is encoded as follows, value = `<encoded-namespace>` + ":" + `<encrypted-peer-secret>` + ":" + `<....namespace-dependent...>`
+    * encoded namespace - `<encoded-namespace>` = base64(`<namespace-uri>`)
+    * encrypted peer secret - a random passphrase encoded using the replying peer's public key, where `<encrypted-peer-secret>` = base64(rsa_encrypt(`<remote-public-peer-file-public-key>`, `<peer-secret>`))
+    * if namespace is `https://meta.openpeer.org/dh/modp/2048` what follows is `<namespace-dependent>` = base64(`<requesting-peer-static-public-key>`) + ":" + base64(`<requesting-peer-ephemeral-public-key>`) based upon a Diffie-Hellman MODP P, Q and G are defined as hex integer values as defined in Diffie-Hellman MODP Namespace Definitions section. Alternative namespace `1024`, `1538`, `3072`, `4096`, `6144`, `8192` are available too.
+  * ICE username fragment - the username fragment for ICE negotiation
   * ICE password encrypted - the password passphrase for ICE negotiation, encrypted data = hex(`<iv>`) + ":" + encrypt(`<key>`, `<ice-password>`), where key = hash(`<peer-secret>`), iv = `<random>`
   * Location details
     * Location ID of requesting location
@@ -5014,7 +5070,7 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
             "findSecretProofExpires": 9484848,
     
             "context": "3b5db5880803d91f2ba9ca522c558fd1c545c28e",
-            "peerSecretEncrypted": "ODVkMmY4ZjJiMjBlNTVkZ...0MmQzZjE0NDgzNTY3YzE5NzFkMw==",
+            "peerSecretEncrypted": "ODVkMmY4ZjJiMjBlNTVkZ...0MmQzZjE0NDgzNTY3YzE5NzFkMw==:ZmFyIG9....1dCBkdWRl:U0lQIHN1Y2tz...IG1vbmtleSBib25rZXJz",
     
             "iceUsernameFrag": "b92f7c1f6285d230796bb89bca57bcf9",
             "icePasswordEncrypted": "497787ddfd19843eb04479d67198010e:NDk3Nzg3...ZWIwNDQ3OWQ2NzE5ODAxMGU=",
@@ -5033,7 +5089,7 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
               "candidates": {
                 "candidate": [
                   {
-                    "namespace": "http://meta.openpeer.org/candidate/finder-relay",
+                    "namespace": "https://meta.openpeer.org/candidate/finder-relay",
                     "transport": "multiplexed-json-mls/tcp",
                     "type": "relay",
                     "host": "100.200.10.20",
@@ -5042,7 +5098,7 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
                     "accessSecretProofEncrypted": "8b29fe4c606e370df6704ed0abb4e2b2:U0RQIHN1Y2t...zIHJlbGFseSBiYWQ="
                   }
                   {
-                    "namespace": "http://meta.openpeer.org/candidate/ice",
+                    "namespace": "https://meta.openpeer.org/candidate/ice",
                     "transport": "json-mls/rudp",
                     "type": "srflx",
                     "foundation": "2130706431",
@@ -5055,7 +5111,7 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
                     }
                   },
                   {
-                    "namespace": "http://meta.openpeer.org/candidate/ice",
+                    "namespace": "https://meta.openpeer.org/candidate/ice",
                     "transport": "json-mls/rudp",
                     "type": "host",
                     "foundation": "1694498815",
@@ -5069,7 +5125,7 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
           },
           "signature": {
             "reference": "#d53255d06a17778b88501f570301e7621c5a7bc4",
-            "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
             "digestValue": "ZDUzMjU1ZDA2YTE...NjIxYzVhN2JjNA==",
             "digestSigned": "WkRVek...TNelZoTjJKak5BPT0=",
             "key": { "uri": "peer://domain.com/541244886de66987ba30cf8d19544b7a12754042" }
@@ -5143,7 +5199,7 @@ Since the request was successfully issued, the information contained in the deta
           },
           "signature": {
             "reference": "#76bda29cbef7b810c464a5dfd68e41bc",
-            "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
             "digestValue": "TlRSbVpEUm1OakJ...LnhNamRtWVdRNE9EazBNUT09",
             "digestSigned": "VGxSU2JWcEVVbTFP....hUzR1TG5oTmFtUnRXVmRSTkU5RWF6Qk5VVDA5",
             "key": { "fingerprint": "54fd4f60cbbbf0077ec33c6447497127fad88941" }
@@ -5224,9 +5280,10 @@ This reply notification is sent directly from the replying peer to the requestin
 
   * Digest value from signature sent in original request - the reply location might not have the ability to validate the signature of the request but the reply location must validate the signature's hash value is correct and copy this value back to the original requester bundled in its own signed package (since the requester knows the original value and must have the public peer file of the reply location to validate the reply's bundle). This allows the requester to validate the original request remained non-tampered throughout and ignore replies where tampering might have occurred.
   * Context - this identifier is combined with the remote peer's context to form the "requester" / "reply" context ID pairing for MLS
-  * Peer secret - this key passphrase is the password used to encrypt data in the reverse direction (as it's sent over MLS directly to the receiving peer there's no need to encrypt it)
+  * validated - if the location sending this reply knows about the public peer file of the location that issued the `peer-location-find` request and was able to successfully validate the signature on the `peer-location-find` request this is set to true. If true, the location that issued the `peer-identity-request` must not send the `peer-identify` request upon connection.
   * ICE username frag - the username fragment for ICE negotiation
   * ICE password - the password passphrase for ICE negotiation
+  * final - 
   * Location details
     * Location ID of requesting location
     * Contact ID of requesting location
@@ -5263,7 +5320,8 @@ This request must be sent over a secure channel with MLS.
             "requestFindProofBundleDigestValue": "ZDUzMjU1ZDA2YTE...NjIxYzVhN2JjNA==",
     
             "context": "a497f346db82ae34c2d9b7f62e34b9757d211bef",
-            "peerSecret": "402a95986e81cfacb1d0668f240713f4ca556d73",
+    
+            "validated": true,
     
             "iceUsernameFrag": "219d07d37faee86a5a866ff3e363b790b3b98fbb",
             "icePassword": "ed84448d05fde7f6b12442df3d07e169583226b4",
@@ -5284,7 +5342,7 @@ This request must be sent over a secure channel with MLS.
               "candidates": {
                 "candidate": [
                   {
-                    "namespace": "http://meta.openpeer.org/candidate/ice",
+                    "namespace": "https://meta.openpeer.org/candidate/ice",
                     "transport": "json-mls/rudp",
                     "type": "srflx",
                     "foundation": "2130706431",
@@ -5297,7 +5355,7 @@ This request must be sent over a secure channel with MLS.
                     }
                   },
                   {
-                    "namespace": "http://meta.openpeer.org/candidate/ice",
+                    "namespace": "https://meta.openpeer.org/candidate/ice",
                     "transport": "json-mls/rudp",
                     "type": "host",
                     "foundation": "1694498815",
@@ -5311,7 +5369,7 @@ This request must be sent over a secure channel with MLS.
           },
           "signature": {
             "reference": "#d53255d06a17778b88501f570301e7621c5a7bc4",
-            "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
             "digestValue": "ZDUzMjU1ZDA2YTE...NjIxYzVhN2JjNA==",
             "digestSigned": "WkRVek...TNelZoTjJKak5BPT0=",
             "key": { "uri": "peer://domain.com/541244886de66987ba30cf8d19544b7a12754042" }
@@ -5477,7 +5535,7 @@ Same as Peer Location Find Reply (E)
               "candidates": {
                 "candidate": [
                   {
-                    "namespace": "http://meta.openpeer.org/candidate/ice",
+                    "namespace": "https://meta.openpeer.org/candidate/ice",
                     "transport": "json-mls/rudp",
                     "foundation": "43848384",
                     "ip": "75.43.32.12",
@@ -5489,7 +5547,7 @@ Same as Peer Location Find Reply (E)
                     }
                   },
                   {
-                    "namespace": "http://meta.openpeer.org/candidate/ice",
+                    "namespace": "https://meta.openpeer.org/candidate/ice",
                     "transport": "json-mls/rudp",
                     "foundation": "43243242",
                     "ip": "192.168.10.200",
@@ -5502,7 +5560,7 @@ Same as Peer Location Find Reply (E)
           },
           "signature": {
             "reference": "#d53255d06a17778b88501f570301e7621c5a7bc4",
-            "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
             "digestValue": "ZDUzMjU1ZDA2YTE...NjIxYzVhN2JjNA==",
             "digestSigned": "WkRVek...TNelZoTjJKak5BPT0=",
             "key": { "uri": "peer://domain.com/541244886de66987ba30cf8d19544b7a12754042" }
@@ -5634,7 +5692,7 @@ The requesting peer must validate the result in the following ways:
           },
           "signature": {
             "reference": "#ec065f4b46a22872f85f6ba5addf1e2",
-            "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
             "digestValue": "ZGZrbnNua2...pmZXdraiBlYnJlcnJmZXJl",
             "digestSigned": "WkdacmJuTnVhMnBtWl...mFpQmxZbkpsY25KbVpYSmw=",
             "key": { "uri": "peer://example.com/db9e3a737c690e7cdcfbacc29e4a54dfa5356b63" }
@@ -5674,7 +5732,7 @@ The requesting peer must validate the result in the following ways:
           },
           "signature": {
             "reference": "#8c905668ddb739b05c66734ffa6e46073c3d4a27",
-            "algorithm": "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+            "algorithm": "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1",
             "digestValue": "c2RwI...HN1Y2tz",
             "digestSigned": "MyUndJSE4c2RwIHN1Y2tz...TJ0eiBjMlJ3SUhOMVkydHo=",
             "key": { "uri": "peer://example.com/d1878a88dc500bcf33a9b6b478b7d76e82b7775e" }
