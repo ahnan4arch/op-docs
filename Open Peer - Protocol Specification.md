@@ -5006,6 +5006,7 @@ This is the request to find a peer that includes the proof of permission to cont
   * Cipher suite to use in the proof and for the encryption
   * Contact id of contact to be found
   * Client nonce - cryptographically random onetime use string
+  * find creation timestamp - this acts as a conflict resolver for a simultaneous "peer-location-find" request. The latest created "peer-location-find" request should win. If the timestamps are identical then the "peer-location-find" with the greater context ID wins (as ASCII value compared UTF8 written string). Any incoming find request which loses should be given a 409-conflict error and must be ignored entirely.
   * Find secret proof - i.e. hex(hmac(`<find-secret-from-remote-public-peer-file-section-B>`, "proof:" + `<client-nonce>` + ":" + expires))
   * Find proof expires
   * Context - the is the requester's part of the context ID. This identifier is combined with the remote peer's context to form the "requester" / "reply" context ID for MLS
@@ -5064,6 +5065,8 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
             "$id": "d53255d06a17778b88501f570301e7621c5a7bc4",
     
             "nonce": "7a95ff1f51923ae6e18cdb07aee14f9136afcb9c",
+    
+            "created": 13494934,
     
             "find": "peer://domain.com/900c9cb1aeb816da4bdf58a972693fce20e",
             "findSecretProof": "85d2f8f2b20e55de0f9642d3f14483567c1971d3",
