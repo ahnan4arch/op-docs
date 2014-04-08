@@ -3664,10 +3664,10 @@ This notification is sent from the inner browser window to the outer window as a
     * Identity access token - a verifiable token that is linked to the logged-in identity
     * Identity access secret - a secret passphrase that can be used in combination to the "identity access token" to provide proof of previous successful login
     * Identity access expiry - the window with sufficient long into-the-future time frame in which the access key long term credentials are valid
-    * Identity encrypted relogin key - the relogin key only has meaning to the identity service and it's encrypted, encrypted value = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<relogin-key>`)), where key = hmac(<encryption-passphrase-upon-grant-proof>, "identity:" + <identity-uri> + ":identityReloginKey"), iv = hash(<salt-string>)
+    * Identity encrypted relogin key - the relogin key only has meaning to the identity service and it's encrypted, encrypted value = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<relogin-key>`)), where key = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":identityReloginKey"), iv = hash(`<salt-string>`)
   * Lock box information (optional, if known)
      * Lockbox domain - if lockbox domain is known in advance, this is the domain for the lockbox to use
-     * Twice encrypted lockbox passphrase - this is a lockbox passphrase which is encrypted twice, twice-encrypted-lockbox-passphrase = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<encrypted-lockbox-passphrase>`)), where key = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":lockboxKey"), iv = hash(`<salt-string>`), where encrypted-lockbox-passphrase = `<inner-salt-string>` + base64(encrypt(`<inner-key>`, `<lockbox-passphrase>`), inner-key = hmac(`<server-encryption-passphrase>`), "identity:" + `<identity-uri>`), iv=hash(`<inner-salt-string>`)
+     * Twice encrypted lockbox passphrase - (optional, if key was previously set) - this is a lockbox passphrase which is encrypted twice, twice-encrypted-lockbox-passphrase = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<encrypted-lockbox-passphrase>`)), where key = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":lockboxKey"), iv = hash(`<salt-string>`), where encrypted-lockbox-passphrase = `<inner-salt-string>` + ":" + base64(encrypt(`<inner-key>`, `<lockbox-passphrase>`), inner-key = hmac(`<server-encryption-passphrase>`), "identity:" + `<identity-uri>`), iv=hash(`<inner-salt-string>`)
      * Lockbox reset flag - this flag is used if the lockbox must be reset with a new password and all data within to be flushed.
   * Encrypted server encryption passphrase - the passphrase used to encrypt sensitive information from the server (e.g. so that the server doesn't know the lockbox passphrase) encrypted using the encryption-passphrase-upon-grant-proof, where encrypted-server-encryption-passphrase = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<server-encrypted-passphrase>`)), where key = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":serverEncryptionKey"), iv = hash(`<salt-string>`)
   * Grant service challenge (optional, if challenge is required)
@@ -3677,11 +3677,16 @@ This notification is sent from the inner browser window to the outer window as a
     * URL - a browser URL where the user can go to obtain more information about this service requesting the challenge
     * Domains - a list of domains the service will accept trusted signatures as proof
     * Namespace URLs - the list of URLs that require permission to continue
+  * Hash of encryption passphrase upon grant proof (optional, if challenge is provided) - hex(hash(`<encryption-passphrase-upon-grant-proof>`)). If the client has previously performed a grant proof and knows the "Encryption passphrase upon grant proof" then this hash can be proof that the passphrase has not changed since a previous session.
   * Encryption passphrase upon grant proof (optional, if challenge is not required) - the outer passphrase used to decrypt the sensitive information from the identity service
 
 ### Returns
 
 ### Security Considerations
+
+  * encryption-passphrase-upon-grant-proof - a key known only by the identity server to encrypt information for a particular identity that can be given . This key should be unique for the user, and can either be randomly generated and set for each identity, or generated based upon a common server secret combined with the identity. An example algorithm for generating based upon a common server secret key might be  hex(hmac(`<common-server-secret-passphase>`, "common-server-secret:" + `<identity-uri>`))
+  * sever-encryption-passphrase - a key generated from a user's password, or other information not known to a server (i.e. key used to protect against the server being able to decrypt information)
+  * lockbox-passphrase - a secret key used to access the associated lockbox
 
 The server encryption passphrase should be calculated locally in the JavaScript using something unavailable in the server, for example the user's password. Other information should be combined to create the encryption / decryption key to ensure two unique users with the same password do not share the same encryption key.
 
@@ -3740,6 +3745,8 @@ If the identity provider was not provided a relogin key it must challenge the ag
             ]
           }
         },
+    
+        "encryptionKeyUponGrantProofHash": "f94a09c33fa36995ff5c5f08bbc37de53ffcab25"
     
         "-or-": "",
     
@@ -3855,7 +3862,7 @@ Identity Lookup Update Request
 
 ### Purpose
 
-This request proves that an identity login is valid and can be used to validate an identity login is successful by way of a 3rd party.
+This request updates the identity lookup information when an identity lookup is performed on the associated identity.
 
 ### Inputs
 
@@ -4224,7 +4231,7 @@ This method allows a peer to publish a document into the network where it can be
   * "Publish to relationships" - list of:
     * Relationships contact file name (e.g. "/hookflash.com/authorization-list/1.0/whitelist" or "/hookflash.com/authorization-list/1.0/adhoc-subscribers"). The scope for relationship documents is always "location". However, specialized document processors can generate "on-the-fly" relationship lists.
     * Permission - one of:
-      * "all"-allowallusersonthelisttosubscribe,fetchandreceivenotification about this document;
+      * "all" - allow all users on the list to subscribe, fetch and receive notification about this document;
       * "none" - do not allow any users on the list to fetch and receive notification about this document;
       * "some" - allow only specific users listed within the relationship list to subscribe and receive notification about this document;
 
@@ -4494,7 +4501,7 @@ This method allows a peer to subscribe to all documents it is authorized to fetc
 
 ### Inputs
 
-  * Documents base path/name - full path base to monitor with optional "*" for partial paths
+  * Documents name regular expression - subscribe via a regular expression to the document name
   * Relationships to subscribe, containing:
     * Name of relationships document
     * Which contacts within the relationships to subscribe
@@ -4521,7 +4528,7 @@ The server only allows subscriptions where permissions allow.
         "$method": "peer-subscribe",
     
         "document": {
-          "name": "/hookflash.com/presence/1.0/",
+          "name": "^\/hookflash.com\/presence\/1\.0\/$",
           "subscribeToRelationships": {
             "relationships": [
               {
@@ -5016,6 +5023,7 @@ This is the request to find a peer that includes the proof of permission to cont
     * if namespace is `https://meta.openpeer.org/dh/modp/2048` what follows is `<namespace-dependent>` = base64(`<requesting-peer-static-public-key>`) + ":" + base64(`<requesting-peer-ephemeral-public-key>`) based upon a Diffie-Hellman MODP P, Q and G are defined as hex integer values as defined in Diffie-Hellman MODP Namespace Definitions section. Alternative namespace `1024`, `1538`, `3072`, `4096`, `6144`, `8192` are available too.
   * ICE username fragment - the username fragment for ICE negotiation
   * ICE password encrypted - the password passphrase for ICE negotiation, encrypted data = hex(`<iv>`) + ":" + encrypt(`<key>`, `<ice-password>`), where key = hash(`<peer-secret>`), iv = `<random>`
+  * final - set to true if the remote party should not expect to receive any more candidates at this time
   * Location details
     * Location ID of requesting location
     * Contact ID of requesting location
@@ -5077,6 +5085,8 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
     
             "iceUsernameFrag": "b92f7c1f6285d230796bb89bca57bcf9",
             "icePasswordEncrypted": "497787ddfd19843eb04479d67198010e:NDk3Nzg3...ZWIwNDQ3OWQ2NzE5ODAxMGU=",
+    
+            "iceFinal": false,
     
             "location": {
               "$id": "5a693555913da634c0b03139ec198bb8bad485ee",
@@ -5277,7 +5287,7 @@ Peer Location Find Reply Notification (E)
 
 ### Purpose
 
-This reply notification is sent directly from the replying peer to the requesting peer's finder (by the replying peer creating a direct connection from the replying peer to the requesting peer's finder and using the relay credentials to create a "channel-map" with the requesting peer).
+This reply notification is sent directly from the replying peer to the requesting peer's finder (by the replying peer creating a direct connection from the replying peer to the requesting peer's finder and using the relay credentials to create a "channel-map" with the requesting peer). Once the requesting peer has received a "peer-location-find" notification, the requesting peer is allowed to send it's own "peer-location-find" notificiation update notification.
 
 ### Outputs
 
@@ -5286,7 +5296,7 @@ This reply notification is sent directly from the replying peer to the requestin
   * validated - if the location sending this reply knows about the public peer file of the location that issued the `peer-location-find` request and was able to successfully validate the signature on the `peer-location-find` request this is set to true. If true, the location that issued the `peer-identity-request` must not send the `peer-identify` request upon connection.
   * ICE username frag - the username fragment for ICE negotiation
   * ICE password - the password passphrase for ICE negotiation
-  * final - 
+  * final - true if the remote party should not expect any more ICE candidates at this time
   * Location details
     * Location ID of requesting location
     * Contact ID of requesting location
@@ -5329,7 +5339,7 @@ This request must be sent over a secure channel with MLS.
             "iceUsernameFrag": "219d07d37faee86a5a866ff3e363b790b3b98fbb",
             "icePassword": "ed84448d05fde7f6b12442df3d07e169583226b4",
     
-            "final": false,
+            "iceFinal": false,
     
             "location": {
               "$id": "1f77425b06b33bfc1d9932a0716f3f2c92ec0e5",
