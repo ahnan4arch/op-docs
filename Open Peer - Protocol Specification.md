@@ -1185,13 +1185,13 @@ The "0" package contains the following:
     * sequence number - for every "0" package, this sequence number starts at 0 and increases by 1 for each "0" package received
     * Nonce - this nonce should be validated as having only been seen once by the receiving client
     * Expiry - a time-stamp and this package must be verified as valid before the expiry or it's considered invalid
-    * Context - (optional) this identifier allows the stream to correlate with other upper layers and the meaning is externally defined / negotiated
+    * Context - (optional) this identifier allows the stream to correlate with other upper layers and the meaning is externally defined / negotiated. In the case of a connecting to a server, the context should include the destination server domain name as the remote server context and the local context can be the local server domain name, "anonymous" if an anonymous context is used or the hash of the peer URI of the connecting peer (all of which much match the keying signature of the local keying material).
     * Encoding - the encoding technique used for this package
       * type - `pki`, `agreement` or `passphrase` - if "pki" then it's using public key encryption, if `agreement` then it's encoded using special key agreement based on a namespace, if "passphrase" then the encoding is done with a passphrase / algorithm externally defined (typically correlated via the context)
-      * fingerprint - if `pki` (or `agreement` where a public key is involved) the fingerprint of the remote party's public key used to encrypt this data, the fingerprint of the public key is hash = hash(`<public-key-der-encoded>`) and for Diffie-Hellman keys it's computed as hash = hmac(`<ephemeral-key`, `<static-key>`) when using the namespace `https://meta.openpeer.org/dh/modp/2048`
+      * fingerprint - (optional) if `pki` (or `agreement` where a public key is involved) the fingerprint of the remote party's public key used to encrypt this data, the fingerprint of the public key is hash = hash(`<public-key-der-encoded>`) and for Diffie-Hellman keys it's computed as hash = hmac(`<remote-ephemeral-key`, `<remotestatic-key>`) when using the namespace `https://meta.openpeer.org/dh/modp/2048`. For `agreement` where the remote public agreement keying is not known in advance (i.e. offer agreement key), there is no fingerprint value present. The answer agreement must include the fingerprint of the offer public agreement keying.
       * key - if `agreement` value = `<encoded-namespace>` + ":" + `<....namespace-dependent...>`
         * encoded namespace - `<encoded-namespace>` = base64(`<namespace-uri>`)
-        * if namespace is `https://meta.openpeer.org/dh/modp/2048` what follows is `<namespace-dependent>` = base64(`<encoding-peer-static-public-key>`) + ":" + base64(`<encoding-peer-ephemeral-public-key>`) based upon a Diffie-Hellman MODP P, Q and G are defined as hex integer values as defined in Diffie-Hellman MODP Namespace Definitions section. Alternative namespace `1024`, `1538`, `3072`, `4096`, `6144`, `8192` are available too. The agreed key becomes converted into a `passphrase` which is calculated as passphrase = hex(`<agreed-key>`).
+        * if namespace is `https://meta.openpeer.org/dh/modp/2048` what follows is `<namespace-dependent>` = base64(`<encoding-peer-static-public-key>`) + ":" + base64(`<encoding-peer-ephemeral-public-key>`) based upon a Diffie-Hellman MODP P, Q and G are defined as hex integer values as defined in Diffie-Hellman MODP Namespace Definitions section. Alternative namespace `1024`, `1538`, `2048`, `3072`, `4096`, `6144`, `8192` are available too. If the remote public agreement keying is known in advance to sending the local public keying agreement material, the agreed key becomes converted into a `passphrase` which is calculated as passphrase = hex(`<agreed-key>`), determined based on context. If the remote public agreement keying is not known in advance, the key uses the agreement mechanism as listed below for the "aes-cfb-32-16-16-sha1-md5" algorithm.
       * algorithm - if `passphrase` is used, the algorithm to decode the keying materials
       * proof - if `passphrase` is used, this field provides proof the correct decoding key is used to decrypt the stream
     * Algorithms - preference ordered set of algorithms supported by the client; once an algorithm is marked as supported it cannot be removed from subsequent "0" package updates.
@@ -1213,6 +1213,12 @@ For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with a "pass
   * hmacIntegrityKey - the initial secret key input string, hex(`<salt>`) + ":" + base64(encrypt(`<integrity-passphrase>`)), where key = hmac(`<external-passphrase>`, "keying:" + `<nonce>`), iv = `<salt>`
 
   The proof for correct keying material is calculated as follows: proof = hex(hmac(`<external-passphrase>`, "keying:" + `<nonce>`))
+
+For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with a "agreement" where the remote public MODP key is not known in advance, the following can be used to encode/decode the input information:
+
+  * secret - the 32 byte AES key is constructed in combination with the agreement key sent with a later agreement response, secret = hex(`<salt>`), where 32 byte AES key is calculated as hmac(hex(`<agreed-key>`), "secret:" + `<nonce>`), iv = `<salt>`
+  * iv - the 16 byte AES initialization vector, hex(`<salt>`), where 16 byte IV is calculated as hmac(hex(`<agreed-key>`), "iv:" + `<nonce>`), iv = `<salt>`
+  * hmacIntegrityKey - the initial secret key input string, hex(`<salt>`), where integriry passphrase is calculated as = hex(hmac(hex(`<agreed-key>`), "integrity:" + `<nonce>`)), iv = `<salt>`
 
 When the mandatory key is used, the AES CFB is initialized with these values and will continue to encrypt payloads using this keying until a new "0" package arrives. Once a new "0" package arrives all keying material is reset and forgotten and the algorithms with new keying information for subsequent messages are used for messages in a stream. The hmac is calculated using the following algorithm, hmac(`<integrity-passphrase>`, "integrity:" + hex(hash(`<decrypted-message>`)) + ":" hex(`<iv>`)). The AES key and integrity passphrase remains the same until a new "0" package is sent, but the IV is changed for every message. The next IV used for the keying selected is calculated based upon the hash of the previous IV for the selected keying and previous hmac integrity value, next_iv = hash(hex(`<previous-iv>`) + ":" + hex(`<previous-integrity-hmac>`)).
 
@@ -1332,39 +1338,31 @@ The following names apply when signaling JSON over MLS:
 
 #### https://meta.openpeer.org/dh/modp/1024 ####
 
-The MOPD
+See https://meta.openpeer.org/dh/modp/1024
 
-      P =
-    
-        E81724A6683F5C98638A243EA698DC03D7CE089AE426D286
-        0D506A34FDD0F9E9FBC8285A822377553F342FDA4EE14F5B
-        5CA5014F6B0638F5B8B3A904A639C6B7ACE6E0462770954D
-        34AC065C115813C67152DE611FC2ED388962A9E73EF29C33
-        E9C6D568B045F69F5D9C8582CFBA0B20DE5D25B21FB79E95
-        F60640287BF711C6E79B7ACFC12DA9812F6073A21EC7559F
-        C3E46B502F2BAFE28657A2676D71FB9BCA4197D45A5AE690
-        17E1E62F4D484E1151F485DC217560342F5DA4CD9A87996A
-        2D006595D95D9C82316A87F57E4F0A3C2465A3BC5034013A
-        DAACEC2242BA8BED1B21141E975CA90448EF413CCEF88CF4
-        D8BFB21630714239B6FFC58296CC0243
-    
-      Q =
-    
-        740B9253341FAE4C31C5121F534C6E01EBE7044D72136943
-        06A8351A7EE87CF4FDE4142D4111BBAA9F9A17ED2770A7AD
-        AE5280A7B5831C7ADC59D482531CE35BD673702313B84AA6
-        9A56032E08AC09E338A96F308FE1769C44B154F39F794E19
-        F4E36AB45822FB4FAECE42C167DD05906F2E92D90FDBCF4A
-        FB0320143DFB88E373CDBD67E096D4C097B039D10F63AACF
-        E1F235A81795D7F1432BD133B6B8FDCDE520CBEA2D2D7348
-        0BF0F317A6A42708A8FA42EE10BAB01A17AED266CD43CCB5
-        168032CAECAECE4118B543FABF27851E1232D1DE281A009D
-        6D567611215D45F68D908A0F4BAE54822477A09E677C467A
-        6C5FD90B1838A11CDB7FE2C14B660121
-    
-      G = 03
-     
+#### https://meta.openpeer.org/dh/modp/1538 ####
 
+See https://meta.openpeer.org/dh/modp/1538
+
+#### https://meta.openpeer.org/dh/modp/2048 ####
+
+See https://meta.openpeer.org/dh/modp/2048
+
+#### https://meta.openpeer.org/dh/modp/3072 ####
+
+See https://meta.openpeer.org/dh/modp/3072
+
+#### https://meta.openpeer.org/dh/modp/4096 ####
+
+See https://meta.openpeer.org/dh/modp/4096
+
+#### https://meta.openpeer.org/dh/modp/6144 ####
+
+See https://meta.openpeer.org/dh/modp/6144
+
+#### https://meta.openpeer.org/dh/modp/8192 ####
+
+See https://meta.openpeer.org/dh/modp/8192
 
 Multiplexed Streams
 -------------------
