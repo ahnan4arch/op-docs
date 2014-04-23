@@ -1196,6 +1196,7 @@ The "0" package contains the following:
       * proof - if `passphrase` is used, this field provides proof the correct decoding key is used to decrypt the stream
     * Algorithms - preference ordered set of algorithms supported by the client; once an algorithm is marked as supported it cannot be removed from subsequent "0" package updates.
     * List of keys, with each key containing:
+      * key disposition - "update" or "remove" - "update" adds or replaces an existing key and "remove" causes an existing key to become purged
       * key index - this corresponds to the algorithm selection index of which key to use in any subsequent decryption
       * algorithm - the algorithm to use when decrypting payloads using this key index
       * algorithm input data - each algorithm requires its own set of keying information required for decryption, which is contained here. All sensitive data is encrypted using the public key of the remote party
@@ -1206,7 +1207,7 @@ For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with "pki", 
   * iv - the 16 byte AES initialization vector, base64(rsa_encrypt(`<remote-public-key>`, `<16-byte-aes-iv>`))
   * hmacIntegrityKey - the initial secret key input string, base64(rsa_encrypt(`<remote-public-key>`, `<integrity-passphrase>`))
 
-For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with a "passphrase", the following can be used to encode/decode the input information:
+For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with a "passphrase" (alternatively "agreement" is used which is converted into a passphrase), the following can be used to encode/decode the input information:
 
   * secret - the 32 byte AES key, hex(`<salt>`) + ":" + base64(encrypt(`<32-byte-aes-key>`)), where key = hmac(`<external-passphrase>`, "keying:" + `<nonce>`), iv = `<salt>`
   * iv - the 16 byte AES initialization vector, hex(`<salt>`) + ":" + base64(encrypt(`<16-byte-aes-iv>`)), where key = hmac(`<external-passphrase>`, "keying:" + `<nonce>`), iv = `<salt>`
@@ -1214,13 +1215,13 @@ For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with a "pass
 
   The proof for correct keying material is calculated as follows: proof = hex(hmac(`<external-passphrase>`, "keying:" + `<nonce>`))
 
-For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with a "agreement" where the remote public MODP key is not known in advance, the following can be used to encode/decode the input information:
+For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with a "agreement" where the remote public Diffie-Hellman key is not known in advance, the following can be used to encode/decode the input information:
 
   * secret - the 32 byte AES key is constructed in combination with the agreement key sent with a later agreement response, secret = hex(`<salt>`), where 32 byte AES key is calculated as hmac(hex(`<agreed-key>`), "secret:" + `<nonce>`), iv = `<salt>`
   * iv - the 16 byte AES initialization vector, hex(`<salt>`), where 16 byte IV is calculated as hmac(hex(`<agreed-key>`), "iv:" + `<nonce>`), iv = `<salt>`
   * hmacIntegrityKey - the initial secret key input string, hex(`<salt>`), where integriry passphrase is calculated as = hex(hmac(hex(`<agreed-key>`), "integrity:" + `<nonce>`)), iv = `<salt>`
 
-When the mandatory key is used, the AES CFB is initialized with these values and will continue to encrypt payloads using this keying until a new "0" package arrives. Once a new "0" package arrives all keying material is reset and forgotten and the algorithms with new keying information for subsequent messages are used for messages in a stream. The hmac is calculated using the following algorithm, hmac(`<integrity-passphrase>`, "integrity:" + hex(hash(`<decrypted-message>`)) + ":" hex(`<iv>`)). The AES key and integrity passphrase remains the same until a new "0" package is sent, but the IV is changed for every message. The next IV used for the keying selected is calculated based upon the hash of the previous IV for the selected keying and previous hmac integrity value, next_iv = hash(hex(`<previous-iv>`) + ":" + hex(`<previous-integrity-hmac>`)).
+When the mandatory key is used, the AES CFB is initialized with these values and will continue to encrypt payloads using this keying until a new "0" package arrives. Once a new "0" package arrives all keying material is updated and the algorithms with new keying information for subsequent messages are used for messages in a stream. The hmac integrity is calculated using the following algorithm, hmac(`<integrity-passphrase>`, "integrity:" + hex(hash(`<decrypted-message>`)) + ":" hex(`<iv>`)). The AES key and integrity passphrase remains the same until a new "0" package is sent, but the IV is changed for every message. The next IV used for the keying selected is calculated based upon the hash of the previous IV for the selected keying and previous hmac integrity value, next_iv = hash(hex(`<previous-iv>`) + ":" + hex(`<previous-integrity-hmac>`)).
 
 Example of the "0" package is JSON in place text with the following data in the bundle:
 
@@ -1261,6 +1262,7 @@ Example of the "0" package is JSON in place text with the following data in the 
           "keys": {
             "key": [
               {
+                "$disposition": "update",
                 "index": 1,
                 "algorithm": "https://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
                 "inputs": {
@@ -1270,6 +1272,7 @@ Example of the "0" package is JSON in place text with the following data in the 
                 }
               },
               {
+                "$disposition": "update",
                 "index": 2,
                 "algorithm": "https://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5",
                 "inputs": {
@@ -1279,6 +1282,7 @@ Example of the "0" package is JSON in place text with the following data in the 
                 }
               },
               {
+                "$disposition": "update",
                 "index": 3,
                 "algorithm": "https://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-16-16-16-md5-md5",
                 "inputs": {
@@ -1302,7 +1306,7 @@ Example of the "0" package is JSON in place text with the following data in the 
 
 ### Security Considerations ###
 
-Any sensitive data contained in the "0" package must be encrypted using the public key of the receiving party. Thus the key, iv, and hmacIntegrityKey must be encrypted. The entire package must be signed by the public key of the party sending the "0" package and the receiver must validate this package's signature before it assumes any of the data sent in the package is considered valid and / or trustworthy.
+Any sensitive data contained in the "0" package must be encrypted using information only the receiving party can decrypt (e.g. receiving party's public key). Thus the key, iv, and hmacIntegrityKey must be encrypted. The entire package must be signed by the public key of the party sending the "0" package and the receiver must validate this package's signature before it assumes any of the data sent in the package is considered valid and / or trustworthy.
 
 All keying information and salts must be generated using cryptographically random algorithms only.
 
@@ -1312,7 +1316,7 @@ The public key used in this exchange need not be the same public key used by a h
 
 The sending party must respect the following:
   
-  * Using the `agreement` type with a Diffie-Hellman key namespace can only be used if the remote Diffie-Hellman public keying material was pre-known by the encoder before encoding the package.
+  * Using the `agreement` type with a Diffie-Hellman key namespace can only encode data once the remote party's public Diffie-Hellman key is received.
 
 The receiving party must verify the following:
 
