@@ -1442,7 +1442,7 @@ Every request must include the federated domain which the request is being proce
 
 Even though all requests / responses are written in human readable form in this document, on-the-wire requests and responses should be written for favor of size efficiency. The recommended method is the Open Peer canonical form using the algorithm for the canonicalization of JSON signatures as specified in this document. This ensures the wire format is optimal on the wire since the canonical form is fairly compact (although if a compression algorithm is applied to the message at a higher layer then the wire savings might become moot).
 
-The client may receive an error complaining that a request has expired if the client's clock was set wrong (401). Hence in every result, the epoch of the server will be sent for the client to detect potential clock errors. To reduce issues, the client should use a secure NTP service to set its own clock at some point before initiating contact to a server or another peer.
+The client may receive an error complaining that a request has expired if the client's clock was set wrong (401). Hence in every result, the seconds since epoch of the server will be sent for the client to detect potential clock errors. To reduce issues, the client should use a secure NTP service to set its own clock at some point before initiating contact to a server or another peer.
 
 The client is responsible for disconnecting at all times from the server. In the case of peer to peer, the initiating peer is considered the client role and the receiving peer plays the server role.
 
@@ -1535,8 +1535,8 @@ Open Peer JSON signatures are used to verify signatures within the JSON. The sig
 The signature output typically looks something like this:
 
     {
-      dataBundle {
-        "data" : {
+      "dataBundle": {
+        "data": {
           "$id": "4bf7fff50ef9bb07428af6294ae41434da175538"
         },
         "signature": {
@@ -2067,7 +2067,7 @@ This request returns a list random possible peer finders that a client can attem
 
 ### Inputs
 
-The total number of server entries desired (which the server can choose to ignore and return less servers than requested, but never more).
+The total number of server entries desired (which the server can choose to ignore and return less servers than requested, but never more) or a particular set of finders can be referenced by requesting a list of finders by their finder ID.
 
 ### Returns
 
@@ -2080,8 +2080,8 @@ Returns a list of Finders containing the following information for each Finder:
   * Public key for the finder - Can be either the full X.509 certificate or a key name lookup for certificates returned from the certificate server
   * Weight / priority - default values for SRV like weight / priority when SRV entry is pre-resolved IP:port pairs
   * Geographic region ID - (optional) each server belongs to a logical geographic region (clients can organize servers into geographic regions for fail over reasons)
-  * Created - the epoch when the finder registered itself to the Bootstrapped Finder service. A finder with the same ID but a newer created date should replace an existing finder with the same ID.
-  * Expires - the epoch when this finder information should be discarded and a new finder fetched to replace the existing one. There is no guarantee the finder will remain online for this period of time as this is a recommendation only. Should initiated communication to a finder server fail, the finder information might be considered no longer valid as the finder server might be gone.
+  * Created - the seconds since epoch when the finder registered itself to the Bootstrapped Finder service. A finder with the same ID but a newer created date should replace an existing finder with the same ID.
+  * Expires - the seconds since epoch when this finder information should be discarded and a new finder fetched to replace the existing one. There is no guarantee the finder will remain online for this period of time as this is a recommendation only. Should initiated communication to a finder server fail, the finder information might be considered no longer valid as the finder server might be gone.
   * Signed by the finder service
 
 ### Security Considerations
@@ -2103,6 +2103,15 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
         "$id": "abd23",
     
         "servers": 2
+    
+        "-or-": "",
+    
+        "servers": {
+          "server": [
+            "4bf7fff50ef9bb07428af6294ae41434da175538",
+            "a7f0c5df6d118ee2a16309bc8110bce009f7e318"
+          ]
+        }
       }
     }
 .
@@ -2607,8 +2616,11 @@ This request obtains access to a lockbox. Access is granted by way of login proo
   * Lockbox information
     * Lockbox domain - the domain hosting the lockbox
     * Lockbox account ID - (optional, if known) the assigned account ID for the lockbox
-    * Lockbox passphrase "hash" - (optional) hash of the lockbox passphrase, hex(hash(`lockbox-passphrase`)). If this hash specified matches the hash in the database associated with the account ID then this hash can be used to login to the lockbox account (by specifying the lockbox account ID). If validated identity information is present and the hash value does not match the hash value in the database then all the content values stored in the lockbox must be deleted (but the associated identities and the namespace grants can stay). This type of scenario can happen if a user's password was reset (where the lockbox passphrase was lost in the process).
-    * Lockbox reset flag - (optional) if specified and true, a new lockbox must be created for the identity specified (and an identity must be specified must be granted access) and this identity must become unassociated with any other existing lockbox accounts. If this identity was previously the only associated identity with a previous lockbox account then the previous lockbox account can be deleted entirely.
+    * Lockbox passphrase ID - (optional, if a lockbox passphrase was previously generated) a static identifier associated with the currently generated passphrase (every time a passphrase is generated an ID is generated as well which is an identifier to refer to a particular passphrase without having to know the passphrase itself). If this ID specified matches the ID in the database associated with the account ID then this ID and proof of the lockbox passphrase can be used to login to the lockbox account (which also requires specifying the lockbox account ID). If validated identity information is present in the request and the "lockbox passphrase ID" value does not match the value in the database then all the content values stored in the lockbox must be purged (but the associated identities and the namespace grants can remain). This type of scenario can happen if a user's password was reset (which may have caused the lockbox passphrase to be lost in the process).
+    * Lockbox hash - (optional but required when a lockbox passphrase is known by the identity being specified) this value is used to store into the database to provide login capability to the login via lockbox passphrase proof in the future without requiring an identity that validates for future calls to "Lockbox Access Request", value = hex(hmac(`<lockbox-passphrase>`, "lockbox:" + `<lockbox-passphrase-id>`))
+    * Lockbox passphrase proof - (optional) proof the passphrase is known and required to login to the lockbox account when logging in without a identity that validates being specified in the request, proof = hex(hmac(`<lockbox-hash>`, "identity-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-passphrase-id>` + ":lockbox-access")), lockbox hash = hex(hmac(`<lockbox-passphrase>`, "lockbox:" + `<lockbox-passphrase-id>`))
+    * Expiry of the proof for the 'lockbox passphrase proof' - a window in which lockbox passphrase proof is considered valid
+    * Lockbox reset flag - (optional) if specified and true, a new lockbox must be created for the identity specified (and an identity which validates must be included in the request) and the identity specified must become unassociated with any other existing lockbox accounts. If this identity was previously the only associated identity with a previous lockbox account then the previous lockbox account can be deleted entirely.
   * Agent
     * User agent - the user agent identification for the product, typically "name/version (os/system)"
     * Name - a human readable friendly name for the product
@@ -2627,7 +2639,7 @@ This request obtains access to a lockbox. Access is granted by way of login proo
     * Lockbox access secret - a secret passphrase that can be used in combination to the "lockbox access token" to provide proof of previous successful login
     * Lockbox access expiry - the window in which the access key is valid (and should be sufficiently in the distant future for use as a long term key)
     * Lockbox domain - the domain hosting the lockbox
-    * Lockbox passphrase "hash" - hash of the lockbox passphrase as previously passed in and associated to the lockbox account.
+    * Lockbox passphrase ID - (optional) returned if passphrase ID as previously specified for the lockbox
   * Grant service challenge (optional, if challenge is required)
     * ID - a challenge ID that the server generated which the client application will have to authorize
     * Name - a human readable name for the service requesting the challenge
@@ -2641,16 +2653,22 @@ This request obtains access to a lockbox. Access is granted by way of login proo
   * List of identities attached to the lockbox
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
+    * passphrase known - flag to indicate if the identity knows the lockbox passphrase or not - set to true for every identity that has previously logged in with the lockbox passphrase ID specified in the request with the lockbox passphrase hash being provided
 
 ### Security Considerations
 
 Access to the lockbox does not grant access to the contents of the lockbox. The lockbox passphrase must be obtained through an alternative method. Upon the server seeing namespaces used in conjunction with a grant ID where the namespace has not previously been granted, the lockbox will issue a "grant service challenge" to verify the user wishes to grant access to all those namespaces.
 
+Access to the lockbox can be made in one of two ways:
+
+  * login with proof of an identity
+  * login with proof of a lockbox passphrase
+
 The server will validate the identity login via the identity service to access the account or validate the client has the correct lockbox passphrase hash to access the account. An identity that has a different provider is considered a different identity. Thus an identity is deemed unique by its identity and its identity provider combined.
 
 If the lockbox reset flag is specified then a new account is created based on the identity and the existing account remains associated to the old identities, or the old account is removed if no other identities remain associated.
 
-If the lockbox passphrase hash does not match for the account but the identity access passed into the account is valid and matches the account ID used then all data in all namespaces for the account must be wiped out. The lockbox passphrase hash must become updated with the new key hash.
+If the lockbox passphrase ID or hash (if specified) does not match for the account but the identity access passed into the account is valid and matches the account ID used then all data in all namespaces for the account must be wiped out. The lockbox passphrase hash must become updated with the new key hash.
 
 ### Example
 
@@ -2674,7 +2692,15 @@ If the lockbox passphrase hash does not match for the account but the identity a
     
         "lockbox": {
           "domain": "example.com",
-          "hash": "cf69f9e4ed98bb739b4c72fc4fff403467014874"
+    
+          "keyName": "2b698e4b5394969e7325d67419cbe115",
+          "hash": "cf69f9e4ed98bb739b4c72fc4fff403467014874",
+    
+          "-or-":
+    
+          "keyName": "2b698e4b5394969e7325d67419cbe115",
+          "keyProof": "5fb03623d0daab3d0e13d48063d3494ef82c8c68",
+          "keyProofExpires": 43843298934,
         },
     
         "agent": {
@@ -2757,11 +2783,13 @@ If the lockbox passphrase hash does not match for the account but the identity a
          "identity": [
             {
               "uri": "identity://domain.com/alice",
-              "provider": "domain.com"
+              "provider": "domain.com",
+              "keyKnown": true
             },
             {
               "uri": "identity:phone:16045551212",
-              "provider": "example.com"
+              "provider": "example.com",
+              "keyKnown": false
             }
           ]
         }
@@ -3029,7 +3057,9 @@ This request retrieves data contained in the lockbox.
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored
     * Updated - time-stamp (or version number) of when entries in the namespace were last updated
-    * List of values, each value encrypted with: encrypted value = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<value>`), where key = hmac(`<lockbox-passphrase>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv = hash(`<salt-string>`)
+    * List of values containing:
+       * expires - (optional) if entry must expire at a certain date (as seconds since epoch)
+       * encrypted value - each value encrypted with: encrypted value = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<value>`), where key = hmac(`<lockbox-passphrase>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv = hash(`<salt-string>`)
 
 ### Security Considerations
 
@@ -3082,7 +3112,11 @@ No value names within the same namespace URL should be identical.
               "$id": "https://domain.com/pemissionname",
               "$updated": 5848843,
               "value1": "4f3f25da69fab2abb5c839158cc54e5a1320fac6:ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
-              "value2": "7779796a91b8a37d922a0338b0f71fcc672379d1:Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
+              "value2": "7779796a91b8a37d922a0338b0f71fcc672379d1:Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk",
+              "value3": {
+                "expires": 495943433,
+                "#text": "1c9e5ddb36e3c34e69c5a6cda6dc206841289b84:MWM5ZTVkZGIzNmU...kYTZkYzIwNjg0MTI4OWI4NA0K"
+              }
             },
             {
               "$id": "https://other.com/pemissionname",
@@ -3113,7 +3147,9 @@ This request retrieves data contained in the lockbox.
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored
-    * List of values, each value encrypted with: encrypted value = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<value>`)), where key = hmac(`<lockbox-passphrase>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv = hash(`<salt-string>`), or a value of "-" to remove a value. The values are merged together with existing values or the values are removed if they contain a value of "-".
+    * List of values containing:
+       * expires - (optional) if entry must expire at a certain date (as seconds since epoch)
+       * encrypted value - each value encrypted with: encrypted value = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<value>`)), where key = hmac(`<lockbox-passphrase>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv = hash(`<salt-string>`), or a value of "-" to remove a value. The values are merged together with existing values or the values are removed if they contain a value of "-".
 
 ### Returns
 
@@ -3144,7 +3180,11 @@ No value names within the same permission URL should be identical. The salt stri
               "$id": "https://domain.com/pemissionname",
               "value1": "4465e9c44b4bcdb9925c57365739d387899e2b91:ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
               "value2": "-",
-              "value3": "a49d7902da1690b1e16588969cf3beab77dae853:Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
+              "value3": {
+                "expires": 495943433,
+                "#text": "1c9e5ddb36e3c34e69c5a6cda6dc206841289b84:MWM5ZTVkZGIzNmU...kYTZkYzIwNjg0MTI4OWI4NA0K"
+              },
+              "value4": "a49d7902da1690b1e16588969cf3beab77dae853:Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
             },
             {
               "$id": "https://other.com/pemissionname",
@@ -3669,7 +3709,8 @@ This notification is sent from the inner browser window to the outer window as a
     * Identity encrypted relogin key - the relogin key only has meaning to the identity service and it's encrypted, encrypted value = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<relogin-key>`)), where key = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":identityReloginKey"), iv = hash(`<salt-string>`)
   * Lock box information (optional, if known)
      * Lockbox domain - if lockbox domain is known in advance, this is the domain for the lockbox to use
-     * Twice encrypted lockbox passphrase - (optional, if key was previously set) - this is a lockbox passphrase which is encrypted twice, twice-encrypted-lockbox-passphrase = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<encrypted-lockbox-passphrase>`)), where key = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":lockboxKey"), iv = hash(`<salt-string>`), where encrypted-lockbox-passphrase = `<inner-salt-string>` + ":" + base64(encrypt(`<inner-key>`, `<lockbox-passphrase>`), inner-key = hmac(`<server-encryption-passphrase>`), "identity:" + `<identity-uri>`), iv=hash(`<inner-salt-string>`)
+     * Lockbox passphrase ID - (optional, if a lockbox passphrase was previously generated and associated with the identity) a static identifier associated with the currently generated passphrase (every time a passphrase is generated an ID is generated as well which is an identifier to refer to a particular passphrase without having to know the passphrase itself)
+     * Twice encrypted lockbox passphrase - (optional, if key was previously set with the identity) - this is a lockbox passphrase which is encrypted twice, twice-encrypted-lockbox-passphrase = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<encrypted-lockbox-passphrase>`)), where key = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":lockboxKey"), iv = hash(`<salt-string>`), where encrypted-lockbox-passphrase = `<inner-salt-string>` + ":" + base64(encrypt(`<inner-key>`, `<lockbox-passphrase>`), inner-key = hmac(`<server-encryption-passphrase>`), "identity:" + `<identity-uri>`), iv=hash(`<inner-salt-string>`)
      * Lockbox reset flag - this flag is used if the lockbox must be reset with a new password and all data within to be flushed.
   * Encrypted server encryption passphrase - the passphrase used to encrypt sensitive information from the server (e.g. so that the server doesn't know the lockbox passphrase) encrypted using the encryption-passphrase-upon-grant-proof, where encrypted-server-encryption-passphrase = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<server-encrypted-passphrase>`)), where key = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":serverEncryptionKey"), iv = hash(`<salt-string>`)
   * Grant service challenge (optional, if challenge is required)
@@ -3701,6 +3742,8 @@ By using information not stored on a server, this ensures that should the server
 
 If the identity provider was not provided a relogin key it must challenge the agent with a grant challenge. This is to ensure the user is aware the agent is seeking access to their secure information in an untrusted environment like a website. If a relogin key was provided the "encryption passphrase upon grant proof" can be provided immediately without a grant challenge since the only way an agent could have obtained that is upon a providing previous proof.
 
+If the "lockbox passphrase ID" is specified but the "twice encrypted lockbox passphrase" is not set, that means the identiy was not trusted to hold the lockbox passphrase even though it was told one exists. This requires the client application login with an alternative identity that was trusted to hold the lockbox passphrase to obtain the lockbox passphrase. The lockbox passphrase must be known by at least one identity if lockbox access is to be shared between applications.
+
 ### Example
 
     {
@@ -3723,6 +3766,7 @@ If the identity provider was not provided a relogin key it must challenge the ag
     
         "lockbox": {
           "domain": "domain.com",
+          "keyName": "5a5ac1ef2cb65303824b107739018d3e8bd01a15",
           "keyEncrypted": "14900c10d3484e5bbdb0af34cde041cd00d4c214:V20x...IbGFWM0J5WTIxWlBRPT0=",
           "reset": false
         },
@@ -3875,7 +3919,8 @@ This request updates the identity lookup information when an identity lookup is 
     * Lockbox access token - a verifiable token that is linked to the lockbox
     * Proof of 'lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":identity-lookup-update"))
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
-    * Lockbox passsphrase encrypted - the lockbox passphrase encrypted to protect the server from knowing the lockbox passphrase, where encrypted-lockbox-passphrase = `<salt-string>` + base64(encrypt(`<key>`, `<lockbox-passphrase>`), key = hmac(`<server-encryption-passphrase>`), "identity:" + `<identity-uri>`), iv=hash(`<salt-string>`)
+     * Lockbox passphrase ID - (optional, if a lockbox passphrase was generated and to be associated with the identity) a static identifier associated with the currently generated passphrase (every time a passphrase is generated an ID is generated as well which is an identifier to refer to a particular passphrase without having to know the passphrase itself)
+    * Lockbox passsphrase encrypted - (optional, if client trusts identity to hold onto the lockbox passphrase) the lockbox passphrase encrypted to protect the server from knowing the lockbox passphrase, where encrypted-lockbox-passphrase = `<salt-string>` + base64(encrypt(`<key>`, `<lockbox-passphrase>`), key = hmac(`<server-encryption-passphrase>`), "identity:" + `<identity-uri>`), iv=hash(`<salt-string>`)
   * Identity bundle information
     * Identity access token - as returned from the "identity access complete" request
     * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-lookup-update"))
@@ -3908,6 +3953,8 @@ The server must validate the following:
   * the contact proof bundle is signed correctly by the private key associated with the public peer file
   * the encryption key upon grant proof was the same as generated by the identity service thus proving the client has the correct keying material (hint: encryption key can have other hashed or encoded information as part of the passphrase to ensure stateless server validation of the key)
 
+If the "lockbox passphrase ID" is specified but the "encrypted lockbox passphrase" is not set, that means the identiy was not trusted to hold the lockbox passphrase even though it was told one exists. This requires the client application login with an alternative identity that was trusted to hold the lockbox passphrase to obtain the lockbox passphrase. The lockbox passphrase must be known by at least one identity if lockbox access is to be shared between applications.
+
 ### Example Association
 
     {
@@ -3927,6 +3974,7 @@ The server must validate the following:
           "accessSecretProofExpires": 43843298934,
     
           "domain": "domain.com",
+          "keyName": "5a5ac1ef2cb65303824b107739018d3e8bd01a15",
           "keyEncrypted": "V20x...IbGFWM0J5WTIxWlBRPT0="
         },
     
@@ -4224,11 +4272,11 @@ This method allows a peer to publish a document into the network where it can be
   * Document name - full path, including namespace
   * Document version - first version must start at 1 and all others must be +1 from previous
   * Document base version - (optional), must be present if sending an "json-diff" document; the base version must be included to know what the base version was used to compute the differences. This base version must match the last published version by the receiver of the publish request or a 409 conflict will be returned.
-  * Document lineage - for v1 documents, it is recommend to use the epoch but the server may replace with its own value in the result (which must be used in subsequent updates); the lineage must match between updates to the same document; the lineage value is to prevent conflicts when performing document deletions
+  * Document lineage - for v1 documents, it is recommend to use the seconds since epoch but the server may replace with its own value in the result (which must be used in subsequent updates); the lineage must match between updates to the same document; the lineage value is to prevent conflicts when performing document deletions
   * Chunk number - (optional), "1/1" is assumed - to allow upload of multiple chunks of the document (note: not all documents support chunking)
   * Scope of where the document resides - associated to "location", or "contact"; the "location" scope is a private namespace only writable to the current session location; the "contact" scope is a namespace shared by all locations for the same contact (or through a special processer is shared amongst all users
   * Lifetime of document - i.e. "session" or "permanent"
-  * Expiry of document - (optional), epoch of when document must expire
+  * Expiry of document - (optional), seconds since epoch of when document must expire
   * Encoding - (optional), "json" is assumed, options are "json", "binary-base64"
   * "Publish to relationships" - list of:
     * Relationships contact file name (e.g. "/hookflash.com/authorization-list/1.0/whitelist" or "/hookflash.com/authorization-list/1.0/adhoc-subscribers"). The scope for relationship documents is always "location". However, specialized document processors can generate "on-the-fly" relationship lists.
@@ -4688,7 +4736,7 @@ Obtain a session token that represents the peer on the finder server so continuo
   * Relay information (for relay connections):
     * access token - the access token needed for creating remote relay credentials that can be given to third parties to connect and relay information to this logged in application
     * access secret encrypted - the secret passphrase used for giving out relay credentials to 3rd parties, encrypted access secret = base64(rsa_encrypt(`<public-key-from-request-peer-file>`, `<access-secret>`))
-  * Expiry epoch (when next a keep alive must be sent by)
+  * Expiry - when next a keep alive must be sent by (seconds since epoch)
   * Server agent
   * Signed by finder's certificate - uses finder's public key fingerprint as signature key reference
 
@@ -4861,7 +4909,7 @@ None.
 
 ### Outputs
 
-  * Expiry epoch (when next a keep alive must be sent by)
+  * Expiry - when next a keep alive must be sent by (as seconds since epoch)
 
 ### Security Considerations 
 
@@ -5043,8 +5091,8 @@ This is the request to find a peer that includes the proof of permission to cont
     * if class is "finder-relay":
       * transport - either "multiplexed-json-mls/tcp" or "multiplexed-json-mls/secure-web-socket"
       * type - "relay"
-      * host - host where to connect to the finder relay
-      * port - port to connect to the finder relay
+      * finder ID - the finder used to connect (can use "Finders Get Request" to obtain a copy of the signed finder information)
+      * finder protocols - the list of protocols supported by the finder
       * access token - token as returned during peer finder session create
       * access secret proof (encrypted) - encrypted version of access secret proof, encrypted proof = hex(`<iv>`) + ":" + encrypt(`<key>`, `<proof>`), where proof = hex(hmac(`<access-secret>`, "finder-relay-access-validate:" + `<access-token>` + ":" + `<context>` + ":channel-map")), key = hash(`<peer-secret>`), iv = `<random>`
       * access secret proof expiry - expiry time of the access secret proof
@@ -5105,10 +5153,20 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
                 "candidate": [
                   {
                     "namespace": "https://meta.openpeer.org/candidate/finder-relay",
-                    "transport": "multiplexed-json-mls/tcp",
                     "type": "relay",
-                    "host": "100.200.10.20",
-                    "port": 32113,
+                    "finder": "4bf7fff50ef9bb07428af6294ae41434da175538",
+                    "protocols": {
+                      "protocol": [
+                        {
+                          "transport": "multiplexed-json/tcp",
+                          "host": "finders.example.com"
+                        },
+                        {
+                          "transport": "multiplexed-json/secure-web-socket",
+                          "host": "finders.example.com"
+                        }
+                      ]
+                    },
                     "accessToken": "9d934822ccca53ac6e16e279830f4ffe3cfe1d0e",
                     "accessSecretProofEncrypted": "8b29fe4c606e370df6704ed0abb4e2b2:U0RQIHN1Y2t...zIHJlbGFseSBiYWQ="
                   }
@@ -5295,7 +5353,7 @@ This reply notification is sent directly from the replying peer to the requestin
 
   * Digest value from signature sent in original request - the reply location might not have the ability to validate the signature of the request but the reply location must validate the signature's hash value is correct and copy this value back to the original requester bundled in its own signed package (since the requester knows the original value and must have the public peer file of the reply location to validate the reply's bundle). This allows the requester to validate the original request remained non-tampered throughout and ignore replies where tampering might have occurred.
   * Context - this identifier is combined with the remote peer's context to form the "requester" / "reply" context ID pairing for MLS
-  * validated - if the location sending this reply knows about the public peer file of the location that issued the `peer-location-find` request and was able to successfully validate the signature on the `peer-location-find` request this is set to true. If true, the location that issued the `peer-identity-request` must not send the `peer-identify` request upon connection.
+  * validated - if the location sending this reply knows about the public peer file of the location that issued the `peer-location-find` request and was able to successfully validate the signature on the `peer-location-find` request this is set to true. If true, the location that issued the `peer-location-find` must not send the Peer Identify Request upon connection.
   * ICE username frag - the username fragment for ICE negotiation
   * ICE password - the password passphrase for ICE negotiation
   * final - true if the remote party should not expect any more ICE candidates at this time
@@ -5770,7 +5828,7 @@ None.
 
 ### Outputs
 
-  * Expiry epoch (when next a keep alive must be sent by)
+  * Expiry - when next a keep alive must be sent by (as seconds since epoch)
 
 ### Security Considerations
 
