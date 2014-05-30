@@ -223,7 +223,18 @@ Upon seeing an unknown grant ID used in conjunction with a the identity where pr
           "name": "Provider Rolodex Service",
           "image": "https://provider.com/rolodex/rolodex.png",
           "url": "https://provider.com/rolodex/",
-          "domains": "trust.com,trust2.com"
+          "domains": "trust.com,trust2.com",
+    
+          "namespaces": {
+            "namespace": [
+              {
+                "$id": "https://domain.com/pemissionname"
+              },
+              {
+                "$id": "https://other.com/pemissionname"
+              }
+            ]
+          }
         }
     
       }
