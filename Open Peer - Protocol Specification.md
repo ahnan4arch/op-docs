@@ -1375,7 +1375,7 @@ Streams can be multiplexed allowing for multiple messages that are are packaged 
 
 The format of the package is:
 
-  * Channel number [4 bytes in network order] - The bi-directional messaging channel
+  * Channel number [4 bytes in network order] - The bi-directional messaging channel, must be a value less than 0x40000000
   * Message Size [4 bytes in network order]
   * raw binary data
 
@@ -1874,12 +1874,12 @@ The request portion is only sent after a 302-redirect whereupon it is sent in a 
             },
             {
               "$id": "596c4577a4efb2a13ded43a3851b7e51577ad186",
-              "type": "bootstrapped-finders",
+              "type": "bootstrapped-servers",
               "version": "1.0",
               "methods": {
                 "method": {
-                  "name": "finders-get",
-                  "uri": "https://finders.example.com/finders-get"
+                  "name": "servers-get",
+                  "uri": "https://finders.example.com/servers-get"
                 }
               }
             },
@@ -2098,14 +2098,16 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
       "request": {
         "$domain": "example.com",
         "$appid": "xyz123",
-        "$handler": "bootstrapped-finders",
-        "$method": "finders-get",
+        "$handler": "bootstrapped-servers",
+        "$method": "servers-get",
         "$id": "abd23",
     
+        "type": "finder",
         "servers": 2
     
         "-or-": "",
     
+        "type": "finder",
         "servers": {
           "server": [
             "4bf7fff50ef9bb07428af6294ae41434da175538",
@@ -2120,16 +2122,17 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
       "result": {
         "$domain": "example.com",
         "$appid": "xyz123",
-        "$handler": "bootstrapped-finders",
-        "$method": "finders-get",
+        "$handler": "bootstrapped-servers",
+        "$method": "servers-get",
         "$id": "abc123",
         "$timestamp": 439439493,
     
-        "finders": {
-          "finderBundle": [
+        "servers": {
+          "serverBundle": [
             {
-              "finder": {
+              "server": {
                 "$id": "4bf7fff50ef9bb07428af6294ae41434da175538",
+                "type": "finder",
                 "protocols": {
                   "protocol": [
                     {
@@ -2162,8 +2165,9 @@ Each Finder should have its own X.509 certificate that it generates upon start-u
               }
             },
             {
-              "finder": {
+              "server": {
                 "$id": "a7f0c5df6d118ee2a16309bc8110bce009f7e318",
+                "type": "finder",
                 "protocols": {
                   "protocol": [
                     {
@@ -2646,7 +2650,7 @@ This request obtains access to a lockbox. Access is granted by way of login proo
     * Image - a branded image representing the service requesting the challenge
     * URL - a browser URL where the user can go to obtain more information about this service requesting the challenge
     * Domains - a list of domains the service will accept trusted signatures as proof
-    * Namespace URL - the namespace URL is the ID where the data is stored, access was requested but access was not previously granted
+    * Namespace URL - the namespace URL is the namespace where the data is stored as passed into the access request, where access was requested for the given grant ID but access was not previously granted to the given grant ID
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored, access was requested and access was previously granted
     * Updated - time-stamp (or version number) of when entries in the namespace were last updated
