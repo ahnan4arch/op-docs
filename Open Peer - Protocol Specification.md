@@ -4166,6 +4166,163 @@ List of services available to peer contact services, containing:
     }
 
 
+Peer Files Get
+--------------
+
+### Purpose
+
+This request retrieves a list of peer files assosciated to peer URIs.
+
+### Inputs
+
+  * Peer list containing:
+    * peer URI
+    * find secret nonce - a one time use nonce key used in proof validation
+    * find secret proof - (optional, see below) i.e. hex(hmac(<find-secret-from-remote-public-peer-file-section-B>, "proof:" + <client-nonce> + ":" + expires))
+    * find secret proof expires - how long until the proof expires
+
+### Returns
+
+List of peers containing:
+
+  * Public peer file
+
+### Security Considerations
+
+If the peer file being looked up has a find secret then find secret proof is not optional and must validate. The nonce value can be the same within the same request. The server need not prove the nonce is unique for this particular request even though the nonce is used in the calculation but the expiry time must be validated.
+
+If none of the lookups can be filled an error is returned. If some of the lookups can be filled then only the peer information that validate properly are returned in the same order they were requested.
+
+### Example
+
+    {
+      "request": {
+        "$domain": "domain.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "peer",
+        "$method": "peer-files-get",
+    
+        "peers": {
+          "peer": [
+            {
+              "uri": "peer://domain.com/7f3c113e43a51f6c7d036be2e7663c84dad49b64dad1bf7a7c0a813a604c2240",
+              "findSecretNonce": "ed585021eec72de8634ed1a5e24c66c2",
+              "findSecretProof": "1a27b4089b8d7d95b8f531acfaa2e5d38735a42e",
+              "findSecretProofExpires": 43484383
+            },
+            {
+              "uri": "peer://domain.com/40a42dc4e7acd58f708e33ef0afe8f7b40d2bf9ca4d8080c5428acbf9a36c766",
+              "findSecretNonce": "ed585021eec72de8634ed1a5e24c66c2",
+              "findSecretProof": "0f1fbe8d675ddee098cdc1f1184ce08ba06c9a82",
+              "findSecretProofExpires": 43484383
+            }
+          ]
+        }
+    
+      }
+    }
+.
+
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "peer",
+        "$method": "peer-files-get",
+        "$timestamp": 439439493,
+    
+        "peers": {
+          "peer": [
+            {
+              "$version": "1",
+              "sectionBundle": [...]
+            },
+            {
+              "$version": "1",
+              "sectionBundle": [...]
+            }
+          ]
+        }
+      }
+    }
+
+
+Peer File Set
+-------------
+
+### Purpose
+
+This request stores a peer file onto the server.
+
+### Inputs
+
+  * Client nonce - a onetime use nonce, i.e. cryptographically random string
+  * Lockbox information
+    * Lockbox account id - the ID associated with the lockbox
+    * Lockbox access token - a verifiable token that is linked to the lockbox
+    * Proof of 'lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":pee-file-set"))
+    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
+  * Peer file
+
+### Returns
+
+Success or failure.
+
+### Security Considerations
+
+The server must ensure the following:
+
+  * The domain in the request matches the domain for the peer file
+  * Lockbox access information is correct
+  * Only one peer file per lockbox is stored (storing another peer file is legal, but it replaces the existing peer file associated to the lockbox)
+  * The peer file being stored validates
+  * Not to replace/delete any peer file on the system still associated to another lockbox (see below)
+
+A client could lie and claim that a public peer file is owned by itself. There's no validation to prove the peer file is owned by the client requesting storage. Since a peer file self validates, there is no advantage to storing someone else's peer file on the server. The only caviate being that an evil client might intentionally store someone else's peer file, then replace it, in a vain attempt to wipe out the pervious peer file from the peer service database. Thus the server must take care never to replace/delete a peer file that is still referenced by another lockbox account.
+
+Peer files expire in time thus the peer service can delete peer files once they expire.
+
+### Example
+
+    {
+      "request": {
+        "$domain": "domain.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "peer",
+        "$method": "peer-file-set",
+    
+        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "lockbox": {
+          "$id": "123456",
+          "accessToken": "a913c2c3314ce71aee554986204a349b",
+          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+          "accessSecretProofExpires": 43843298934
+        }
+    
+        "peer": {
+          "$version": "1",
+          "sectionBundle": [...]
+        }
+    
+      }
+    }
+.
+
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "peer",
+        "$method": "peer-file-set",
+        "$timestamp": 439439493,
+    
+      }
+    }
+
 
 Peer Salt Service Protocol
 ==========================
@@ -4724,6 +4881,7 @@ Obtain a session token that represents the peer on the finder server so continuo
     * Peer contact making the request
     * Client nonce - cryptographically random one time use key
     * Expiry for the one time use token
+    * find mode - "all", "exclusive", "none" - if "all" this client wants any find request to go to this location as well as any others. In "exclusive" mode, the client only wants find requests to go to this one location and no others and if "none" this location does not wish to be found.
     * Location details
       * Location ID
       * Device ID
@@ -4732,7 +4890,6 @@ Obtain a session token that represents the peer on the finder server so continuo
       * OS
       * System
       * Host
-    * Public peer file
     * Signed by peer private key
 
 ### Outputs
@@ -4770,6 +4927,8 @@ If a Section-B of the public peer file is not present, the peer does not wish to
             "nonce": "09b11ed79d531a2ccd2756a2104abbbf77da10d6",
             "expires": 4848343494,
     
+            "findMode": "all",
+    
             "location": {
               "$id": "5a693555913da634c0b03139ec198bb8bad485ee",
               "contact": "peer://domain.com/920bd1d88e4cc3ba0f95e24ea9168e272ff03b3b",
@@ -4781,17 +4940,7 @@ If a Section-B of the public peer file is not present, the peer does not wish to
                 "system": "iPad v2",
                 "host": "foobar"
               }
-            },
-    
-            "peer": {
-              "$version": "1",
-              "sectionBundle": {
-                "section": {
-                  "$id": "A",
-                  ...
-                }
-              }
-            }
+            }    
           },
           "signature": {
             "reference": "#6fc5c4ea068698ab31b6b6f75666808f",
