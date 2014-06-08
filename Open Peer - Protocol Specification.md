@@ -1994,6 +1994,14 @@ The request portion is only sent after a 302-redirect whereupon it is sent in a 
                 "method": {
                   "name": "peer-services-get",
                   "uri": "https://peer.example.com/peer-services-get"
+                },
+                "method": {
+                  "name": "peer-files-get",
+                  "uri": "https://peer.example.com/peer-files-get"
+                },
+                "method": {
+                  "name": "peer-file-set",
+                  "uri": "https://peer.example.com/peer-file-set"
                 }
               }
             },        {
@@ -2055,25 +2063,31 @@ The request portion is only sent after a 302-redirect whereupon it is sent in a 
     }
 
 
-Bootstrapped Finder Service Requests
-====================================
+Bootstrapped Servers Requests
+=============================
 
-Finders Get Request
+Servers Get Request
 -------------------
 
 ### Purpose
 
-This request returns a list random possible peer finders that a client can attempt a connection for the sake of registering or finding other peers.
+This request returns a list random possible peer servers based on a type of server that a client can attempt a connection.
 
 ### Inputs
 
-The total number of server entries desired (which the server can choose to ignore and return less servers than requested, but never more) or a particular set of finders can be referenced by requesting a list of finders by their finder ID.
+Server information, including:
+
+  * type of server - e.g. "finder", "push-mailbox"
+  * total servers - (optional) if list of servers is not provided then this value must be present or it will be assumed a value of "1"
+  * list of servers - (optional) if list of servers is provided then the list contains:
+    * server ID - the server ID to fetch
 
 ### Returns
 
 Returns a list of Finders containing the following information for each Finder:
 
-  * Finder ID - the unique ID that represents this finder in the system
+  * Server ID - the unique ID that represents this server in the system
+  * Type - the type of server (should match the type of server requested)
   * Array of protocols supported, with each defining:
     * Transport - a string describing the type of transport supported
     * host record [or pre-resolved comma separated IP:port pair locations] - for example for "multiplexed-json/tcp" lookup type is SRV with _finder._tcp.domain.com
@@ -5244,7 +5258,7 @@ This is the request to find a peer that includes the proof of permission to cont
     * if class is "finder-relay":
       * transport - either "multiplexed-json-mls/tcp" or "multiplexed-json-mls/secure-web-socket"
       * type - "relay"
-      * finder ID - the finder used to connect (can use "Finders Get Request" to obtain a copy of the signed finder information)
+      * finder ID - the finder used to connect (can use "Servers Get Request" to obtain a copy of the signed finder information)
       * finder protocols - the list of protocols supported by the finder
       * access token - token as returned during peer finder session create
       * access secret proof (encrypted) - encrypted version of access secret proof, encrypted proof = hex(`<iv>`) + ":" + encrypt(`<key>`, `<proof>`), where proof = hex(hmac(`<access-secret>`, "finder-relay-access-validate:" + `<access-token>` + ":" + `<context>` + ":channel-map")), key = hash(`<peer-secret>`), iv = `<random>`
