@@ -2635,8 +2635,8 @@ This request obtains access to a lockbox. Access is granted by way of login proo
     * Lockbox domain - the domain hosting the lockbox
     * Lockbox account ID - (optional, if known) the assigned account ID for the lockbox
     * Lockbox passphrase ID - (optional, if a lockbox passphrase was previously generated) a static identifier associated with the currently generated passphrase (every time a passphrase is generated an ID is generated as well which is an identifier to refer to a particular passphrase without having to know the passphrase itself). If this ID specified matches the ID in the database associated with the account ID then this ID and proof of the lockbox passphrase can be used to login to the lockbox account (which also requires specifying the lockbox account ID). If validated identity information is present in the request and the "lockbox passphrase ID" value does not match the value in the database then all the content values stored in the lockbox must be purged (but the associated identities and the namespace grants can remain). This type of scenario can happen if a user's password was reset (which may have caused the lockbox passphrase to be lost in the process).
-    * Lockbox hash - (optional but required when a lockbox passphrase is known by the identity being specified) this value is used to store into the database to provide login capability to the login via lockbox passphrase proof in the future without requiring an identity that validates for future calls to "Lockbox Access Request", value = hex(hmac(`<lockbox-passphrase>`, "lockbox:" + `<lockbox-passphrase-id>`))
-    * Lockbox passphrase proof - (optional) proof the passphrase is known and required to login to the lockbox account when logging in without a identity that validates being specified in the request, proof = hex(hmac(`<lockbox-hash>`, "identity-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-passphrase-id>` + ":lockbox-access")), lockbox hash = hex(hmac(`<lockbox-passphrase>`, "lockbox:" + `<lockbox-passphrase-id>`))
+    * Lockbox passphrase hash - (optional but required when a lockbox passphrase is known and an identity access information is specified) this value is used to store into the database to provide login capability to the login via lockbox passphrase proof in the future without requiring an identity that validates for future calls to "Lockbox Access Request", value = hex(hmac(`<lockbox-passphrase>`, "lockbox:" + `<lockbox-passphrase-id>`))
+    * Lockbox passphrase proof - (optional) proof the passphrase is known and required to login to the lockbox account when logging in without specifying identity access information in the request, proof = hex(hmac(`<lockbox-hash>`, "identity-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-passphrase-id>` + ":lockbox-access")), lockbox hash = hex(hmac(`<lockbox-passphrase>`, "lockbox:" + `<lockbox-passphrase-id>`))
     * Expiry of the proof for the 'lockbox passphrase proof' - a window in which lockbox passphrase proof is considered valid
     * Lockbox reset flag - (optional) if specified and true, a new lockbox must be created for the identity specified (and an identity which validates must be included in the request) and the identity specified must become unassociated with any other existing lockbox accounts. If this identity was previously the only associated identity with a previous lockbox account then the previous lockbox account can be deleted entirely.
   * Agent
@@ -2712,7 +2712,7 @@ If the lockbox passphrase ID or hash (if specified) does not match for the accou
           "domain": "example.com",
     
           "keyName": "2b698e4b5394969e7325d67419cbe115",
-          "hash": "cf69f9e4ed98bb739b4c72fc4fff403467014874",
+          "keyHash": "cf69f9e4ed98bb739b4c72fc4fff403467014874",
     
           "-or-":
     
@@ -3726,11 +3726,23 @@ This notification is sent from the inner browser window to the outer window as a
     * Identity access expiry - the window with sufficient long into-the-future time frame in which the access key long term credentials are valid
     * Identity encrypted relogin key - the relogin key only has meaning to the identity service and it's encrypted, encrypted value = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<relogin-key>`)), where key = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":identityReloginKey"), iv = hash(`<salt-string>`)
   * Lock box information (optional, if known)
-     * Lockbox domain - if lockbox domain is known in advance, this is the domain for the lockbox to use
-     * Lockbox passphrase ID - (optional, if a lockbox passphrase was previously generated and associated with the identity) a static identifier associated with the currently generated passphrase (every time a passphrase is generated an ID is generated as well which is an identifier to refer to a particular passphrase without having to know the passphrase itself)
-     * Twice encrypted lockbox passphrase - (optional, if key was previously set with the identity) - this is a lockbox passphrase which is encrypted twice, twice-encrypted-lockbox-passphrase = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<encrypted-lockbox-passphrase>`)), where key = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":lockboxKey"), iv = hash(`<salt-string>`), where encrypted-lockbox-passphrase = `<inner-salt-string>` + ":" + base64(encrypt(`<inner-key>`, `<lockbox-passphrase>`), inner-key = hmac(`<server-encryption-passphrase>`), "identity:" + `<identity-uri>`), iv=hash(`<inner-salt-string>`)
-     * Lockbox reset flag - this flag is used if the lockbox must be reset with a new password and all data within to be flushed.
-  * Encrypted server encryption passphrase - the passphrase used to encrypt sensitive information from the server (e.g. so that the server doesn't know the lockbox passphrase) encrypted using the encryption-passphrase-upon-grant-proof, where encrypted-server-encryption-passphrase = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<server-encrypted-passphrase>`)), where key = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":serverEncryptionKey"), iv = hash(`<salt-string>`)
+    * Lockbox domain - if lockbox domain is known in advance, this is the domain for the lockbox to use
+    * Lockbox passphrase ID - (optional, if a lockbox passphrase was previously generated and associated with the identity) a static identifier associated with the currently generated passphrase (every time a passphrase is generated an ID is generated as well which is an identifier to refer to a particular passphrase without having to know the passphrase itself)
+    * Twice encrypted lockbox passphrase - (optional, if key was previously set with the identity) - this is a lockbox passphrase which is encrypted twice
+      * `<twice-encrypted-lockbox-passphrase>` = `<outer-salt-string>` + ":" + `<outer-proof>` + ":" + base64(encrypt(`<outer-key>`, `<encrypted-lockbox-passphrase>`))
+        * `<outer-key>` = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":lockbox-key")
+        * `<outer-proof>` = hmac(`<outer-key>`, "proof:" + `<outer-salt-string>` + ":" + hex(hash(`<encrypted-lockbox-passphrase>`)))
+        * `<iv>` = hash(`<outer-salt-string>`)
+      * `<encrypted-lockbox-passphrase>` = `<inner-salt-string>` + ":" `<inner-proof>` + ":" + base64(encrypt(`<inner-key>`, `<lockbox-passphrase>`)
+        * `<inner-key>` = hmac(`<user-specific-passphrase>`, "identity:" + `<identity-uri>` + ":lockbox-key")
+        * `<inner-proof>` = hmac(`<inner-key>`, "proof:" + `<inner-salt-string>` + ":" + hex(hash(`<lockbox-passphrase>`)))
+        * `<iv>` = hash(`<inner-salt-string>`)
+    * Lockbox reset flag - this flag is used if the lockbox must be reset with a new password and all data within to be flushed.
+  * Encrypted user specific passphrase - the passphrase used to encrypt sensitive information to keep private from a server (i.e. so that the server doesn't know the lockbox passphrase) encrypted using the `<encryption-passphrase-upon-grant-proof>`
+    * `<encrypted-user-specific-passphrase>` = `<salt-string>` + ":" `<proof>` + ":" + base64(encrypt(`<key>`, `<user-specific-passphrase>`))
+      * `<key>` = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":server-encryption-key")
+      * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<user-specific-passphrase>`)))
+      * `<iv>` = hash(`<salt-string>`)
   * Grant service challenge (optional, if challenge is required)
     * ID - a challenge ID that the server generated which the client application will have to authorize
     * Name - a human readable name for the service requesting the challenge
@@ -3739,14 +3751,14 @@ This notification is sent from the inner browser window to the outer window as a
     * Domains - a list of domains the service will accept trusted signatures as proof
     * Namespace URLs - the list of URLs that require permission to continue
   * Hash of encryption passphrase upon grant proof (optional, if challenge is provided) - hex(hash(`<encryption-passphrase-upon-grant-proof>`)). If the client has previously performed a grant proof and knows the "Encryption passphrase upon grant proof" then this hash can be proof that the passphrase has not changed since a previous session.
-  * Encryption passphrase upon grant proof (optional, if challenge is not required) - the outer passphrase used to decrypt the sensitive information from the identity service
+  * Encryption passphrase upon grant proof (optional, if challenge is not required) - the outer passphrase used to decrypt the sensitive information previously encrypted by the identity service
 
 ### Returns
 
 ### Security Considerations
 
-  * encryption-passphrase-upon-grant-proof - a key known only by the identity server to encrypt information for a particular identity that can be given . This key should be unique for the user, and can either be randomly generated and set for each identity, or generated based upon a common server secret combined with the identity. An example algorithm for generating based upon a common server secret key might be  hex(hmac(`<common-server-secret-passphase>`, "common-server-secret:" + `<identity-uri>`))
-  * sever-encryption-passphrase - a key generated from a user's password, or other information not known to a server (i.e. key used to protect against the server being able to decrypt information)
+  * encryption-passphrase-upon-grant-proof - a key known only by the identity server used to encrypt information for a particular identity to prevent access to the sensitive information until grant proof is given. The key can be immediately returned if grant proof was previously given by the client. This key should be unique for the user, and can either be randomly generated and set for each identity, or generated based upon a common server secret combined with the identity, for example hex(hmac(`<common-server-secret-passphase>`, "common-server-secret:" + `<identity-uri>`)).
+  * user-specific-passphrase - a key generated from a user's password (or other user specific information) which is never known to any server or any other user (i.e. this key is used to protect against the server being able to decrypt sensitive information)
   * lockbox-passphrase - a secret key used to access the associated lockbox
 
 The server encryption passphrase should be calculated locally in the JavaScript using something unavailable in the server, for example the user's password. Other information should be combined to create the encryption / decryption key to ensure two unique users with the same password do not share the same encryption key.
@@ -3938,7 +3950,11 @@ This request updates the identity lookup information when an identity lookup is 
     * Proof of 'lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":identity-lookup-update"))
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
      * Lockbox passphrase ID - (optional, if a lockbox passphrase was generated and to be associated with the identity) a static identifier associated with the currently generated passphrase (every time a passphrase is generated an ID is generated as well which is an identifier to refer to a particular passphrase without having to know the passphrase itself)
-    * Lockbox passsphrase encrypted - (optional, if client trusts identity to hold onto the lockbox passphrase) the lockbox passphrase encrypted to protect the server from knowing the lockbox passphrase, where encrypted-lockbox-passphrase = `<salt-string>` + base64(encrypt(`<key>`, `<lockbox-passphrase>`), key = hmac(`<server-encryption-passphrase>`), "identity:" + `<identity-uri>`), iv=hash(`<salt-string>`)
+    * Encryopted lockbox passsphrase - (optional, if client trusts identity to hold onto the lockbox passphrase) the lockbox passphrase encrypted to protect the server from knowing the lockbox passphrase
+      * `<encrypted-lockbox-passphrase>` = `<salt-string>` + ":" `<proof>` + ":" + base64(encrypt(`<key>`, `<lockbox-passphrase>`)
+        * `<key>` = hmac(`<user-specific-passphrase>`, "identity:" + `<identity-uri>` + ":lockbox-key")
+        * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<lockbox-passphrase>`)))
+        * `<iv>` = hash(`<salt-string>`)
   * Identity bundle information
     * Identity access token - as returned from the "identity access complete" request
     * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-lookup-update"))
@@ -3953,7 +3969,7 @@ This request updates the identity lookup information when an identity lookup is 
       * Contact - the peer URI for the public peer file specified
       * Identity URI - the full identity URI of the logged in user
       * Signed by public peer file specified (only if peer file is being set, otherwise no "identityBundle" will be present)
-  * Encryption passphrase upon grant proof - the passphrase was used to decrypt sensitive information from the identity provider
+  * Encryption passphrase upon grant proof - the passphrase previously returned from the identity provider upon grant proof being provided
 
 ### Returns
 
@@ -4203,7 +4219,9 @@ List of peers containing:
 
 ### Security Considerations
 
-If the peer file being looked up has a find secret then find secret proof is not optional and must validate. The nonce value can be the same within the same request. The server need not prove the nonce is unique for this particular request even though the nonce is used in the calculation but the expiry time must be validated.
+If the peer URI looked up contains a find secret proof then the find secret proof must validate. The nonce value can be the same within the same request. The server need not prove the nonce is unique for this particular request even though the nonce is used in the calculation but the expiry window must be validated.
+
+If the peer URI looked up does not contain a find secret proof then the peer file will be returned without section "B" of the public peer file. This allows an incomplete public peer file to be returned for the sake of validation of peer URI signatures without the ability to contact the originating user via a finder.
 
 If none of the lookups can be filled an error is returned. If some of the lookups can be filled then only the peer information that validate properly are returned in the same order they were requested.
 
@@ -5239,7 +5257,7 @@ This is the request to find a peer that includes the proof of permission to cont
     * encrypted peer secret - a random passphrase encoded using the replying peer's public key, where `<encrypted-peer-secret>` = base64(rsa_encrypt(`<remote-public-peer-file-public-key>`, `<peer-secret>`))
     * if namespace is `https://meta.openpeer.org/dh/modp/2048` what follows is `<namespace-dependent>` = base64(`<requesting-peer-static-public-key>`) + ":" + base64(`<requesting-peer-ephemeral-public-key>`) based upon a Diffie-Hellman MODP P, Q and G are defined as hex integer values as defined in Diffie-Hellman MODP Namespace Definitions section. Alternative namespace `1024`, `1538`, `3072`, `4096`, `6144`, `8192` are available too.
   * ICE username fragment - the username fragment for ICE negotiation
-  * ICE password encrypted - the password passphrase for ICE negotiation, encrypted data = hex(`<iv>`) + ":" + encrypt(`<key>`, `<ice-password>`), where key = hash(`<peer-secret>`), iv = `<random>`
+  * ICE password encrypted - the password passphrase for ICE negotiation, encrypted data = `<salt>` + ":" + `<proof>` + ":" + encrypt(`<key>`, `<ice-password>`), where `<key>` = hash(`<peer-secret>`), iv = hash(`<salt>`), where `<proof>` = hex(hmac(`<key>`, "proof:" + `<salt>` + hex(hash(`<ice-password>`))))
   * final - set to true if the remote party should not expect to receive any more candidates at this time
   * Location details
     * Location ID of requesting location
