@@ -3724,7 +3724,11 @@ This notification is sent from the inner browser window to the outer window as a
     * Identity access token - a verifiable token that is linked to the logged-in identity
     * Identity access secret - a secret passphrase that can be used in combination to the "identity access token" to provide proof of previous successful login
     * Identity access expiry - the window with sufficient long into-the-future time frame in which the access key long term credentials are valid
-    * Identity encrypted relogin key - the relogin key only has meaning to the identity service and it's encrypted, encrypted value = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<relogin-key>`)), where key = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":identityReloginKey"), iv = hash(`<salt-string>`)
+    * Identity encrypted relogin key - the relogin key only has meaning to the identity service and it's encrypted
+      * `<encrypted-relogin-key>` = `<salt-string>` + ":" + `<proof>` + ":" + base64(encrypt(`<key>`, `<relogin-key>`))
+        * `<key>` = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":identityReloginKey")
+        * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<relogin-key>`)))
+        * `<iv>` = hash(`<salt-string>`)
   * Lock box information (optional, if known)
     * Lockbox domain - if lockbox domain is known in advance, this is the domain for the lockbox to use
     * Lockbox passphrase ID - (optional, if a lockbox passphrase was previously generated and associated with the identity) a static identifier associated with the currently generated passphrase (every time a passphrase is generated an ID is generated as well which is an identifier to refer to a particular passphrase without having to know the passphrase itself)
@@ -3738,11 +3742,6 @@ This notification is sent from the inner browser window to the outer window as a
         * `<inner-proof>` = hmac(`<inner-key>`, "proof:" + `<inner-salt-string>` + ":" + hex(hash(`<lockbox-passphrase>`)))
         * `<iv>` = hash(`<inner-salt-string>`)
     * Lockbox reset flag - this flag is used if the lockbox must be reset with a new password and all data within to be flushed.
-  * Encrypted user specific passphrase - the passphrase used to encrypt sensitive information to keep private from a server (i.e. so that the server doesn't know the lockbox passphrase) encrypted using the `<encryption-passphrase-upon-grant-proof>`
-    * `<encrypted-user-specific-passphrase>` = `<salt-string>` + ":" `<proof>` + ":" + base64(encrypt(`<key>`, `<user-specific-passphrase>`))
-      * `<key>` = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":server-encryption-key")
-      * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<user-specific-passphrase>`)))
-      * `<iv>` = hash(`<salt-string>`)
   * Grant service challenge (optional, if challenge is required)
     * ID - a challenge ID that the server generated which the client application will have to authorize
     * Name - a human readable name for the service requesting the challenge
@@ -3750,6 +3749,11 @@ This notification is sent from the inner browser window to the outer window as a
     * URL - a browser URL where the user can go to obtain more information about this service requesting the challenge
     * Domains - a list of domains the service will accept trusted signatures as proof
     * Namespace URLs - the list of URLs that require permission to continue
+  * Encrypted user specific passphrase - the passphrase used to encrypt sensitive information to keep private from a server (i.e. so that the server doesn't know the lockbox passphrase) encrypted using the `<encryption-passphrase-upon-grant-proof>`
+    * `<encrypted-user-specific-passphrase>` = `<salt-string>` + ":" `<proof>` + ":" + base64(encrypt(`<key>`, `<user-specific-passphrase>`))
+      * `<key>` = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":server-encryption-key")
+      * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<user-specific-passphrase>`)))
+      * `<iv>` = hash(`<salt-string>`)
   * Hash of encryption passphrase upon grant proof (optional, if challenge is provided) - hex(hash(`<encryption-passphrase-upon-grant-proof>`)). If the client has previously performed a grant proof and knows the "Encryption passphrase upon grant proof" then this hash can be proof that the passphrase has not changed since a previous session.
   * Encryption passphrase upon grant proof (optional, if challenge is not required) - the outer passphrase used to decrypt the sensitive information previously encrypted by the identity service
 
@@ -3791,17 +3795,15 @@ If the "lockbox passphrase ID" is specified but the "twice encrypted lockbox pas
     
           "uri": "identity://domain.com/alice",
           "provider": "domain.com",
-          "reloginKeyEncrypted": "11087e19d84cf0b736b02b847248f283964efb9d:ZDI5MjJmMzNhO...MmMyM2ZlODExNzFhZjNlMy00YzIxNmMyMw=="
+          "reloginKeyEncrypted": "11087e19d84cf0b736b02b847248f283964efb9d:251d354a4ac77d20ccb23edb2cbd4df7355b81b0:ZDI5MjJmMzNhO...MmMyM2ZlODExNzFhZjNlMy00YzIxNmMyMw=="
         },
     
         "lockbox": {
           "domain": "domain.com",
           "keyName": "5a5ac1ef2cb65303824b107739018d3e8bd01a15",
-          "keyEncrypted": "14900c10d3484e5bbdb0af34cde041cd00d4c214:V20x...IbGFWM0J5WTIxWlBRPT0=",
+          "keyEncrypted": "14900c10d3484e5bbdb0af34cde041cd00d4c214:a61e0d21e455f93f975b1ef07fd533963a22f518:V20x...IbGFWM0J5WTIxWlBRPT0=",
           "reset": false
         },
-    
-        "serverEncryptionKeyEncrypted": "18439df4b73835aeaec4ae05810b811498db6760:MTg0MzlkZjRiNzM4MzVh...ODEwYjgxMTQ5OGRiNjc2MA==",
     
         "namespaceGrantChallenge": {
           "$id": "1f15433f56f9c6decf9c17c95078fe1c",
@@ -3822,10 +3824,10 @@ If the "lockbox passphrase ID" is specified but the "twice encrypted lockbox pas
           }
         },
     
-        "encryptionKeyUponGrantProofHash": "f94a09c33fa36995ff5c5f08bbc37de53ffcab25"
+        "encryptedUserSpecificKey": "18439df4b73835aeaec4ae05810b811498db6760:e7bec33217ba3b43800728c3b63fcb630127aa3a:MTg0MzlkZjRiNzM4MzVh...ODEwYjgxMTQ5OGRiNjc2MA==",
     
+        "encryptionKeyUponGrantProofHash": "f94a09c33fa36995ff5c5f08bbc37de53ffcab25"    
         "-or-": "",
-    
         "encryptionKeyUponGrantProof": "0e232cbc3628a4ba7fefe553f1cb85797a79e3c4"
     
       }
@@ -3950,7 +3952,7 @@ This request updates the identity lookup information when an identity lookup is 
     * Proof of 'lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":identity-lookup-update"))
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
      * Lockbox passphrase ID - (optional, if a lockbox passphrase was generated and to be associated with the identity) a static identifier associated with the currently generated passphrase (every time a passphrase is generated an ID is generated as well which is an identifier to refer to a particular passphrase without having to know the passphrase itself)
-    * Encryopted lockbox passsphrase - (optional, if client trusts identity to hold onto the lockbox passphrase) the lockbox passphrase encrypted to protect the server from knowing the lockbox passphrase
+    * Encrypted lockbox passsphrase - (optional, if client trusts identity to hold onto the lockbox passphrase) the lockbox passphrase encrypted to protect the server from knowing the lockbox passphrase
       * `<encrypted-lockbox-passphrase>` = `<salt-string>` + ":" `<proof>` + ":" + base64(encrypt(`<key>`, `<lockbox-passphrase>`)
         * `<key>` = hmac(`<user-specific-passphrase>`, "identity:" + `<identity-uri>` + ":lockbox-key")
         * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<lockbox-passphrase>`)))
@@ -4009,7 +4011,7 @@ If the "lockbox passphrase ID" is specified but the "encrypted lockbox passphras
     
           "domain": "domain.com",
           "keyName": "5a5ac1ef2cb65303824b107739018d3e8bd01a15",
-          "keyEncrypted": "V20x...IbGFWM0J5WTIxWlBRPT0="
+          "keyEncrypted": "f7df70be985744a03de34f0014c998f21341cd0a:a1ab1cd5bc3900b4f1313bc9d35827661311f2bd:V20x...IbGFWM0J5WTIxWlBRPT0="
         },
     
         "identity": {
