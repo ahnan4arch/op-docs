@@ -3820,8 +3820,8 @@ If the "lockbox passphrase ID" is specified but the "twice encrypted lockbox pas
     }
 
 
-Identity Namespace Grant Challenge Validate Request
----------------------------------------------------
+Identity Access Namespace Grant Challenge Validate Request
+----------------------------------------------------------
 
 ### Purpose
 
@@ -3861,7 +3861,7 @@ Once correctly proven, the identity service will allow the application access to
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lockbox",
-        "$method": "lockbox-namespace-grant-challenge-validate",
+        "$method": "identity-access-namespace-grant-challenge-validate",
     
         "nonce": "b7d4da923dffcee835906a167878f062d6d30143",
         "identity": {
@@ -3911,7 +3911,7 @@ Once correctly proven, the identity service will allow the application access to
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lockbox",
-        "$method": "lockbox-namespace-grant-challenge-validate",
+        "$method": "identity-access-namespace-grant-challenge-validate",
         "$timestamp": 439439493,
     
         "encryptionKeyUponGrantProof": "0e232cbc3628a4ba7fefe553f1cb85797a79e3c4"
