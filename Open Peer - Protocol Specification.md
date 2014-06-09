@@ -3832,7 +3832,7 @@ This request proves that the grant ID challenge is proven valid by way of the na
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Identity information information
     * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-namespace-grant-challenge-validate"))
+    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-access-namespace-grant-challenge-validate"))
     * Expiry of the proof for the 'identity access secret' - a window in which access secret proof short term credentials are considered valid
   * Grant service challenge as issued by the lockbox service bundled with signature as returned from the namespace grant service
 
