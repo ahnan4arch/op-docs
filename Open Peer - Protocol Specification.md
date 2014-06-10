@@ -1120,7 +1120,7 @@ The packaging of an JSON message for deliver to a peer entity is simple:
   * JSON data - the JSON message data to be receive of exactly the message size specified (no NUL termination is required or expected).
 
 
-The packaging of an JSON message for deliver over RUDP is known as "json/stream"):
+The packaging of an JSON message for deliver over a stream is known as "json/stream"):
 
 ### JSON Signaling over RUDP ###
 
@@ -1132,25 +1132,25 @@ The packaging of an JSON message for deliver over RUDP is known as "json/rudp"):
 
 Open Peer can utilize standard TCP to connection from a peer to a server. In this mode, TCP is considered a stream and the same rules of packaging are applied depending on the context of the negotiated packaging.
 
-The packaging of an JSON message for deliver over RUDP is known as "json/tcp"):
+The packaging of an JSON message for deliver over TCP is known as "json/tcp"):
 
 ### JSON Signaling Using TLS ###
 
 Open Peer can utilize standard TLS to connection from a peer to a server. In this mode, TLS is considered a stream and the same rules of packaging are applied depending on the context of the negotiated packaging.
 
-The packaging of an JSON message for deliver over RUDP is known as "json/tls"):
+The packaging of an JSON message for deliver over TLS is known as "json/tls"):
 
 ### JSON Signaling Using Web Socket Protocol ###
 
 Open Peer can utilize standard Web Socket Protocol to connection from a peer to a server. In this mode, the web socket is considered a stream and the same rules of packaging are applied depending on the context of the negotiated packaging. For consistency, the size packaging already present in Web Sockets is ignored.
 
-The packaging of an JSON message for deliver over RUDP is known as "json/web-socket"):
+The packaging of an JSON message for deliver over web-sockets is known as "json/web-socket"):
 
 ### JSON Signaling Using Secure Web Socket Protocol ###
 
 Open Peer can utilize standard Web Socket Protocol to connection from a peer to a server. In this mode, the web socket is considered a stream and the same rules of packaging are applied depending on the context of the negotiated packaging. For consistency, the size packaging already present in Web Sockets is ignored.
 
-The packaging of an JSON message for deliver over RUDP is known as "json/tls-web-socket"):
+The packaging of an JSON message for deliver over secure web sockets is known as "json/tls-web-socket"):
 
 
 Message Layer Security
@@ -1209,17 +1209,33 @@ For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with "pki", 
 
 For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with a "passphrase" (alternatively "agreement" is used which is converted into a passphrase), the following can be used to encode/decode the input information:
 
-  * secret - the 32 byte AES key, hex(`<salt>`) + ":" + base64(encrypt(`<32-byte-aes-key>`)), where key = hmac(`<external-passphrase>`, "keying:" + `<nonce>`), iv = `<salt>`
-  * iv - the 16 byte AES initialization vector, hex(`<salt>`) + ":" + base64(encrypt(`<16-byte-aes-iv>`)), where key = hmac(`<external-passphrase>`, "keying:" + `<nonce>`), iv = `<salt>`
-  * hmacIntegrityKey - the initial secret key input string, hex(`<salt>`) + ":" + base64(encrypt(`<integrity-passphrase>`)), where key = hmac(`<external-passphrase>`, "keying:" + `<nonce>`), iv = `<salt>`
+  * secret - the encoded 32 byte AES key
+    * `<secret-encoded>` = hex(`<salt>`) + ":" + base64(encrypt(`<key>`, `<32-byte-aes-key>`))
+      * `<key>` = hmac(`<external-passphrase>`, "keying:" + `<nonce>`)
+      * `<iv>` = `<salt>`
+  * iv - the encoded 16 byte AES initialization vector
+    * `<iv-encoded>` = hex(`<salt>`) + ":" + base64(encrypt(`<key>`, `<16-byte-aes-iv>`))
+      * `<key>` = hmac(`<external-passphrase>`, "keying:" + `<nonce>`)
+      * `<iv>` = `<salt>`
+  * hmacIntegrityKey - the encoded version of the initial integrity passphrase
+    * `<integrity-passphrase-encoded>` = hex(`<salt>`) + ":" + base64(encrypt(`<key>`,`<integrity-passphrase>`))
+      * `<key>` = hmac(`<external-passphrase>`, "keying:" + `<nonce>`)
+      * `<iv>` = `<salt>`
 
   The proof for correct keying material is calculated as follows: proof = hex(hmac(`<external-passphrase>`, "keying:" + `<nonce>`))
 
 For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with a "agreement" where the remote public Diffie-Hellman key is not known in advance, the following can be used to encode/decode the input information:
 
-  * secret - the 32 byte AES key is constructed in combination with the agreement key sent with a later agreement response, secret = hex(`<salt>`), where 32 byte AES key is calculated as hmac(hex(`<agreed-key>`), "secret:" + `<nonce>`), iv = `<salt>`
-  * iv - the 16 byte AES initialization vector, hex(`<salt>`), where 16 byte IV is calculated as hmac(hex(`<agreed-key>`), "iv:" + `<nonce>`), iv = `<salt>`
-  * hmacIntegrityKey - the initial secret key input string, hex(`<salt>`), where integriry passphrase is calculated as = hex(hmac(hex(`<agreed-key>`), "integrity:" + `<nonce>`)), iv = `<salt>`
+  * secret - the 32 byte AES key is constructed in combination with the agreement key sent with a later agreement response
+    * `<secret-encoded>` = hex(`<salt>`)
+      * `<key>` = hmac(hex(`<agreed-key>`), "secret:" + `<nonce>`)
+      * `<iv>` = `<salt>`
+  * iv - the 16 byte AES initialization vector is constructed in combination with the agreement key sent with a later agreement response
+    * `<iv-encoded>` = `<salt-string>`
+      * `<iv>` = hmac(hex(`<agreed-key>`), "iv:" + `<nonce>` + ":" + `<salt-string>`))
+  * hmacIntegrityKey - the initial integrity passphase string
+    * `<integrity-passphrase-encoded>` = `<salt-string>`
+      * `<integrity-passphrase>` = hex(hmac(hex(`<agreed-key>`), "integrity:" + `<nonce>` + ":" + `<salt-string>`))
 
 When the mandatory key is used, the AES CFB is initialized with these values and will continue to encrypt payloads using this keying until a new "0" package arrives. Once a new "0" package arrives all keying material is updated and the algorithms with new keying information for subsequent messages are used for messages in a stream. The hmac integrity is calculated using the following algorithm, hmac(`<integrity-passphrase>`, "integrity:" + hex(hash(`<decrypted-message>`)) + ":" hex(`<iv>`)). The AES key and integrity passphrase remains the same until a new "0" package is sent, but the IV is changed for every message. The next IV used for the keying selected is calculated based upon the hash of the previous IV for the selected keying and previous hmac integrity value, next_iv = hash(hex(`<previous-iv>`) + ":" + hex(`<previous-integrity-hmac>`)).
 
@@ -2409,9 +2425,6 @@ Once the browser window receives notification that it is ready, this request is 
     * Name - a human readable friendly name for the product
     * Image - a human visual image for the brand that must be square in shape.
     * Agent URL - a web page that can be rendered in a browser to obtain more information about the agent
-    * Nonce - a one time use value as input into hashes
-    * Access token - application's identifier with the grant service
-    * Proof of 'application access secret' - proof that a passphrase the application has with the grant service is known, proof = hex(hmac(<agent-access-secret>, "application-access-validate:" + <client-nonce> + ":" + <expires> + ":" + <agent-access-token> + ":" + "namespace-grant-start"))
     * Log - log level to output to logger, where values "none", "basic", "detail", "debug", "trace", "insane", default is "none"
   * List of grant service challenges containing:
     * ID - a challenge ID that the server generated which the client application will have to authorize
@@ -2452,11 +2465,6 @@ The server must verify that all nonce values have never been seen previously wit
           "name": "hookflash",
           "image": "https://hookflash.com/brandsquare.png",
           "url": "https://hookflash.com/agentinfo/",
-    
-          "nonce": "c8574fef7e5655264ed92e307bb1c336",
-          "accessToken": "7bf8320b4f3068885b925074fe5af4f8",
-          "accessSecretProof": "cbed2026e4f534ab06c15a4c535f4461e52e7883",
-          "accessSecretProofExpires": "43737344",
     
           "log": "trace"
         },
@@ -2636,7 +2644,9 @@ This request obtains access to a lockbox. Access is granted by way of login proo
     * Lockbox account ID - (optional, if known) the assigned account ID for the lockbox
     * Lockbox passphrase ID - (optional, if a lockbox passphrase was previously generated) a static identifier associated with the currently generated passphrase (every time a passphrase is generated an ID is generated as well which is an identifier to refer to a particular passphrase without having to know the passphrase itself). If this ID specified matches the ID in the database associated with the account ID then this ID and proof of the lockbox passphrase can be used to login to the lockbox account (which also requires specifying the lockbox account ID). If validated identity information is present in the request and the "lockbox passphrase ID" value does not match the value in the database then all the content values stored in the lockbox must be purged (but the associated identities and the namespace grants can remain). This type of scenario can happen if a user's password was reset (which may have caused the lockbox passphrase to be lost in the process).
     * Lockbox passphrase hash - (optional but required when a lockbox passphrase is known and an identity access information is specified) this value is used to store into the database to provide login capability to the login via lockbox passphrase proof in the future without requiring an identity that validates for future calls to "Lockbox Access Request", value = hex(hmac(`<lockbox-passphrase>`, "lockbox:" + `<lockbox-passphrase-id>`))
-    * Lockbox passphrase proof - (optional) proof the passphrase is known and required to login to the lockbox account when logging in without specifying identity access information in the request, proof = hex(hmac(`<lockbox-hash>`, "identity-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-passphrase-id>` + ":lockbox-access")), lockbox hash = hex(hmac(`<lockbox-passphrase>`, "lockbox:" + `<lockbox-passphrase-id>`))
+    * Lockbox passphrase proof - (optional) proof the passphrase is known and required to login to the lockbox account when logging in without specifying identity access information in the request
+      * `<proof>` = hex(hmac(`<lockbox-hash>`, "identity-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-passphrase-id>` + ":lockbox-access"))
+        * `<lockbox-hash>` = hex(hmac(`<lockbox-passphrase>`, "lockbox:" + `<lockbox-passphrase-id>`))
     * Expiry of the proof for the 'lockbox passphrase proof' - a window in which lockbox passphrase proof is considered valid
     * Lockbox reset flag - (optional) if specified and true, a new lockbox must be created for the identity specified (and an identity which validates must be included in the request) and the identity specified must become unassociated with any other existing lockbox accounts. If this identity was previously the only associated identity with a previous lockbox account then the previous lockbox account can be deleted entirely.
   * Agent
@@ -2828,7 +2838,8 @@ This request proves that a lockbox access is valid and can be used to validate a
   * Lockbox information
     * Lockbox account ID - (optional) the assigned account ID for the lockbox, if specified the access token must validate the account ID as valid
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":" + `<purpose>`))
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known
+      * `<proof>` = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":" + `<purpose>`))
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
 
 ### Returns
@@ -2882,7 +2893,8 @@ This request proves that the grant ID challenge is proven valid by way of the na
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-namespace-grant-challenge-validate"))
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known
+      * `<proof>` = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-namespace-grant-challenge-validate"))
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
   * Grant service challenge as issued by the lockbox service bundled with signature as returned from the namespace grant service
 
@@ -2968,19 +2980,21 @@ This request updates the identities that are allowed to access the lockbox accou
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-identities-update"))
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known
+      * `<proof>` = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-identities-update"))
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
   * List of identities information
     * Disposition - "update" is used to add / update an identity and "remove" removes access to an identity
     * Identity access token - (optional, required if "update" is used), as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - (optional, required if "update" is used), proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":lockbox-access-update"))
+    * Proof of 'identity access secret' - (optional, required if "update" is used), proof required to validate that the 'identity access secret' is known
+      * `<proof>` = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":lockbox-access-update"))
     * Expiry of the proof for the 'identity access secret' - (optional, required if "update" is used) window in which access secret proof short term credentials are considered valid
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
 
 ### Returns
 
-  * List of identities still attached to the lockbox o Original identity URI
+  * List of identities still attached to the lockbox account
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
 
 ### Security Considerations
@@ -3065,7 +3079,8 @@ This request retrieves data contained in the lockbox.
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-content-get"))
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known
+      * `<proof>` = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-content-get"))
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored
@@ -3077,7 +3092,11 @@ This request retrieves data contained in the lockbox.
     * Updated - time-stamp (or version number) of when entries in the namespace were last updated
     * List of values containing:
        * expires - (optional) if entry must expire at a certain date (as seconds since epoch)
-       * encrypted value - each value encrypted with: encrypted value = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<value>`), where key = hmac(`<lockbox-passphrase>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv = hash(`<salt-string>`)
+       * encrypted value - each value encrypted
+         * `<encrypted-value>` = `<salt-string>` + ":" + `<proof>` + ":" + base64(encrypt(`<key>`, `<value>`)
+           * `<key>` = hmac(`<lockbox-passphrase>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`)
+           * `<iv>` = hash(`<salt-string>`)
+           * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<value>`)))
 
 ### Security Considerations
 
@@ -3129,18 +3148,18 @@ No value names within the same namespace URL should be identical.
             {
               "$id": "https://domain.com/pemissionname",
               "$updated": 5848843,
-              "value1": "4f3f25da69fab2abb5c839158cc54e5a1320fac6:ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
-              "value2": "7779796a91b8a37d922a0338b0f71fcc672379d1:Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk",
+              "value1": "4f3f25da69fab2abb5c839158cc54e5a1320fac6:30c4a41e8cc52111a9bc18a434900aa5ef210cd8:ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
+              "value2": "7779796a91b8a37d922a0338b0f71fcc672379d1:be3b546821ee4a5ec1917b48793b751bcfbedfea:Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk",
               "value3": {
                 "expires": 495943433,
-                "#text": "1c9e5ddb36e3c34e69c5a6cda6dc206841289b84:MWM5ZTVkZGIzNmU...kYTZkYzIwNjg0MTI4OWI4NA0K"
+                "#text": "1c9e5ddb36e3c34e69c5a6cda6dc206841289b84:0e8ff1a9c56ab54649bd38db496fe4917f25c19b:MWM5ZTVkZGIzNmU...kYTZkYzIwNjg0MTI4OWI4NA0K"
               }
             },
             {
               "$id": "https://other.com/pemissionname",
               "$updated": 5848845,
-              "what1": "0ff33b2aa4b2da358cd7c04b420c10dc8c6e0521:ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
-              "what2": "f19c58e42a6a6f62164de7bc3352da9fbacf117a:Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
+              "what1": "0ff33b2aa4b2da358cd7c04b420c10dc8c6e0521:b56c4fda829f23b9471c7865363e9cab3c732b68:ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
+              "what2": "f19c58e42a6a6f62164de7bc3352da9fbacf117a:76ceb30737c3afb9bb4268015d171ad3d83bb73a:Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
             }
           ]
         }
@@ -3161,13 +3180,18 @@ This request retrieves data contained in the lockbox.
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-content-set"))
+    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known
+      * `<proof>` = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-content-set"))
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored
     * List of values containing:
        * expires - (optional) if entry must expire at a certain date (as seconds since epoch)
-       * encrypted value - each value encrypted with: encrypted value = `<salt-string>` + ":" + base64(encrypt(`<key>`, `<value>`)), where key = hmac(`<lockbox-passphrase>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`), iv = hash(`<salt-string>`), or a value of "-" to remove a value. The values are merged together with existing values or the values are removed if they contain a value of "-".
+       * encrypted value - each value encrypted, or a value of "-" to remove a value. The values are merged together with existing values or the values are removed if they contain a value of "-".
+         * `<encrypted-value>` = `<salt-string>` + ":" `<proof>` + base64(encrypt(`<key>`, `<value>`))
+           * `<key>` = hmac(`<lockbox-passphrase>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`)
+           * `<iv>` = hash(`<salt-string>`)
+           * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<value>`)))
 
 ### Returns
 
@@ -3196,18 +3220,18 @@ No value names within the same permission URL should be identical. The salt stri
           "namespace": [
             {
               "$id": "https://domain.com/pemissionname",
-              "value1": "4465e9c44b4bcdb9925c57365739d387899e2b91:ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
+              "value1": "4465e9c44b4bcdb9925c57365739d387899e2b91:4e0786dbeb25ce6dddf86b7ba35d8b027dadd46f:ZmRzbmZranNkbmF...a2pkc2tqZnNkbmtkc2puZmRhZnNzDQo=",
               "value2": "-",
               "value3": {
                 "expires": 495943433,
-                "#text": "1c9e5ddb36e3c34e69c5a6cda6dc206841289b84:MWM5ZTVkZGIzNmU...kYTZkYzIwNjg0MTI4OWI4NA0K"
+                "#text": "1c9e5ddb36e3c34e69c5a6cda6dc206841289b84:2c6113de4e9fd74b9df4ec72dea90752c00df982:MWM5ZTVkZGIzNmU...kYTZkYzIwNjg0MTI4OWI4NA0K"
               },
-              "value4": "a49d7902da1690b1e16588969cf3beab77dae853:Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
+              "value4": "a49d7902da1690b1e16588969cf3beab77dae853:f0c1b96698076ec51903efd4dfa4cc4ae0961521:Zmpza2xham...Zsa2RzamxmYXNmYXNzZmRzYWZk"
             },
             {
               "$id": "https://other.com/pemissionname",
-              "what1": "9d47f79a64157a9adc2c3cc6648e5dfe38b97805:ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
-              "what2": "5b8e96e6083ba1c9d156e3af90e7aeeab8a55378:Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
+              "what1": "9d47f79a64157a9adc2c3cc6648e5dfe38b97805:698ea594850d1a6c44f620423e13e9c4e4c84018:ZmRzbmllZmJocmViaX...JmcXJicg0Kc2RmYQ0KZHNmYQ0Kcw0KZg==",
+              "what2": "5b8e96e6083ba1c9d156e3af90e7aeeab8a55378:eae069a6e0fbb4d033b400078a0abfd31034339c:Wm1SemJtbG...ljZzBLYzJSbVlRMEtaSE5tWVEwS2N3MEtaZz09"
             }
           ]
         }
@@ -3514,7 +3538,8 @@ This request proves that an identity access is valid and can be used to validate
   * Purpose - reason for validation (each service using this validation should have a unique purpose string)
   * Identity information
     * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":" + `<purpose>`))
+    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known
+      * `<proof>` = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":" + `<purpose>`))
     * Expiry of the proof for the 'identity access secret' - a window in which access secret proof short term credentials are considered valid
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
@@ -3727,20 +3752,20 @@ This notification is sent from the inner browser window to the outer window as a
     * Identity encrypted relogin key - the relogin key only has meaning to the identity service and it's encrypted
       * `<encrypted-relogin-key>` = `<salt-string>` + ":" + `<proof>` + ":" + base64(encrypt(`<key>`, `<relogin-key>`))
         * `<key>` = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":identityReloginKey")
-        * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<relogin-key>`)))
         * `<iv>` = hash(`<salt-string>`)
+        * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<relogin-key>`)))
   * Lock box information (optional, if known)
     * Lockbox domain - if lockbox domain is known in advance, this is the domain for the lockbox to use
     * Lockbox passphrase ID - (optional, if a lockbox passphrase was previously generated and associated with the identity) a static identifier associated with the currently generated passphrase (every time a passphrase is generated an ID is generated as well which is an identifier to refer to a particular passphrase without having to know the passphrase itself)
     * Twice encrypted lockbox passphrase - (optional, if key was previously set with the identity) - this is a lockbox passphrase which is encrypted twice
       * `<twice-encrypted-lockbox-passphrase>` = `<outer-salt-string>` + ":" + `<outer-proof>` + ":" + base64(encrypt(`<outer-key>`, `<encrypted-lockbox-passphrase>`))
         * `<outer-key>` = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":lockbox-key")
-        * `<outer-proof>` = hmac(`<outer-key>`, "proof:" + `<outer-salt-string>` + ":" + hex(hash(`<encrypted-lockbox-passphrase>`)))
         * `<iv>` = hash(`<outer-salt-string>`)
+        * `<outer-proof>` = hmac(`<outer-key>`, "proof:" + `<outer-salt-string>` + ":" + hex(hash(`<encrypted-lockbox-passphrase>`)))
       * `<encrypted-lockbox-passphrase>` = `<inner-salt-string>` + ":" `<inner-proof>` + ":" + base64(encrypt(`<inner-key>`, `<lockbox-passphrase>`)
         * `<inner-key>` = hmac(`<user-specific-passphrase>`, "identity:" + `<identity-uri>` + ":lockbox-key")
-        * `<inner-proof>` = hmac(`<inner-key>`, "proof:" + `<inner-salt-string>` + ":" + hex(hash(`<lockbox-passphrase>`)))
         * `<iv>` = hash(`<inner-salt-string>`)
+        * `<inner-proof>` = hmac(`<inner-key>`, "proof:" + `<inner-salt-string>` + ":" + hex(hash(`<lockbox-passphrase>`)))
     * Lockbox reset flag - this flag is used if the lockbox must be reset with a new password and all data within to be flushed.
   * Grant service challenge (optional, if challenge is required)
     * ID - a challenge ID that the server generated which the client application will have to authorize
@@ -3752,8 +3777,8 @@ This notification is sent from the inner browser window to the outer window as a
   * Encrypted user specific passphrase - the passphrase used to encrypt sensitive information to keep private from a server (i.e. so that the server doesn't know the lockbox passphrase) encrypted using the `<encryption-passphrase-upon-grant-proof>`
     * `<encrypted-user-specific-passphrase>` = `<salt-string>` + ":" `<proof>` + ":" + base64(encrypt(`<key>`, `<user-specific-passphrase>`))
       * `<key>` = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":server-encryption-key")
-      * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<user-specific-passphrase>`)))
       * `<iv>` = hash(`<salt-string>`)
+      * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<user-specific-passphrase>`)))
   * Hash of encryption passphrase upon grant proof (optional, if challenge is provided) - hex(hash(`<encryption-passphrase-upon-grant-proof>`)). If the client has previously performed a grant proof and knows the "Encryption passphrase upon grant proof" then this hash can be proof that the passphrase has not changed since a previous session.
   * Encryption passphrase upon grant proof (optional, if challenge is not required) - the outer passphrase used to decrypt the sensitive information previously encrypted by the identity service
 
@@ -3846,7 +3871,8 @@ This request proves that the grant ID challenge is proven valid by way of the na
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Identity information information
     * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-access-namespace-grant-challenge-validate"))
+    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known
+      * `<proof>` = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-access-namespace-grant-challenge-validate"))
     * Expiry of the proof for the 'identity access secret' - a window in which access secret proof short term credentials are considered valid
   * Grant service challenge as issued by the lockbox service bundled with signature as returned from the namespace grant service
 
@@ -3949,19 +3975,22 @@ This request updates the identity lookup information when an identity lookup is 
     * Lockbox account ID - the assigned account ID for the lockbox
     * Lockbox domain - this is the domain for the lockbox to use
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of 'lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":identity-lookup-update"))
+    * Proof of 'lockbox access secret' - proof required to validate that the lockbox access secret' is known
+      * `<proof>` = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":identity-lookup-update"))
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
      * Lockbox passphrase ID - (optional, if a lockbox passphrase was generated and to be associated with the identity) a static identifier associated with the currently generated passphrase (every time a passphrase is generated an ID is generated as well which is an identifier to refer to a particular passphrase without having to know the passphrase itself)
     * Encrypted lockbox passsphrase - (optional, if client trusts identity to hold onto the lockbox passphrase) the lockbox passphrase encrypted to protect the server from knowing the lockbox passphrase
       * `<encrypted-lockbox-passphrase>` = `<salt-string>` + ":" `<proof>` + ":" + base64(encrypt(`<key>`, `<lockbox-passphrase>`)
         * `<key>` = hmac(`<user-specific-passphrase>`, "identity:" + `<identity-uri>` + ":lockbox-key")
-        * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<lockbox-passphrase>`)))
         * `<iv>` = hash(`<salt-string>`)
+        * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<lockbox-passphrase>`)))
   * Identity bundle information
     * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-lookup-update"))
+    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known
+      * `<proof>` = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-lookup-update"))
     * Expiry of the proof for the 'identity access secret' - a window in which access secret proof short term credentials are considered valid
-    * Stable ID - a stable ID representing the user regardless of which identity is being used or the current peer contact ID, stable ID = hex(hash("stable-id:" + `<lockbox-domain>` + ":" + `<lockbox-account-id>`))
+    * Stable ID - a stable ID representing the user regardless of which identity is being used or the current peer contact ID
+      * `<stable-id>` = hex(hash("stable-id:" + `<lockbox-domain>` + ":" + `<lockbox-account-id>`))
     * Identity URI - the full identity URI of the logged in user
     * Identity provider - identity provider providing identity service
     * Public peer file - the public peer file associated with the contact ID
@@ -4115,7 +4144,8 @@ This request retrieves gets a list of peer contact services available to the pee
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of 'lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":peer-services-get"))
+    * Proof of 'lockbox access secret' - proof required to validate that the lockbox access secret' is known
+      * `<proof>` = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":peer-services-get"))
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
 
 ### Returns
@@ -4210,7 +4240,8 @@ This request retrieves a list of peer files assosciated to peer URIs.
   * Peer list containing:
     * peer URI
     * find secret nonce - a one time use nonce key used in proof validation
-    * find secret proof - (optional, see below) i.e. hex(hmac(<find-secret-from-remote-public-peer-file-section-B>, "proof:" + <client-nonce> + ":" + expires))
+    * find secret proof - (optional, see below) i.e.
+      * `<proof>` = hex(hmac(`<find-secret-from-remote-public-peer-file-section-B>`, "proof:" + `<client-nonce>` + ":" + `<expires>`))
     * find secret proof expires - how long until the proof expires
 
 ### Returns
@@ -4296,7 +4327,8 @@ This request stores a peer file onto the server.
   * Lockbox information
     * Lockbox account id - the ID associated with the lockbox
     * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of 'lockbox access secret' - proof required to validate that the lockbox access secret' is known, proof = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":pee-file-set"))
+    * Proof of 'lockbox access secret' - proof required to validate that the lockbox access secret' is known
+      * `<proof>` = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":pee-file-set"))
     * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
   * Peer file
 
@@ -5145,7 +5177,8 @@ Map a channel in the multiplex stream to a remote party. This request must be is
    * localContext - a context ID representing the context ID of the issuer of the request
    * remoteContext - a context ID representing the context ID of the remote relay where this request is being connected
    * relay access token - token as returned during peer finder session create (to connect to this session)
-   * proof of relay access secret proof = hex(hash("proof:" + `<client-nonce>` + ":" + `<local-context>` + ":" + `<channel-number>` + ":" + `<expires>` + ":" + hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<relay-access-token>` + ":" + `<remote-context>` + ":channel-map"))))
+   * proof of relay access secret
+     * `<proof>` = hex(hash("proof:" + `<client-nonce>` + ":" + `<local-context>` + ":" + `<channel-number>` + ":" + `<expires>` + ":" + hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<relay-access-token>` + ":" + `<remote-context>` + ":channel-map"))))
    * access secret proof expiry - expiry time of the access secret proof
 
 ### Outputs
@@ -5202,7 +5235,8 @@ This notification is sent from the finder server to a client with a session whos
    * localContext - the context ID representing the local session's context ID from where the relay access credentials were granted
    * remoteContext - a context ID representing the local context ID of the party party that issued the Channel Map Request
    * relay access token - token as returned during peer finder session create (to connect to this session)
-   * proof of relay access secret proof = hex(hash("proof:" + `<client-nonce>` + ":" + `<remote-context>` + ":" + `<channel-number>` + ":" + `<expires>` + ":" + hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<relay-access-token>` + ":" + `<local-context>` + ":channel-map"))))
+   * proof of relay access secret
+     * `<proof>` = hex(hash("proof:" + `<client-nonce>` + ":" + `<remote-context>` + ":" + `<channel-number>` + ":" + `<expires>` + ":" + hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<relay-access-token>` + ":" + `<local-context>` + ":channel-map"))))
    * access secret proof expiry - expiry time of the access secret proof
 
 ### Outputs
@@ -5266,8 +5300,8 @@ This is the request to find a peer that includes the proof of permission to cont
   * ICE password encrypted - the password passphrase for ICE negotiation
     * `<ice-password-encrypted>` = `<salt>` + ":" + `<proof>` + ":" + encrypt(`<key>`, `<ice-password>`)
       * `<key>` = hash(`<peer-secret>`)
-      * `<proof>` = hex(hmac(`<key>`, "proof:" + `<salt>` + hex(hash(`<ice-password>`))))
       * `<iv>` = hash(`<salt>`)
+      * `<proof>` = hex(hmac(`<key>`, "proof:" + `<salt>` + hex(hash(`<ice-password>`))))
   * final - set to true if the remote party should not expect to receive any more candidates at this time
   * Location details
     * Location ID of requesting location
