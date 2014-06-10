@@ -1992,6 +1992,10 @@ The request portion is only sent after a 302-redirect whereupon it is sent in a 
                     "uri": "https://identity.example.com/identity-access-validate"
                   },
                   {
+                    "name": "identity-access-namespace-grant-challenge-validate",
+                    "uri": "https://identity.example.com/identity-access-namespace-grant-challenge-validate"
+                  },
+                  {
                     "name": "identity-lookup-update",
                     "uri": "https://identity.example.com/identity-lookup-update"
                   },
@@ -3776,7 +3780,7 @@ This notification is sent from the inner browser window to the outer window as a
     * Namespace URLs - the list of URLs that require permission to continue
   * Encrypted user specific passphrase - the passphrase used to encrypt sensitive information to keep private from a server (i.e. so that the server doesn't know the lockbox passphrase) encrypted using the `<encryption-passphrase-upon-grant-proof>`
     * `<encrypted-user-specific-passphrase>` = `<salt-string>` + ":" `<proof>` + ":" + base64(encrypt(`<key>`, `<user-specific-passphrase>`))
-      * `<key>` = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":server-encryption-key")
+      * `<key>` = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":user-specific-key")
       * `<iv>` = hash(`<salt-string>`)
       * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<user-specific-passphrase>`)))
   * Hash of encryption passphrase upon grant proof (optional, if challenge is provided) - hex(hash(`<encryption-passphrase-upon-grant-proof>`)). If the client has previously performed a grant proof and knows the "Encryption passphrase upon grant proof" then this hash can be proof that the passphrase has not changed since a previous session.
