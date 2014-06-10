@@ -5256,12 +5256,12 @@ This is the request to find a peer that includes the proof of permission to cont
   * Context - the is the requester's part of the context ID. This identifier is combined with the remote peer's context to form the "requester" / "reply" context ID for MLS
   * Encoded peer secret - peer secret contains all the keying materials needed to decrypt the ICE passwords and establish shared keying between clients and is encoded as follows
     * `<encoded-peer-secret>` = `<encoded-namespace>` + ":" + `<encrypted-peer-secret>` + ":" + `<....namespace-dependent...>`
-    * encoded namespace - `<encoded-namespace>` = base64(`<namespace-uri>`)
-    * encrypted peer secret - a random passphrase encoded using the replying peer's public key
-      * `<encrypted-peer-secret>` = base64(rsa_encrypt(`<remote-public-peer-file-public-key>`, `<peer-secret>`))
-    * namespace dependend data
-      * if namespace is `https://meta.openpeer.org/dh/modp/2048` what follows is:
-        * `<namespace-dependent>` = base64(`<requesting-peer-static-public-key>`) + ":" + base64(`<requesting-peer-ephemeral-public-key>`) based upon a Diffie-Hellman MODP P, Q and G are defined as hex integer values as defined in Diffie-Hellman MODP Namespace Definitions section. Alternative namespace `1024`, `1538`, `3072`, `4096`, `6144`, `8192` are available too.
+      * encoded namespace - `<encoded-namespace>` = base64(`<namespace-uri>`)
+      * encrypted peer secret - a random passphrase encoded using the replying peer's public key
+        * `<encrypted-peer-secret>` = base64(rsa_encrypt(`<remote-public-peer-file-public-key>`, `<peer-secret>`))
+      * namespace dependend data
+        * if namespace is `https://meta.openpeer.org/dh/modp/2048` what follows is:
+          * `<namespace-dependent>` = base64(`<requesting-peer-static-public-key>`) + ":" + base64(`<requesting-peer-ephemeral-public-key>`) based upon a Diffie-Hellman MODP P, Q and G are defined as hex integer values as defined in Diffie-Hellman MODP Namespace Definitions section. Alternative namespace `1024`, `1538`, `3072`, `4096`, `6144`, `8192` are available too.
   * ICE username fragment - the username fragment for ICE negotiation
   * ICE password encrypted - the password passphrase for ICE negotiation
     * `<ice-password-encrypted>` = `<salt>` + ":" + `<proof>` + ":" + encrypt(`<key>`, `<ice-password>`)
