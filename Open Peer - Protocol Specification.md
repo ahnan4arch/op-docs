@@ -3755,7 +3755,7 @@ This notification is sent from the inner browser window to the outer window as a
     * Identity access expiry - the window with sufficient long into-the-future time frame in which the access key long term credentials are valid
     * Identity encrypted relogin key - the relogin key only has meaning to the identity service and it's encrypted
       * `<encrypted-relogin-key>` = `<salt-string>` + ":" + `<proof>` + ":" + base64(encrypt(`<key>`, `<relogin-key>`))
-        * `<key>` = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":identityReloginKey")
+        * `<key>` = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":identity-relogin-key")
         * `<iv>` = hash(`<salt-string>`)
         * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<relogin-key>`)))
   * Lock box information (optional, if known)
