@@ -4243,24 +4243,16 @@ This request retrieves a list of peer files assosciated to peer URIs.
 
   * Peer list containing:
     * peer URI
-    * find secret nonce - a one time use nonce key used in proof validation
-    * find secret proof - (optional, see below) i.e.
-      * `<proof>` = hex(hmac(`<find-secret-from-remote-public-peer-file-section-B>`, "proof:" + `<client-nonce>` + ":" + `<expires>`))
-    * find secret proof expires - how long until the proof expires
 
 ### Returns
 
 List of peers containing:
 
-  * Public peer file
+  * Public peer file - of all the peer URIs that did have a previously set peer file on the system
 
 ### Security Considerations
 
-If the peer URI looked up contains a find secret proof then the find secret proof must validate. The nonce value can be the same within the same request. The server need not prove the nonce is unique for this particular request even though the nonce is used in the calculation but the expiry window must be validated.
-
-If the peer URI looked up does not contain a find secret proof then the peer file will be returned without section "B" of the public peer file. This allows an incomplete public peer file to be returned for the sake of validation of peer URI signatures without the ability to contact the originating user via a finder.
-
-If none of the lookups can be filled an error is returned. If some of the lookups can be filled then only the peer information that validate properly are returned in the same order they were requested.
+The returned peer file may not contain section "B" (which holds the peer find secret allowing other peers to find the peer on the network). If the client already has a peer file but opts to download a peer file again via this method then care must be taken to ensure the peer file which is of greater version or the peer file that does contains section "B" is retained.
 
 ### Example
 
@@ -4274,18 +4266,8 @@ If none of the lookups can be filled an error is returned. If some of the lookup
     
         "peers": {
           "peer": [
-            {
-              "uri": "peer://domain.com/7f3c113e43a51f6c7d036be2e7663c84dad49b64dad1bf7a7c0a813a604c2240",
-              "findSecretNonce": "ed585021eec72de8634ed1a5e24c66c2",
-              "findSecretProof": "1a27b4089b8d7d95b8f531acfaa2e5d38735a42e",
-              "findSecretProofExpires": 43484383
-            },
-            {
-              "uri": "peer://domain.com/40a42dc4e7acd58f708e33ef0afe8f7b40d2bf9ca4d8080c5428acbf9a36c766",
-              "findSecretNonce": "ed585021eec72de8634ed1a5e24c66c2",
-              "findSecretProof": "0f1fbe8d675ddee098cdc1f1184ce08ba06c9a82",
-              "findSecretProofExpires": 43484383
-            }
+            "peer://domain.com/7f3c113e43a51f6c7d036be2e7663c84dad49b64dad1bf7a7c0a813a604c2240",
+            "peer://domain.com/40a42dc4e7acd58f708e33ef0afe8f7b40d2bf9ca4d8080c5428acbf9a36c766"
           ]
         }
     
@@ -4341,6 +4323,8 @@ This request stores a peer file onto the server.
 Success or failure.
 
 ### Security Considerations
+
+If the client wishes, it may exclude section "B" from the peer file to allow validation of peer URIs for the peer file but disallow finding of the peer on the network.
 
 The server must ensure the following:
 
