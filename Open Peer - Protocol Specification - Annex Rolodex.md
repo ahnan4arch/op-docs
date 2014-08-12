@@ -345,8 +345,6 @@ This request is sent by the client application to get updates to the contact lis
     * Expiry of the proof for the 'rolodex access secret' - a window in which access secret proof is considered valid
     * version - a version string as previously returned from the rolodex update request representing the delta information last obtained from the rolodex service
     * refresh - request the contact list be refreshed immediately
-  * Grant information
-    * grant ID - the grant ID that has been given namespace access to the rolodex namespace, i.e. "https://openpeer.org/permission/rolodex"
 
 ### Returns
 
@@ -354,7 +352,10 @@ This request is sent by the client application to get updates to the contact lis
     * update next - the timestamp when the next update can/should be issued (but not before)
     * version - a version string representing the delta information from last update to this update for the rolodex service
   * list of identities, with each identity containing:
-    * disposition - "update" or "remove"
+    * disposition - "pending", "update" or "remove"
+      * "pending" - the remote party wishes to be added to the contact list but has not yet been approved
+      * "updated" - the remote party is added to the contact list
+      * "removed" - the remote party is no longer in the contact list
     * Original identity URI
     * Provider - service responsible for this identity
     * Identity display name - (optional), the display name to use with the identity
@@ -442,3 +443,75 @@ If the result is an error result with error code "424" i.e. "Failed Rolodex Toke
       }
     }
 
+
+Rolodex Contact Update Request
+------------------------------
+
+### Purpose
+
+This request is sent by the client application to update a contact in the contact list. Not all rolodex services will support this feature.
+
+### Inputs
+
+  * Client nonce - a onetime use nonce, i.e. cryptographically random string
+  * rolodex information
+    * server token - given by the identity service that only has meaning to the rolodex service
+    * rolodex access token - as returned from the "rolodex access" request
+    * Proof of 'rolodex access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<rolodex-access-secret>`, "rolodex-access-validate:" + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<rolodex-access-token>` + ":rolodex-contacts-get"))
+    * Expiry of the proof for the 'rolodex access secret' - a window in which access secret proof is considered valid
+    * version - a version string as previously returned from the rolodex update request representing the delta information last obtained from the rolodex service
+    * refresh - request the contact list be refreshed immediately
+  * identity information
+    * disposition - "update", "remove"
+      * "update" - add/update the identity to the contact list (if contact was pending then the contact is now approved)
+      * "remove" - remove the identity from the contact list
+    * Original identity URI
+    * Provider - service responsible for this identity
+
+### Returns
+
+Success or failure.
+
+### Security Considerations
+
+If the result is an error result with error code "424" i.e. "Failed Rolodex Token Dependency" then the rolodex access token must be refreshed via the identity service.
+
+### Example
+
+    {
+      "request": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "rolodex",
+        "$method": "rolodex-contact-update",
+    
+        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
+        "rolodex": {
+           "serverToken": "b3ff46bae8cacd1e572ee5e158bcb04ed9297f20-9619e3bc-4cd41c9c64ab2ed2a03b45ace82c546d",
+           "accessToken": "a913c2c3314ce71aee554986204a349b",
+           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+           "accessSecretProofExpires": 43843298934,
+           "version": "4341443-54343a",
+           "refresh": false
+         },
+    
+         "identity": {
+           "$disposition": "update",
+           "uri": "identity://foo.com/alice",
+           "provider": "foo.com"
+         }
+      }
+    }
+.
+
+    {
+      "result": {
+        "$domain": "provider.com",
+        "$appid": "xyz123",
+        "$id": "abd23",
+        "$handler": "rolodex",
+        "$method": "rolodex-contact-update",
+        "$timestamp": 439439493
+      }
+    }
