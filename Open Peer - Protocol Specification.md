@@ -251,7 +251,7 @@ Section "B" (packaged and signed by identity's private key)
   * Peer contact's full URI (to know how to locate the peer universally but does not directly reveal any identities). Peer's contact ID part of the full peer URI is calculated as follows: hex(hash("contact:" + `<public-peer-section-A-JSON-object>`)), where the hash algorithm used is "SHA256" for the default "https://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5" namespace. When the input `<public-peer-file-section-A-JSON-object>` is used in the hash, the same canonical algorithm method as the signature in section "A". The input into the algorithm is the entire section "A" bundle including the certificate signing the section bundle. Thus the input canonical sequence will always start start with the exact phrase (followed by the remaining information): {"sectionBundle":{"section":{"$id":"A",
   * Find secret passphrase (must be known by peer attempting to initiate a finder connection to another peer).
   * "other" custom data as desired
-  * signed by public key in section "A" and referenced by peer URI
+  * Signed by public key in section "A" and referenced by peer URI
 
 
 Section "C" (packaged and signed by identity's private key)
@@ -260,7 +260,7 @@ Section "C" (packaged and signed by identity's private key)
   * Peer contact's full URI (to know how to locate the peer universally). See Section "B" for calculation.
   * Any / all asserted public identities
   * "other" custom data as desired
-  * signed by public key in section "A" and referenced by peer URI
+  * Signed by public key in section "A" and referenced by peer URI
 
 The public key is used as a way to send the peer privately encrypted data from another source. As long as the other source has the correct public key it is possible to establish direct secure communication by exchanging keys using public / private keys as the encryptions method.
 
@@ -278,16 +278,16 @@ Security Considerations
 
 When verifying Section "A":
 
-  * the salt must not be expired (or the peer file is expired)
-  * the salt must be signed by the domain whose certificate is found using "Certificates Get" for the domain and the salt signing key must still be valid.
-  * the Section "A" bundle must be signed by a public key whose public key value is included in the signature of the bundle
+  * The salt must not be expired (or the peer file is expired)
+  * The salt must be signed by the domain whose certificate is found using "Certificates Get" for the domain and the salt signing key must still be valid.
+  * The Section "A" bundle must be signed by a public key whose public key value is included in the signature of the bundle
 
 When verifying Section "B" / Section "C":
 
-  * the domain used in the peer URI must match the domain used in the signature of the signed salt
-  * the "contact ID" part of the peer URI must match the following calculation: hex(hash("contact:" + `<public-peer-section-A-JSON-object>`)), where the hash algorithm used is "SHA256" for the default "https://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5" namespace.
-  * the signature must be signed by the public key contained in Section "A"
-  * the reference peer URI in the signature must be the same URI as defined within the section
+  * The domain used in the peer URI must match the domain used in the signature of the signed salt
+  * The "contact ID" part of the peer URI must match the following calculation: hex(hash("contact:" + `<public-peer-section-A-JSON-object>`)), where the hash algorithm used is "SHA256" for the default "https://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5" namespace.
+  * The signature must be signed by the public key contained in Section "A"
+  * The reference peer URI in the signature must be the same URI as defined within the section
 
 The identities contained within section "C" can be verified using the standard verification methods used to validate identities (see the "Identity Validation" section).
 
@@ -456,8 +456,8 @@ This section is used to prove association to the public peer file and provide a 
   * Peer contact's full URI (see public peer file Section "B" for calculation)
   * Binary salt, encoded as: base64(`<binary-salt>`)
   * 'Private Peer File secret passphrase' proof, result = hex(hmac(`<private-peer-file-secret-passphrase>`, "proof:" + `<peer-contact-id>`))
-    * note: `<peer-contact-id>` is only the contact ID part of the full peer URI whose calculation is described in Section "B" of the public peer file
-    * note: the hmac algorithm uses SHA256 rather than SHA1 for the default https://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5
+    * Note: `<peer-contact-id>` is only the contact ID part of the full peer URI whose calculation is described in Section "B" of the public peer file
+    * Note: the hmac algorithm uses SHA256 rather than SHA1 for the default https://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5
   * Signed by the private key
 
 
@@ -1169,7 +1169,7 @@ The format for the unidirectional message is as follows:
   * Message Size [4 bytes in network order] - The length of the raw encrypted message, including encryption headers and integrity footers
   * Encryption key algorithm selection (16 bits network byte order, upper 8 bits reserved and must be set to "0") - When negotiating, each number represents selected keys / algorithm pair for use by the number chosen but "0" is used to represent a key / algorithm negotiation. Every "0" key causes a reset of all encryption algorithms in progress to substitute with the values specified in the "0" package. Each key / algorithm selected is selected from the supported keys / algorithms offered to the remote party, but can only be amongst the algorithms the remote party supports. As such, there is one mandated algorithm to ensure compatibility, "https://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5", where the AES (Rijndael- 128) in CFB mode with a 32 byte key size, 16 byte block size, 16 byte feedback size, SHA1-HMAC integrity protection, and an md5 hash IV sequence calculation.
   * Data bundle, consisting of:
-    * integrity header of the data encrypted using the algorithm / key selected (algorithm specific)
+    * Integrity header of the data encrypted using the algorithm / key selected (algorithm specific)
     * JSON message encrypted using the algorithm / key selected
 
 The advantage of pre-knowing the public key of the remote party by the sender allows for unidirectional encryption with different keys being used in each direction and allows for encryption to begin in both directions in a single round trip negotiation.
@@ -1182,42 +1182,42 @@ The "0" package contains the following:
 
   * Signed keying bundle including:
 
-    * sequence number - for every "0" package, this sequence number starts at 0 and increases by 1 for each "0" package received
+    * Sequence number - for every "0" package, this sequence number starts at 0 and increases by 1 for each "0" package received
     * Nonce - this nonce should be validated as having only been seen once by the receiving client
     * Expiry - a time-stamp and this package must be verified as valid before the expiry or it's considered invalid
     * Context - (optional) this identifier allows the stream to correlate with other upper layers and the meaning is externally defined / negotiated. In the case of a connecting to a server, the context should include the destination server domain name as the remote server context and the local context can be the local server domain name, "anonymous" if an anonymous context is used or the hash of the peer URI of the connecting peer (all of which much match the keying signature of the local keying material).
     * Encoding - the encoding technique used for this package
-      * type - `pki`, `agreement` or `passphrase` - if "pki" then it's using public key encryption, if `agreement` then it's encoded using special key agreement based on a namespace, if "passphrase" then the encoding is done with a passphrase / algorithm externally defined (typically correlated via the context)
-      * fingerprint - (optional) if `pki` (or `agreement` where a public key is involved) the fingerprint of the remote party's public key used to encrypt this data, the fingerprint of the public key is hash = hash(`<public-key-der-encoded>`) and for Diffie-Hellman keys it's computed as hash = hmac(`<remote-ephemeral-key`, `<remotestatic-key>`) when using the namespace `https://meta.openpeer.org/dh/modp/2048`. For `agreement` where the remote public agreement keying is not known in advance (i.e. offer agreement key), there is no fingerprint value present. The answer agreement must include the fingerprint of the offer public agreement keying.
-      * key - if `agreement` value = `<encoded-namespace>` + ":" + `<....namespace-dependent...>`
-        * encoded namespace - `<encoded-namespace>` = base64(`<namespace-uri>`)
-        * if namespace is `https://meta.openpeer.org/dh/modp/2048` what follows is `<namespace-dependent>` = base64(`<encoding-peer-static-public-key>`) + ":" + base64(`<encoding-peer-ephemeral-public-key>`) based upon a Diffie-Hellman MODP P, Q and G are defined as hex integer values as defined in Diffie-Hellman MODP Namespace Definitions section. Alternative namespace `1024`, `1538`, `2048`, `3072`, `4096`, `6144`, `8192` are available too. If the remote public agreement keying is known in advance to sending the local public keying agreement material, the agreed key becomes converted into a `passphrase` which is calculated as passphrase = hex(`<agreed-key>`), determined based on context. If the remote public agreement keying is not known in advance, the key uses the agreement mechanism as listed below for the "aes-cfb-32-16-16-sha1-md5" algorithm.
-      * algorithm - if `passphrase` is used, the algorithm to decode the keying materials
-      * proof - if `passphrase` is used, this field provides proof the correct decoding key is used to decrypt the stream
+      * Type - `pki`, `agreement` or `passphrase` - if "pki" then it's using public key encryption, if `agreement` then it's encoded using special key agreement based on a namespace, if "passphrase" then the encoding is done with a passphrase / algorithm externally defined (typically correlated via the context)
+      * Fingerprint - (optional) if `pki` (or `agreement` where a public key is involved) the fingerprint of the remote party's public key used to encrypt this data, the fingerprint of the public key is hash = hash(`<public-key-der-encoded>`) and for Diffie-Hellman keys it's computed as hash = hmac(`<remote-ephemeral-key`, `<remotestatic-key>`) when using the namespace `https://meta.openpeer.org/dh/modp/2048`. For `agreement` where the remote public agreement keying is not known in advance (i.e. offer agreement key), there is no fingerprint value present. The answer agreement must include the fingerprint of the offer public agreement keying.
+      * Key - if `agreement` value = `<encoded-namespace>` + ":" + `<....namespace-dependent...>`
+        * Encoded namespace - `<encoded-namespace>` = base64(`<namespace-uri>`)
+        * If namespace is `https://meta.openpeer.org/dh/modp/2048` what follows is `<namespace-dependent>` = base64(`<encoding-peer-static-public-key>`) + ":" + base64(`<encoding-peer-ephemeral-public-key>`) based upon a Diffie-Hellman MODP P, Q and G are defined as hex integer values as defined in Diffie-Hellman MODP Namespace Definitions section. Alternative namespace `1024`, `1538`, `2048`, `3072`, `4096`, `6144`, `8192` are available too. If the remote public agreement keying is known in advance to sending the local public keying agreement material, the agreed key becomes converted into a `passphrase` which is calculated as passphrase = hex(`<agreed-key>`), determined based on context. If the remote public agreement keying is not known in advance, the key uses the agreement mechanism as listed below for the "aes-cfb-32-16-16-sha1-md5" algorithm.
+      * Algorithm - if `passphrase` is used, the algorithm to decode the keying materials
+      * Proof - if `passphrase` is used, this field provides proof the correct decoding key is used to decrypt the stream
     * Algorithms - preference ordered set of algorithms supported by the client; once an algorithm is marked as supported it cannot be removed from subsequent "0" package updates.
     * List of keys, with each key containing:
-      * key disposition - "update" or "remove" - "update" adds or replaces an existing key and "remove" causes an existing key to become purged
-      * key index - this corresponds to the algorithm selection index of which key to use in any subsequent decryption
-      * algorithm - the algorithm to use when decrypting payloads using this key index
-      * algorithm input data - each algorithm requires its own set of keying information required for decryption, which is contained here. All sensitive data is encrypted using the public key of the remote party
+      * Key disposition - "update" or "remove" - "update" adds or replaces an existing key and "remove" causes an existing key to become purged
+      * Key index - this corresponds to the algorithm selection index of which key to use in any subsequent decryption
+      * Algorithm - the algorithm to use when decrypting payloads using this key index
+      * Algorithm input data - each algorithm requires its own set of keying information required for decryption, which is contained here. All sensitive data is encrypted using the public key of the remote party
 
 For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with "pki", the following algorithm input information is used:
 
-  * secret - the 32 byte AES key, base64(rsa_encrypt(`<remote-public-key>`, `<32-byte-aes-key>`))
-  * iv - the 16 byte AES initialization vector, base64(rsa_encrypt(`<remote-public-key>`, `<16-byte-aes-iv>`))
-  * hmacIntegrityKey - the initial secret key input string, base64(rsa_encrypt(`<remote-public-key>`, `<integrity-passphrase>`))
+  * Secret - the 32 byte AES key, base64(rsa_encrypt(`<remote-public-key>`, `<32-byte-aes-key>`))
+  * IV - the 16 byte AES initialization vector, base64(rsa_encrypt(`<remote-public-key>`, `<16-byte-aes-iv>`))
+  * HMAC integrity key - the initial secret key input string, base64(rsa_encrypt(`<remote-public-key>`, `<integrity-passphrase>`))
 
 For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with a "passphrase" (alternatively "agreement" is used which is converted into a passphrase), the following can be used to encode/decode the input information:
 
-  * secret - the encoded 32 byte AES key
+  * Secret - the encoded 32 byte AES key
     * `<secret-encoded>` = hex(`<salt>`) + ":" + base64(encrypt(`<key>`, `<32-byte-aes-key>`))
       * `<key>` = hmac(`<external-passphrase>`, "keying:" + `<nonce>`)
       * `<iv>` = `<salt>`
-  * iv - the encoded 16 byte AES initialization vector
+  * IV - the encoded 16 byte AES initialization vector
     * `<iv-encoded>` = hex(`<salt>`) + ":" + base64(encrypt(`<key>`, `<16-byte-aes-iv>`))
       * `<key>` = hmac(`<external-passphrase>`, "keying:" + `<nonce>`)
       * `<iv>` = `<salt>`
-  * hmacIntegrityKey - the encoded version of the initial integrity passphrase
+  * HMAC integrity key - the encoded version of the initial integrity passphrase
     * `<integrity-passphrase-encoded>` = hex(`<salt>`) + ":" + base64(encrypt(`<key>`,`<integrity-passphrase>`))
       * `<key>` = hmac(`<external-passphrase>`, "keying:" + `<nonce>`)
       * `<iv>` = `<salt>`
@@ -1226,14 +1226,14 @@ For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with a "pass
 
 For the mandatory "aes-cfb-32-16-16-sha1-md5" algorithm and encoded with a "agreement" where the remote public Diffie-Hellman key is not known in advance, the following can be used to encode/decode the input information:
 
-  * secret - the 32 byte AES key is constructed in combination with the agreement key sent with a later agreement response
+  * Secret - the 32 byte AES key is constructed in combination with the agreement key sent with a later agreement response
     * `<secret-encoded>` = hex(`<salt>`)
       * `<key>` = hmac(hex(`<agreed-key>`), "secret:" + `<nonce>`)
       * `<iv>` = `<salt>`
-  * iv - the 16 byte AES initialization vector is constructed in combination with the agreement key sent with a later agreement response
+  * IV - the 16 byte AES initialization vector is constructed in combination with the agreement key sent with a later agreement response
     * `<iv-encoded>` = `<salt-string>`
       * `<iv>` = hmac(hex(`<agreed-key>`), "iv:" + `<nonce>` + ":" + `<salt-string>`))
-  * hmacIntegrityKey - the initial integrity passphase string
+  * HMAC integrity key - the initial integrity passphase string
     * `<integrity-passphrase-encoded>` = `<salt-string>`
       * `<integrity-passphrase>` = hex(hmac(hex(`<agreed-key>`), "integrity:" + `<nonce>` + ":" + `<salt-string>`))
 
@@ -1338,7 +1338,7 @@ The receiving party must verify the following:
 
   * The receiving party must verify the signature used in the sender's "0" package and all subsequent "0" packages.
   * The first "0" package must include the x509 certificate of the sending party (unless the receiving party is guaranteed to be able to resolve the signature key reference immediately)
-  * he subsequent "0" packages must use the same signature key as the first package (thus the x509 certificate should not need to be included again)
+  * The subsequent "0" packages must use the same signature key as the first package (thus the x509 certificate should not need to be included again)
   * A signature key reference in future "0" package signatures is used
   * The "0" package must is the first message received on the wire.
   * The algorithm presented is a known algorithm (as previously announced)
@@ -1393,7 +1393,7 @@ The format of the package is:
 
   * Channel number [4 bytes in network order] - The bi-directional messaging channel, must be a value less than 0x40000000
   * Message Size [4 bytes in network order]
-  * raw binary data
+  * Raw binary data
 
 Any newly seen channel number represents the opening of a channel. A message size of "0" indicated the channel number in use is now closed.
 
@@ -1428,7 +1428,7 @@ When combining multiplexed stream packaging and symmetric encrypted data, the fo
 
   * Encryption key algorithm selection (16 bits network byte order, upper 8 bits reserved and must be set to "0") - When negotiating, each number represents selected keys / algorithm pair for use by the number chosen but "0" is used to represent a key / algorithm negotiation.
   * Data bundle, consisting of:
-    * integrity header of the data encrypted using the algorithm / key selected (algorithm specific)
+    * Integrity header of the data encrypted using the algorithm / key selected (algorithm specific)
     * JSON message encrypted using the algorithm / key selected
 
 The interpretation of the algorithm, data and if it contains an integrity header are negotiated externally. Algorithm numbers can be reserved for signaling purposes, so long as those algorithms are negotiated externally.
@@ -1448,9 +1448,9 @@ General Request, Notify and Result Formation Rules
 
 Open Peer has four types of messages:
 
-  * request - the request types requires a "result" as a response to the request whose ID matches the request.
-  * result - a result is in response to a request whose ID must match the request
-  * notify - this is a special type of request whose result is ignored and not required (and no response is presumed to occur with a notify type)
+  * Request - the request types requires a "result" as a response to the request whose ID matches the request.
+  * Result - a result is in response to a request whose ID must match the request
+  * Notify - this is a special type of request whose result is ignored and not required (and no response is presumed to occur with a notify type)
 
 All request types and results use a simplified JSON format. The messages are sent either over HTTPS/TLS/MLS/Message or over RUDP/UDP or SCP protocols. Alternative protocols are acceptable so long as they maintain the integrity and public / private key aspects of these protocols.
 
@@ -1511,14 +1511,14 @@ This algorithm breaks down as follows:
 
 Open Peer uses the following definitions (unless otherwise specified):
 
-  * public key - a RSA compatible public key encoded as X.509 DER encoding (BER decoding) format
-  * private key - a RSA compatible encoded as "SubjectPublicKeyInfo" PKCS #1 format.
-  * signature key - a key defined or referenced from within a signature (see JSON Signatures).
-  * key - a binary value key or passphrase used as input into encrypt / decrypt routines which may pre-pass through hash / hmac algorithms before being utilized.
+  * Public key - a RSA compatible public key encoded as X.509 DER encoding (BER decoding) format
+  * Private key - a RSA compatible encoded as "SubjectPublicKeyInfo" PKCS #1 format.
+  * Signature key - a key defined or referenced from within a signature (see JSON Signatures).
+  * Key - a binary value key or passphrase used as input into encrypt / decrypt routines which may pre-pass through hash / hmac algorithms before being utilized.
   * IV - the initialization vector for an encryption / decryption algorithm, always 16 bytes long.
-  * passphrase - a cryptographically generated string using limited subset of the visible ASCII characters, or a user input passphrase. Each character in a passphrase is given a security strength of 5 bits. Thus a passphrase input into a "SHA1" algorithm should contain a minimal "(20 x 8) / 5 = 32" characters; a passhrase used for AES should contain a minimal "(32 x 8) / 5 = 52" characters; a passphrase used for IV calculation should contain a minimal "(16 x 8) / 5 = 26" characters;
-  * salt - binary cryptographically random data
-  * salt string - passphrase compatible cryptographically random data
+  * Passphrase - a cryptographically generated string using limited subset of the visible ASCII characters, or a user input passphrase. Each character in a passphrase is given a security strength of 5 bits. Thus a passphrase input into a "SHA1" algorithm should contain a minimal "(20 x 8) / 5 = 32" characters; a passhrase used for AES should contain a minimal "(32 x 8) / 5 = 52" characters; a passphrase used for IV calculation should contain a minimal "(16 x 8) / 5 = 26" characters;
+  * Salt - binary cryptographically random data
+  * Salt string - passphrase compatible cryptographically random data
 
 
 Open Peer uses the following definitions for use with the "https://meta.openpeer.org/2013/07/21/jsonmsg#rsa-sha1-aes-cfb-32-16-16-sha256-md5" algorithms (unless otherwise specified):
@@ -1697,11 +1697,11 @@ The identity URI being validated is contained within the "contactProof" JSON obj
 
 The following steps must be perform to prove an identity is associated with a peer URI:
 
-  * the current date time-stamp (within the "contactProof") must be beyond the creation date (a small window is allowed for small clock variations)
-  * the current date time-stamp (within the "contactProof") must not be beyond the expiry date
-  * peer URI (within the "contactProof") must match the peer URI being associated
-  * the signature on the "contactProof" must be signed by the public key from the public peer file associated with the peer URI
-  * the signature on the "identityProof" must be signed by the domain from the identity URI being validated and the referenced certificate obtained and checked from performing a "Certificated Get" on the domain; alternatively if the identity URI is of a legacy type, an identity lookup must be performed on the identity and provider of the identity returned by by the lookup must match the domain referenced in the signature
+  * The current date time-stamp (within the "contactProof") must be beyond the creation date (a small window is allowed for small clock variations)
+  * The current date time-stamp (within the "contactProof") must not be beyond the expiry date
+  * Peer URI (within the "contactProof") must match the peer URI being associated
+  * The signature on the "contactProof" must be signed by the public key from the public peer file associated with the peer URI
+  * The signature on the "identityProof" must be signed by the domain from the identity URI being validated and the referenced certificate obtained and checked from performing a "Certificated Get" on the domain; alternatively if the identity URI is of a legacy type, an identity lookup must be performed on the identity and provider of the identity returned by by the lookup must match the domain referenced in the signature
 
 An identity lookup should be performed on the identity to obtain the latest identity proof thus only the latest identity proof should be considered valid.
 
@@ -2097,10 +2097,10 @@ This request returns a list random possible peer servers based on a type of serv
 
 Server information, including:
 
-  * type of server - e.g. "finder", "push-mailbox"
-  * total servers - (optional) if list of servers is not provided then this value must be present or it will be assumed a value of "1"
-  * list of servers - (optional) if list of servers is provided then the list contains:
-    * server ID - the server ID to fetch
+  * Type of server - e.g. "finder", "push-mailbox"
+  * Total servers - (optional) if list of servers is not provided then this value must be present or it will be assumed a value of "1"
+  * List of servers - (optional) if list of servers is provided then the list contains:
+    * Server ID - the server ID to fetch
 
 ### Returns
 
@@ -2110,7 +2110,7 @@ Returns a list of Finders containing the following information for each Finder:
   * Type - the type of server (should match the type of server requested)
   * Array of protocols supported, with each defining:
     * Transport - a string describing the type of transport supported
-    * host record [or pre-resolved comma separated IP:port pair locations] - for example for "multiplexed-json/tcp" lookup type is SRV with _finder._tcp.domain.com
+    * Host record [or pre-resolved comma separated IP:port pair locations] - for example for "multiplexed-json/tcp" lookup type is SRV with _finder._tcp.domain.com
   * Public key for the finder - Can be either the full X.509 certificate or a key name lookup for certificates returned from the certificate server
   * Weight / priority - default values for SRV like weight / priority when SRV entry is pre-resolved IP:port pairs
   * Geographic region ID - (optional) each server belongs to a logical geographic region (clients can organize servers into geographic regions for fail over reasons)
@@ -2376,7 +2376,7 @@ This request notification is sent from the inner frame to the outer window as a 
   * Visibility:
     * true - notify the login window needs visibility
   * Redirect
-    * a URL the outer page must redirect to immediately
+    * A URL the outer page must redirect to immediately
 
 ### Returns
 
@@ -2639,18 +2639,27 @@ This request obtains access to a lockbox. Access is granted by way of login proo
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Identity information (optional, if logging in using an identity)
     * Identity access token - as returned from the "Identity Access Complete" notification
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":lockbox-access"))
-    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
+      * Token id - an id associated to the identity
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":identity-lockbox-access"))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - "lockbox-access"
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
   * Lockbox information
     * Lockbox domain - the domain hosting the lockbox
     * Lockbox account ID - (optional, if known) the assigned account ID for the lockbox
     * Lockbox passphrase ID - (optional, if a lockbox passphrase was previously generated) a static identifier associated with the currently generated passphrase (every time a passphrase is generated an ID is generated as well which is an identifier to refer to a particular passphrase without having to know the passphrase itself). If this ID specified matches the ID in the database associated with the account ID then this ID and proof of the lockbox passphrase can be used to login to the lockbox account (which also requires specifying the lockbox account ID). If validated identity information is present in the request and the "lockbox passphrase ID" value does not match the value in the database then all the content values stored in the lockbox must be purged (but the associated identities and the namespace grants can remain). This type of scenario can happen if a user's password was reset (which may have caused the lockbox passphrase to be lost in the process).
-    * Lockbox passphrase hash - (optional but required when a lockbox passphrase is known and an identity access information is specified) this value is used to store into the database to provide login capability to the login via lockbox passphrase proof in the future without requiring an identity that validates for future calls to "Lockbox Access Request", value = hex(hmac(`<lockbox-passphrase>`, "lockbox:" + `<lockbox-passphrase-id>`))
-    * Lockbox passphrase proof - (optional) proof the passphrase is known and required to login to the lockbox account when logging in without specifying identity access information in the request
-      * `<proof>` = hex(hmac(`<lockbox-hash>`, "identity-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-passphrase-id>` + ":lockbox-access"))
-        * `<lockbox-hash>` = hex(hmac(`<lockbox-passphrase>`, "lockbox:" + `<lockbox-passphrase-id>`))
+    * Lockbox passphrase hash - (optional but required when a lockbox passphrase is known and an identity access information is specified) this value is used to store into the database to provide login capability to the login via lockbox passphrase proof in the future without requiring an identity that validates for future calls to "Lockbox Access Request"
+      * `<lockbox-hash>` = hex(hmac(`<lockbox-passphrase>`, "lockbox:" + `<lockbox-passphrase-id>`))
+    * Lockbox passphrase token - (optional) proof the passphrase is known and required to login to the lockbox account when logging in without specifying identity access information in the request
+      * Token id - the lockbox passphrase
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<lockbox-hash>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":identity-lockbox-access))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - "identity-lockbox-access"
     * Expiry of the proof for the 'lockbox passphrase proof' - a window in which lockbox passphrase proof is considered valid
     * Lockbox reset flag - (optional) if specified and true, a new lockbox must be created for the identity specified (and an identity which validates must be included in the request) and the identity specified must become unassociated with any other existing lockbox accounts. If this identity was previously the only associated identity with a previous lockbox account then the previous lockbox account can be deleted entirely.
   * Agent
@@ -2661,15 +2670,16 @@ This request obtains access to a lockbox. Access is granted by way of login proo
   * Grant
     * ID - a client generated cryptographic unique ID representing the agent's permission to access the lockbox. Once this ID is generated by a client, it should remain stable in subsequent accesses (or a new permission grant will be required). This ID should remain secret to the client application and only given to trusted services.
   * List of namespace URLs where access is requested
-    * namespace URL
+    * Namespace URL
 
 ### Returns
 
   * Lockbox information
     * Lockbox account ID - the assigned account ID for the lockbox
-    * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Lockbox access secret - a secret passphrase that can be used in combination to the "lockbox access token" to provide proof of previous successful login
-    * Lockbox access expiry - the window in which the access key is valid (and should be sufficiently in the distant future for use as a long term key)
+    * Lockbox token
+      * Token id - a token associated to this lockbox account
+      * Token secret - a verifiable secret associate to the token
+      * Token expires - a window in which the token remain valid (should be sufficiently in the distant future to allow long term access usage)
     * Lockbox domain - the domain hosting the lockbox
     * Lockbox passphrase ID - (optional) returned if passphrase ID as previously specified for the lockbox
   * Grant service challenge (optional, if challenge is required)
@@ -2685,7 +2695,7 @@ This request obtains access to a lockbox. Access is granted by way of login proo
   * List of identities attached to the lockbox
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
-    * passphrase known - flag to indicate if the identity knows the lockbox passphrase or not - set to true for every identity that has previously logged in with the lockbox passphrase ID specified in the request with the lockbox passphrase hash being provided
+    * Passphrase known - flag to indicate if the identity knows the lockbox passphrase or not - set to true for every identity that has previously logged in with the lockbox passphrase ID specified in the request with the lockbox passphrase hash being provided
 
 ### Security Considerations
 
@@ -2693,8 +2703,8 @@ Access to the lockbox does not grant access to the contents of the lockbox. The 
 
 Access to the lockbox can be made in one of two ways:
 
-  * login with proof of an identity
-  * login with proof of a lockbox passphrase
+  * Login with proof of an identity
+  * Login with proof of a lockbox passphrase
 
 The server will validate the identity login via the identity service to access the account or validate the client has the correct lockbox passphrase hash to access the account. An identity that has a different provider is considered a different identity. Thus an identity is deemed unique by its identity and its identity provider combined.
 
@@ -2710,13 +2720,16 @@ If the lockbox passphrase ID or hash (if specified) does not match for the accou
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lockbox",
-        "$method": "lockbox-access",
+        "$method": "access",
     
-        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "identity": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934,
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "identity-lockbox-access",
+            "expires": 43843298934
+          },
     
           "uri": "identity://domain.com/alice",
           "provider": "domain.com"
@@ -2731,8 +2744,13 @@ If the lockbox passphrase ID or hash (if specified) does not match for the accou
           "-or-":
     
           "keyName": "2b698e4b5394969e7325d67419cbe115",
-          "keyProof": "5fb03623d0daab3d0e13d48063d3494ef82c8c68",
-          "keyProofExpires": 43843298934,
+          "token": {
+            "$id": "2b698e4b5394969e7325d67419cbe115",
+            "proof": "a092438cc499a78263c7584c0abff1e05360ff31",
+            "nonce": "1ae808b20adefd4873950904ff268d62",
+            "resource": "identity-lockbox-access",
+            "expires": 43843298934
+          }
         },
     
         "agent": {
@@ -2767,14 +2785,16 @@ If the lockbox passphrase ID or hash (if specified) does not match for the accou
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lockbox",
-        "$method": "lockbox-access",
+        "$method": "access",
         "$timestamp": 439439493,
     
         "lockbox": {
           "$id": "123456",
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecret": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretExpires": 8483943493,
+          "token": {
+            "$id": "ad940fc24d31370067e515edb3444b15cc3a472f",
+            "secret": "70c598517c1f0eb32f6bc32e021677d334a475f5",
+            "expires": 4384334
+          },
     
           "domain": "example.com"
         },
@@ -2837,14 +2857,15 @@ This request proves that a lockbox access is valid and can be used to validate a
 
 ### Inputs
 
-  * Client nonce - a onetime use nonce, i.e. cryptographically random string
-  * Purpose - reason for validation (each service using this validation should have a unique purpose string)
   * Lockbox information
     * Lockbox account ID - (optional) the assigned account ID for the lockbox, if specified the access token must validate the account ID as valid
-    * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known
-      * `<proof>` = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":" + `<purpose>`))
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
+    * Lockbox access token - as returned from the "Lockbox Access" request
+      * Token id - an id associated to the lockbox
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":" + `<roken-resource>`))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - any resource string will be used in proof validation
 
 ### Returns
 
@@ -2860,15 +2881,18 @@ Success or failure.
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lockbox",
-        "$method": "lockbox-access-validate",
+        "$method": "access-validate",
     
-        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
-        "purpose": "whatever",
         "lockbox": {
           "$id": "123456",
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
+    
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "whatever",
+            "expires": 43843298934
+          }
         }
       }
     }
@@ -2880,7 +2904,7 @@ Success or failure.
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lockbox",
-        "$method": "identity-access-validate",
+        "$method": "access-validate",
         "$timestamp": 439439493
       }
     }
@@ -2894,12 +2918,13 @@ This request proves that the grant ID challenge is proven valid by way of the na
 
 ### Inputs
 
-  * Client nonce - a onetime use nonce, i.e. cryptographically random string
-  * Lockbox information
-    * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known
-      * `<proof>` = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-namespace-grant-challenge-validate"))
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
+  * Lockbox access token - as returned from the "Lockbox Access" request
+    * Token id - an id associated to the lockbox
+    * Token proof - proof the token secret is known by the client
+      * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":identity-lockbox-namespace-grant-challenge-validate"))
+    * Token nonce - one time use random string
+    * Token proof expires - how long until the proof expires
+    * Token resource - must be "identity-lockbox-namespace-grant-challenge-validate"
   * Grant service challenge as issued by the lockbox service bundled with signature as returned from the namespace grant service
 
 ### Returns
@@ -2918,13 +2943,16 @@ The lockbox service will validate that the proof bundle is correct and if the ch
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lockbox",
-        "$method": "lockbox-namespace-grant-challenge-validate",
+        "$method": "namespace-grant-challenge-validate",
     
-        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "identity-lockbox-namespace-grant-challenge-validate",
+            "expires": 43843298934
+          }
         },
     
         "namespaceGrantChallengeBundle:" {
@@ -2967,7 +2995,7 @@ The lockbox service will validate that the proof bundle is correct and if the ch
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lockbox",
-        "$method": "lockbox-namespace-grant-challenge-validate",
+        "$method": "namespace-grant-challenge-validate",
         "$timestamp": 439439493
       }
     }
@@ -2981,18 +3009,23 @@ This request updates the identities that are allowed to access the lockbox accou
 
 ### Inputs
 
-  * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
-    * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known
-      * `<proof>` = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-identities-update"))
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
+    * Lockbox access token - as returned from the "Lockbox Access" request
+      * Token id - an id associated to the lockbox
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":identity-lockbox-identities-update"))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - must be "identity-lockbox-identities-update"
   * List of identities information
     * Disposition - "update" is used to add / update an identity and "remove" removes access to an identity
     * Identity access token - (optional, required if "update" is used), as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - (optional, required if "update" is used), proof required to validate that the 'identity access secret' is known
-      * `<proof>` = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":lockbox-access-update"))
-    * Expiry of the proof for the 'identity access secret' - (optional, required if "update" is used) window in which access secret proof short term credentials are considered valid
+      * Token id - an id associated to the identity
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":identity-lockbox-identities-update"))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - must be "identity-lockbox-identities-update"
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
 
@@ -3013,13 +3046,16 @@ If all the identities associated to the lockbox are removed then the lockbox acc
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lockbox",
-        "$method": "lockbox-identities-update",
+        "$method": "identities-update",
     
-        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "identity-lockbox-identities-update",
+            "expires": 43843298934
+          }
         },
     
         "identities": {
@@ -3027,9 +3063,13 @@ If all the identities associated to the lockbox are removed then the lockbox acc
             {
               "$disposition": "update",
     
-              "accessToken": "a913c2c3314ce71aee554986204a349b",
-              "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-              "accessSecretProofExpires": 43843298934,
+              "token": {
+                "$id": "13b6b0532bf6af507267b88740865788266956cb",
+                "proof": "869b58d9c36b1be306786bc90bb8df5185f50a83",
+                "nonce": "966f1b0b5443e476354e1304ac802cef",
+                "resource": "identity-lockbox-identities-update",
+                "expires": 43843298934
+              },
     
               "uri": "identity://domain.com/alice",
               "provider": "domain.com"
@@ -3052,7 +3092,7 @@ If all the identities associated to the lockbox are removed then the lockbox acc
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lockbox",
-        "$method": "lockbox-identities-update",
+        "$method": "identities-update",
         "$timestamp": 439439493,
     
         "identities": {
@@ -3080,12 +3120,14 @@ This request retrieves data contained in the lockbox.
 
 ### Inputs
 
-  * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
-    * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known
-      * `<proof>` = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-content-get"))
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
+    * Lockbox access token - as returned from the "Lockbox Access" request
+      * Token id - an id associated to the lockbox
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":identity-lockbox-content-get"))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - must be "identity-lockbox-content-get"
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored
 
@@ -3095,8 +3137,8 @@ This request retrieves data contained in the lockbox.
     * Namespace URL - the namespace URL is the ID where the data is stored
     * Updated - time-stamp (or version number) of when entries in the namespace were last updated
     * List of values containing:
-       * expires - (optional) if entry must expire at a certain date (as seconds since epoch)
-       * encrypted value - each value encrypted
+       * Expires - (optional) if entry must expire at a certain date (as seconds since epoch)
+       * Encrypted value - each value encrypted
          * `<encrypted-value>` = `<salt-string>` + ":" + `<proof>` + ":" + base64(encrypt(`<key>`, `<value>`)
            * `<key>` = hmac(`<lockbox-passphrase>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`)
            * `<iv>` = hash(`<salt-string>`)
@@ -3114,13 +3156,16 @@ No value names within the same namespace URL should be identical.
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lockbox",
-        "$method": "lockbox-content-get",
+        "$method": "content-get",
     
-        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "identity-lockbox-content-get",
+            "expires": 43843298934
+          }
         },
     
         "namespaces": {
@@ -3181,17 +3226,19 @@ This request retrieves data contained in the lockbox.
 
 ### Inputs
 
-  * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
-    * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of lockbox access secret' - proof required to validate that the lockbox access secret' is known
-      * `<proof>` = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":lockbox-content-set"))
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
+    * Lockbox access token - as returned from the "Lockbox Access" request
+      * Token id - an id associated to the lockbox
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":identity-lockbox-content-set"))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - must be "identity-lockbox-content-set"
   * Content list of data elements containing:
     * Namespace URL - the namespace URL is the ID where the data is stored
     * List of values containing:
-       * expires - (optional) if entry must expire at a certain date (as seconds since epoch)
-       * encrypted value - each value encrypted, or a value of "-" to remove a value. The values are merged together with existing values or the values are removed if they contain a value of "-".
+       * Expires - (optional) if entry must expire at a certain date (as seconds since epoch)
+       * Encrypted value - each value encrypted, or a value of "-" to remove a value. The values are merged together with existing values or the values are removed if they contain a value of "-".
          * `<encrypted-value>` = `<salt-string>` + ":" `<proof>` + base64(encrypt(`<key>`, `<value>`))
            * `<key>` = hmac(`<lockbox-passphrase>`, "lockbox:" + `<permission-url>` + ":" + `<value-name>`)
            * `<iv>` = hash(`<salt-string>`)
@@ -3211,13 +3258,16 @@ No value names within the same permission URL should be identical. The salt stri
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lockbox",
-        "$method": "lockbox-content-set",
+        "$method": "content-set",
     
-        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "identity-lockbox-content-set",
+            "expires": 43843298934
+          }
         },
     
         "namespaces":{
@@ -3250,7 +3300,7 @@ No value names within the same permission URL should be identical. The salt stri
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lockbox",
-        "$method": "lockbox-content-get",
+        "$method": "content-set",
         "$timestamp": 439439493
       }
     }
@@ -3295,7 +3345,7 @@ List of resulting identities that resolve in the order requested as follows:
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lookup",
-        "$method": "identity-lookup-check",
+        "$method": "check",
     
         "providers": {
           "provider": [
@@ -3322,7 +3372,7 @@ List of resulting identities that resolve in the order requested as follows:
         "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "identity-lookup",
-        "$method": "identity-lookup-check",
+        "$method": "check",
         "$timestamp": 439439493,
     
         "identities": {
@@ -3396,7 +3446,7 @@ List of resulting identities that resolve in the order requested as follows:
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lookup",
-        "$method": "identity-lookup",
+        "$method": "lookup",
     
         "providers": {
           "provider": [
@@ -3423,7 +3473,7 @@ List of resulting identities that resolve in the order requested as follows:
         "$appid": "xyz123",
         "$id": "abc123",
         "$handler": "identity-lookup",
-        "$method": "identity-lookup",
+        "$method": "lookup",
         "$timestamp": 439439493,
     
         "identities": {
@@ -3538,13 +3588,14 @@ This request proves that an identity access is valid and can be used to validate
 
 ### Inputs
 
-  * Client nonce - a onetime use nonce, i.e. cryptographically random string
-  * Purpose - reason for validation (each service using this validation should have a unique purpose string)
   * Identity information
-    * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known
-      * `<proof>` = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":" + `<purpose>`))
-    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof short term credentials are considered valid
+    * Identity access token - as returned from the "Identity Access Complete" notification
+      * Token id - an id associated to the identity
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":" + `<roken-resource>`))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - any resource string will be used in proof validation
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
 
@@ -3562,14 +3613,16 @@ Success or failure.
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
-        "$method": "identity-access-validate",
+        "$method": "access-validate",
     
-        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
-        "purpose": "whatever",
         "identity": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934,
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "whatever",
+            "expires": 43843298934
+          },
     
           "uri": "identity://domain.com/alice",
           "provider": "domain.com"
@@ -3584,7 +3637,7 @@ Success or failure.
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
-        "$method": "identity-access-validate",
+        "$method": "access-validate",
         "$timestamp": 439439493
       }
     }
@@ -3624,7 +3677,7 @@ This request notification is sent from the inner frame to the outer frame as a p
   * Visibility:
     * true - notify the login window needs visibility
   * Redirect
-    * a URL the outer page must redirect to immediately
+    * A URL the outer page must redirect to immediately
 
 ### Returns
 
@@ -3642,7 +3695,7 @@ This notification is allowed to be sent more than once to the outer frame as nee
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
-        "$method": "identity-access-window",
+        "$method": "access-window",
     
         "browser": {
           "ready": true,
@@ -3659,7 +3712,7 @@ This notification is allowed to be sent more than once to the outer frame as nee
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
-        "$method": "identity-access-window",
+        "$method": "access-window",
         "$timestamp": 439439493
       }
     }
@@ -3713,7 +3766,7 @@ Once the inner frame receives this notification it is allowed to replace the out
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
-        "$method": "identity-access-start",
+        "$method": "access-start",
     
         "agent": {
           "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
@@ -3750,9 +3803,10 @@ This notification is sent from the inner browser window to the outer window as a
   * Identity information
     * Identity URI - the full identity URI of the logged in user
     * Identity provider - identity provider providing identity service
-    * Identity access token - a verifiable token that is linked to the logged-in identity
-    * Identity access secret - a secret passphrase that can be used in combination to the "identity access token" to provide proof of previous successful login
-    * Identity access expiry - the window with sufficient long into-the-future time frame in which the access key long term credentials are valid
+    * Identity access token - a token used to access all resources related to the identity
+      * Token id - an id associated to the identity
+      * Token secret - the secret needed to prove the token is valid
+      * Token expires - a window in which the token remain valid (should be sufficiently in the distant future to allow long term access usage)
     * Identity encrypted relogin key - the relogin key only has meaning to the identity service and it's encrypted
       * `<encrypted-relogin-key>` = `<salt-string>` + ":" + `<proof>` + ":" + base64(encrypt(`<key>`, `<relogin-key>`))
         * `<key>` = hmac(`<encryption-passphrase-upon-grant-proof>`, "identity:" + `<identity-uri>` + ":identity-relogin-key")
@@ -3790,9 +3844,9 @@ This notification is sent from the inner browser window to the outer window as a
 
 ### Security Considerations
 
-  * encryption-passphrase-upon-grant-proof - a key known only by the identity server used to encrypt information for a particular identity to prevent access to the sensitive information until grant proof is given. The key can be immediately returned if grant proof was previously given by the client. This key should be unique for the user, and can either be randomly generated and set for each identity, or generated based upon a common server secret combined with the identity, for example hex(hmac(`<common-server-secret-passphase>`, "common-server-secret:" + `<identity-uri>`)).
-  * user-specific-passphrase - a key generated from a user's password (or other user specific information) which is never known to any server or any other user (i.e. this key is used to protect against the server being able to decrypt sensitive information)
-  * lockbox-passphrase - a secret key used to access the associated lockbox
+  * `<encryption-passphrase-upon-grant-proof>` - a key known only by the identity server used to encrypt information for a particular identity to prevent access to the sensitive information until grant proof is given. The key can be immediately returned if grant proof was previously given by the client. This key should be unique for the user, and can either be randomly generated and set for each identity, or generated based upon a common server secret combined with the identity, for example hex(hmac(`<common-server-secret-passphase>`, "common-server-secret:" + `<identity-uri>`)).
+  * `<user-specific-passphrase>` - a key generated from a user's password (or other user specific information) which is never known to any server or any other user (i.e. this key is used to protect against the server being able to decrypt sensitive information)
+  * `<lockbox-passphrase>` - a secret key used to access the associated lockbox
 
 The server encryption passphrase should be calculated locally in the JavaScript using something unavailable in the server, for example the user's password. Other information should be combined to create the encryption / decryption key to ensure two unique users with the same password do not share the same encryption key.
 
@@ -3815,12 +3869,14 @@ If the "lockbox passphrase ID" is specified but the "twice encrypted lockbox pas
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
-        "$method": "identity-access-complete",
+        "$method": "access-complete",
     
         "identity": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecret": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretExpires": 8483943493,
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "secret": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "expires": 43843298934
+          },
     
           "uri": "identity://domain.com/alice",
           "provider": "domain.com",
@@ -3872,12 +3928,14 @@ This request proves that the grant ID challenge is proven valid by way of the na
 
 ### Inputs
 
-  * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Identity information information
-    * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known
-      * `<proof>` = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-access-namespace-grant-challenge-validate"))
-    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof short term credentials are considered valid
+    * Identity access token - as returned from the "Identity Access Complete" notification
+      * Token id - an id associated to the identity
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":identity-access-namespace-grant-challenge-validate"))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - must be "identity-access-namespace-grant-challenge-validate"
   * Grant service challenge as issued by the lockbox service bundled with signature as returned from the namespace grant service
 
 ### Returns
@@ -3890,10 +3948,10 @@ Upon success:
 
 The identity service must validate:
 
- * the nonce has not been seen before
- * the proof bundle is correct
- * the grant ID was the same ID as previously specified in the challenge for this login scenario (hint: this ID can have encoded or hashed information incorporated in its value for stateless validation)
- * the grant challenge bundle URL and permission URLs are the same URLs as specified in the original bundle
+ * The nonce has not been seen before
+ * The proof bundle is correct
+ * The grant ID was the same ID as previously specified in the challenge for this login scenario (hint: this ID can have encoded or hashed information incorporated in its value for stateless validation)
+ * The grant challenge bundle URL and permission URLs are the same URLs as specified in the original bundle
 
 Once correctly proven, the identity service will allow the application access to the key needed to decrypt sensitive login information.
 
@@ -3904,14 +3962,18 @@ Once correctly proven, the identity service will allow the application access to
         "$domain": "provider.com",
         "$appid": "xyz123",
         "$id": "abd23",
-        "$handler": "identity-lockbox",
-        "$method": "identity-access-namespace-grant-challenge-validate",
+        "$handler": "identity",
+        "$method": "access-namespace-grant-challenge-validate",
     
         "nonce": "b7d4da923dffcee835906a167878f062d6d30143",
         "identity": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "identity-access-namespace-grant-challenge-validate",
+            "expires": 43843298934
+          }
         },
     
         "namespaceGrantChallengeBundle:" {
@@ -3955,7 +4017,7 @@ Once correctly proven, the identity service will allow the application access to
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity-lockbox",
-        "$method": "identity-access-namespace-grant-challenge-validate",
+        "$method": "access-namespace-grant-challenge-validate",
         "$timestamp": 439439493,
     
         "encryptionKeyUponGrantProof": "0e232cbc3628a4ba7fefe553f1cb85797a79e3c4"
@@ -3974,14 +4036,16 @@ This request updates the identity lookup information when an identity lookup is 
 
 ### Inputs
 
-  * Client one time use nonce (cryptographically random string)
   * Lockbox information
     * Lockbox account ID - the assigned account ID for the lockbox
     * Lockbox domain - this is the domain for the lockbox to use
-    * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of 'lockbox access secret' - proof required to validate that the lockbox access secret' is known
-      * `<proof>` = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":identity-lookup-update"))
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
+    * Lockbox access token - as returned from the "Identity Lockbox Access" request
+      * Token id - an id associated to the lockbox
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":identity-lookup-update"))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - must be "identity-lookup-update"
      * Lockbox passphrase ID - (optional, if a lockbox passphrase was generated and to be associated with the identity) a static identifier associated with the currently generated passphrase (every time a passphrase is generated an ID is generated as well which is an identifier to refer to a particular passphrase without having to know the passphrase itself)
     * Encrypted lockbox passsphrase - (optional, if client trusts identity to hold onto the lockbox passphrase) the lockbox passphrase encrypted to protect the server from knowing the lockbox passphrase
       * `<encrypted-lockbox-passphrase>` = `<salt-string>` + ":" `<proof>` + ":" + base64(encrypt(`<key>`, `<lockbox-passphrase>`)
@@ -3989,17 +4053,20 @@ This request updates the identity lookup information when an identity lookup is 
         * `<iv>` = hash(`<salt-string>`)
         * `<proof>` = hmac(`<key>`, "proof:" + `<salt-string>` + ":" + hex(hash(`<lockbox-passphrase>`)))
   * Identity bundle information
-    * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known
-      * `<proof>` = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":identity-lookup-update"))
-    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof short term credentials are considered valid
+    * Identity access token - as returned from the "Identity Access Complete" notification
+      * Token id - an id associated to the identity
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":identity-lookup-update"))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - must be "identity-lookup-update"
     * Stable ID - a stable ID representing the user regardless of which identity is being used or the current peer contact ID
       * `<stable-id>` = hex(hash("stable-id:" + `<lockbox-domain>` + ":" + `<lockbox-account-id>`))
     * Identity URI - the full identity URI of the logged in user
     * Identity provider - identity provider providing identity service
     * Public peer file - the public peer file associated with the contact ID
     * Priority / weight - SRV like priority and weighting system to gage which identity discovered to be associated to the same peer contact have highest priority
-    * contact proof bundle - signed bundle to be incorporated as part of the identity proof returned from identity-lookup
+    * Contact proof bundle - signed bundle to be incorporated as part of the identity proof returned from identity-lookup
       * Stable ID - same value as passed into identity information (as part of the signed bundle)
       * Contact - the peer URI for the public peer file specified
       * Identity URI - the full identity URI of the logged in user
@@ -4014,13 +4081,13 @@ Success or failure.
 
 The server must validate the following:
 
-  * the identity access token/secret proof are valid
-  * the lockbox access and the identity access (via the lockbox-access-validate request)
-  * the stable IDs have been calculated correctly
-  * the identity URIs match those of the identity access token
-  * the contact URI matches the public peer file
-  * the contact proof bundle is signed correctly by the private key associated with the public peer file
-  * the encryption key upon grant proof was the same as generated by the identity service thus proving the client has the correct keying material (hint: encryption key can have other hashed or encoded information as part of the passphrase to ensure stateless server validation of the key)
+  * The identity access token/secret proof are valid
+  * The lockbox access and the identity access (via the lockbox-access-validate request)
+  * The stable IDs have been calculated correctly
+  * The identity URIs match those of the identity access token
+  * The contact URI matches the public peer file
+  * The contact proof bundle is signed correctly by the private key associated with the public peer file
+  * The encryption key upon grant proof was the same as generated by the identity service thus proving the client has the correct keying material (hint: encryption key can have other hashed or encoded information as part of the passphrase to ensure stateless server validation of the key)
 
 If the "lockbox passphrase ID" is specified but the "encrypted lockbox passphrase" is not set, that means the identiy was not trusted to hold the lockbox passphrase even though it was told one exists. This requires the client application login with an alternative identity that was trusted to hold the lockbox passphrase to obtain the lockbox passphrase. The lockbox passphrase must be known by at least one identity if lockbox access is to be shared between applications.
 
@@ -4032,15 +4099,19 @@ If the "lockbox passphrase ID" is specified but the "encrypted lockbox passphras
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
-        "$method": "identity-lookup-update",
+        "$method": "lookup-update",
     
         "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
           "$id": "123456",
     
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934,
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "identity-lookup-update",
+            "expires": 43843298934
+          },
     
           "domain": "domain.com",
           "keyName": "5a5ac1ef2cb65303824b107739018d3e8bd01a15",
@@ -4048,9 +4119,13 @@ If the "lockbox passphrase ID" is specified but the "encrypted lockbox passphras
         },
     
         "identity": {
-          "accessToken": "43cf3836c3ed86bbc00c0d0d8e02f8b2",
-          "accessSecretProof": "3a1db4981bd4f52510d7475e014c1fe1db2236a3",
-          "accessSecretProofExpires": 48383843,
+          "token": {
+            "$id": "8dcc5c3c69ace1f3ccd30c2bbc9335b2",
+            "proof": "0616279abafe1f289badbd4f6a9c97ce0900db25",
+            "nonce": "c6c42a9ebe64df2a26cc7bf282ddc6e5",
+            "resource": "identity-lookup-update",
+            "expires": 43843298934
+          },
     
           "uri": "identity://domain.com/alice",
           "provider": "domain.com",
@@ -4090,7 +4165,7 @@ If the "lockbox passphrase ID" is specified but the "encrypted lockbox passphras
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
-        "$method": "identity-lookup-update",
+        "$method": "lookup-update",
         "$timestamp": 439439493
       }
     }
@@ -4147,10 +4222,13 @@ This request retrieves gets a list of peer contact services available to the pee
 
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
-    * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of 'lockbox access secret' - proof required to validate that the lockbox access secret' is known
-      * `<proof>` = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":peer-services-get"))
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
+    * Lockbox access token - as returned from the "Lockbox Access" request
+      * Token id - an id associated to the lockbox
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":peer-services-get"))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - mjust be "peer-services-get"
 
 ### Returns
 
@@ -4174,13 +4252,16 @@ List of services available to peer contact services, containing:
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "peer",
-        "$method": "peer-services-get",
+        "$method": "services-get",
     
-        "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "peer-services-get",
+            "expires": 43843298934
+          }
         }
     
       }
@@ -4193,7 +4274,7 @@ List of services available to peer contact services, containing:
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "peer",
-        "$method": "peer-services-get",
+        "$method": "services-get",
         "$timestamp": 439439493,
     
         "services": {
@@ -4242,7 +4323,7 @@ This request retrieves a list of peer files assosciated to peer URIs.
 ### Inputs
 
   * Peer list containing:
-    * peer URI
+    * Peer URI
 
 ### Returns
 
@@ -4312,10 +4393,13 @@ This request stores a peer file onto the server.
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Lockbox information
     * Lockbox account id - the ID associated with the lockbox
-    * Lockbox access token - a verifiable token that is linked to the lockbox
-    * Proof of 'lockbox access secret' - proof required to validate that the lockbox access secret' is known
-      * `<proof>` = hex(hmac(`<lockbox-access-secret>`, "lockbox-access-validate:" + `<client-nonce>` + ":" + `<expires>` + ":" + `<lockbox-access-token>` + ":pee-file-set"))
-    * Expiry of the proof for the 'lockbox access secret' - a window in which access secret proof short term credentials are considered valid
+    * Lockbox access token - as returned from the "Lockbox Access" request
+      * Token id - an id associated to the lockbox
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":peer-peer-file-set"))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - mjust be "peer-peer-file-set"
   * Peer file
 
 ### Returns
@@ -4351,9 +4435,13 @@ Peer files expire in time thus the peer service can delete peer files once they 
         "nonce": "ed585021eec72de8634ed1a5e24c66c2",
         "lockbox": {
           "$id": "123456",
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "peer-peer-file-set",
+            "expires": 43843298934
+          }
         }
     
         "peer": {
@@ -4935,7 +5023,7 @@ Obtain a session token that represents the peer on the finder server so continuo
     * Peer contact making the request
     * Client nonce - cryptographically random one time use key
     * Expiry for the one time use token
-    * find mode - "all", "exclusive", "none" - if "all" this client wants any find request to go to this location as well as any others. In "exclusive" mode, the client only wants find requests to go to this one location and no others and if "none" this location does not wish to be found.
+    * Find mode - "all", "exclusive", "none" - if "all" this client wants any find request to go to this location as well as any others. In "exclusive" mode, the client only wants find requests to go to this one location and no others and if "none" this location does not wish to be found.
     * Location details
       * Location ID
       * Device ID
@@ -4949,8 +5037,10 @@ Obtain a session token that represents the peer on the finder server so continuo
 ### Outputs
 
   * Relay information (for relay connections):
-    * access token - the access token needed for creating remote relay credentials that can be given to third parties to connect and relay information to this logged in application
-    * access secret encrypted - the secret passphrase used for giving out relay credentials to 3rd parties, encrypted access secret = base64(rsa_encrypt(`<public-key-from-request-peer-file>`, `<access-secret>`))
+    * Relay access token - a token to prove access to the rolodex
+      * Token id - an id associated to the rolodex
+      * Token secret encrypted - the secret needed to prove the token is valid
+        * `<encrypted-token-secret>` = base64(rsa_encrypt(`<public-key-from-request-peer-file>`, `<token-secret>`))
   * Expiry - when next a keep alive must be sent by (seconds since epoch)
   * Server agent
   * Signed by finder's certificate - uses finder's public key fingerprint as signature key reference
@@ -5022,8 +5112,10 @@ If a Section-B of the public peer file is not present, the peer does not wish to
             "$id": "edbd821123e9cfedf0285a95989ac461",
     
             "relay": {
-              "accessToken": "9d934822ccca53ac6e16e279830f4ffe3cfe1d0e",
-              "accessSecretEncrypted": "NWNmZGNkZWJmNDI5MDMzMmI2Mzc4YTYzZWMyZmVhNjA="
+              "token": {
+                "$id": "5cfc836dd5fc3ea37906fee13d033cab074e5721",
+                "secretEncrypted": "NzQyNjcyN2QwMGJmYmFmNWYyNzViZmJkYTYwODQzYjcxMDljYmI4Ng=="
+              }
             },
         
             "server": "hooflash/1.0 (centos)",
@@ -5160,14 +5252,16 @@ Map a channel in the multiplex stream to a remote party. This request must be is
 
 ### Inputs
 
-   * channel number - channel number to allocate
-   * nonce - a client defined one time use value
-   * localContext - a context ID representing the context ID of the issuer of the request
-   * remoteContext - a context ID representing the context ID of the remote relay where this request is being connected
-   * relay access token - token as returned during peer finder session create (to connect to this session)
-   * proof of relay access secret
-     * `<proof>` = hex(hash("proof:" + `<client-nonce>` + ":" + `<local-context>` + ":" + `<channel-number>` + ":" + `<expires>` + ":" + hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<relay-access-token>` + ":" + `<remote-context>` + ":channel-map"))))
-   * access secret proof expiry - expiry time of the access secret proof
+  * Channel number - channel number to allocate
+  * LocalContext - a context ID representing the context ID of the issuer of the request
+  * RemoteContext - a context ID representing the context ID of the remote relay where this request is being connected
+  * Relay access token - as returned from the "Session Create" request
+    * Token id - an id associated to the relay
+    * Token proof - proof the token secret is known by the client
+      * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":peer-finder-channel-map"))
+    * Token nonce - one time use random string
+    * Token proof expires - how long until the proof expires
+    * Token resource - must be "peer-finder-channel-map"
 
 ### Outputs
 
@@ -5185,13 +5279,16 @@ Map a channel in the multiplex stream to a remote party. This request must be is
         "$method": "channel-map",
     
         "channel": 5,
-        "nonce": "6771816e06b7b6f5d24f0d65df018dd256a31027",
         "relay": {
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "peer-finder-channel-map",
+            "expires": 43843298934
+          },
           "localContext": "a497f346db82ae34c2d9b7f62e34b9757d211bef",
-          "remoteContext": "3b5db5880803d91f2ba9ca522c558fd1c545c28e",
-          "accessToken": "9d934822ccca53ac6e16e279830f4ffe3cfe1d0e",
-          "accessSecretProof": "SSByZWFsbHk...gaGF0ZSBTRFA=",
-          "accessSecretProofExpires": 3884383
+          "remoteContext": "3b5db5880803d91f2ba9ca522c558fd1c545c28e"
         }
       }
     }
@@ -5218,14 +5315,17 @@ This notification is sent from the finder server to a client with a session whos
 
 ### Inputs
 
-   * channel number - channel number that the finder will allocate for use with the incoming channel
-   * nonce - a finder server defined one time use value
-   * localContext - the context ID representing the local session's context ID from where the relay access credentials were granted
-   * remoteContext - a context ID representing the local context ID of the party party that issued the Channel Map Request
-   * relay access token - token as returned during peer finder session create (to connect to this session)
-   * proof of relay access secret
-     * `<proof>` = hex(hash("proof:" + `<client-nonce>` + ":" + `<remote-context>` + ":" + `<channel-number>` + ":" + `<expires>` + ":" + hex(hmac(`<relay-access-secret>`, "finder-relay-access-validate:" + `<relay-access-token>` + ":" + `<local-context>` + ":channel-map"))))
-   * access secret proof expiry - expiry time of the access secret proof
+  * Channel number - channel number that the finder will allocate for use with the incoming channel
+  * Nonce - a finder server defined one time use value
+  * LocalContext - the context ID representing the local session's context ID from where the relay access credentials were granted
+  * RemoteContext - a context ID representing the local context ID of the party party that issued the Channel Map Request
+  * Relay access token - as returned from the "Session Create" request
+    * Token id - an id associated to the relay
+    * Token proof - proof the token secret is known by the client
+      * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":peer-finder-channel-map"))
+    * Token nonce - one time use random string
+    * Token proof expires - how long until the proof expires
+    * Token resource - must be "peer-finder-channel-map"
 
 ### Outputs
 
@@ -5244,11 +5344,15 @@ This notification is sent from the finder server to a client with a session whos
         "channel": 5,
         "nonce": "6771816e06b7b6f5d24f0d65df018dd256a31027",
         "relay": {
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "peer-finder-channel-map",
+            "expires": 43843298934
+          },
           "localContext": "3b5db5880803d91f2ba9ca522c558fd1c545c28e",
-          "remoteContext": "a497f346db82ae34c2d9b7f62e34b9757d211bef",
-          "accessToken": "9d934822ccca53ac6e16e279830f4ffe3cfe1d0e",
-          "accessSecretProof": "SSByZWFsbHk...gaGF0ZSBTRFA=",
-          "accessSecretProofExpires": 3884383
+          "remoteContext": "a497f346db82ae34c2d9b7f62e34b9757d211bef"
         }
       }
     }
@@ -5272,17 +5376,17 @@ This is the request to find a peer that includes the proof of permission to cont
   * Cipher suite to use in the proof and for the encryption
   * Contact id of contact to be found
   * Client nonce - cryptographically random onetime use string
-  * find creation timestamp - this acts as a conflict resolver for a simultaneous "peer-location-find" request. The latest created "peer-location-find" request should win. If the timestamps are identical then the "peer-location-find" with the greater context ID wins (as ASCII value compared UTF8 written string). Any incoming find request which loses should be given a 409-conflict error and must be ignored entirely.
+  * Find creation timestamp - this acts as a conflict resolver for a simultaneous "peer-location-find" request. The latest created "peer-location-find" request should win. If the timestamps are identical then the "peer-location-find" with the greater context ID wins (as ASCII value compared UTF8 written string). Any incoming find request which loses should be given a 409-conflict error and must be ignored entirely.
   * Find secret proof - i.e. hex(hmac(`<find-secret-from-remote-public-peer-file-section-B>`, "proof:" + `<client-nonce>` + ":" + expires))
   * Find proof expires
   * Context - the is the requester's part of the context ID. This identifier is combined with the remote peer's context to form the "requester" / "reply" context ID for MLS
   * Encoded peer secret - peer secret contains all the keying materials needed to decrypt the ICE passwords and establish shared keying between clients and is encoded as follows
     * `<encoded-peer-secret>` = `<encoded-namespace>` + ":" + `<encrypted-peer-secret>` + ":" + `<....namespace-dependent...>`
-      * encoded namespace - `<encoded-namespace>` = base64(`<namespace-uri>`)
-      * encrypted peer secret - a random passphrase encoded using the replying peer's public key
+      * Encoded namespace - `<encoded-namespace>` = base64(`<namespace-uri>`)
+      * Encrypted peer secret - a random passphrase encoded using the replying peer's public key
         * `<encrypted-peer-secret>` = base64(rsa_encrypt(`<remote-public-peer-file-public-key>`, `<peer-secret>`))
-      * namespace dependend data
-        * if namespace is `https://meta.openpeer.org/dh/modp/2048` what follows is:
+      * Namespace dependend data
+        * If namespace is `https://meta.openpeer.org/dh/modp/2048` what follows is:
           * `<namespace-dependent>` = base64(`<requesting-peer-static-public-key>`) + ":" + base64(`<requesting-peer-ephemeral-public-key>`) based upon a Diffie-Hellman MODP P, Q and G are defined as hex integer values as defined in Diffie-Hellman MODP Namespace Definitions section. Alternative namespace `1024`, `1538`, `3072`, `4096`, `6144`, `8192` are available too.
   * ICE username fragment - the username fragment for ICE negotiation
   * ICE password encrypted - the password passphrase for ICE negotiation
@@ -5290,29 +5394,33 @@ This is the request to find a peer that includes the proof of permission to cont
       * `<key>` = hash(`<peer-secret>`)
       * `<iv>` = hash(`<salt>`)
       * `<proof>` = hex(hmac(`<key>`, "proof:" + `<salt>` + hex(hash(`<ice-password>`))))
-  * final - set to true if the remote party should not expect to receive any more candidates at this time
+  * Final - set to true if the remote party should not expect to receive any more candidates at this time
   * Location details
     * Location ID of requesting location
     * Contact ID of requesting location
     * Location details
   * Location candidate contact addresses for peer location, each containing:
-    * transport
-    * if class is "ice":
-      * transport
-      * type - "host" or "srflx" or "prflx" or "relay"
+    * Transport
+    * If class is "ice":
+      * Transport
+      * Type - "host" or "srflx" or "prflx" or "relay"
       * IP
-      * port
-      * priority
-      * related IP (optional, mandatory if type is "srflx" or "prflx" or "relay")
-      * related port (optional, mandatory if type is "srflx" or "prflx" or "relay")
-    * if class is "finder-relay":
-      * transport - either "multiplexed-json-mls/tcp" or "multiplexed-json-mls/secure-web-socket"
-      * type - "relay"
-      * finder ID - the finder used to connect (can use "Servers Get Request" to obtain a copy of the signed finder information)
-      * finder protocols - the list of protocols supported by the finder
-      * access token - token as returned during peer finder session create
-      * access secret proof (encrypted) - encrypted version of access secret proof, encrypted proof = hex(`<iv>`) + ":" + encrypt(`<key>`, `<proof>`), where proof = hex(hmac(`<access-secret>`, "finder-relay-access-validate:" + `<access-token>` + ":" + `<context>` + ":channel-map")), key = hash(`<peer-secret>`), iv = `<random>`
-      * access secret proof expiry - expiry time of the access secret proof
+      * Port
+      * Priority
+      * Related IP (optional, mandatory if type is "srflx" or "prflx" or "relay")
+      * Related port (optional, mandatory if type is "srflx" or "prflx" or "relay")
+    * If class is "finder-relay":
+      * Transport - either "multiplexed-json-mls/tcp" or "multiplexed-json-mls/secure-web-socket"
+      * Type - "relay"
+      * Finder ID - the finder used to connect (can use "Servers Get Request" to obtain a copy of the signed finder information)
+      * Finder protocols - the list of protocols supported by the finder
+      * Relay access token - a token to prove access to the rolodex
+        * Token id - an id associated to the rolodex
+        * Token secret encrypted - the secret needed to prove the token is valid
+          * `<encrypted-token-secret>` = `<salt>` + ":" + `<proof>` + ":" + encrypt(`<key>`, `<token-secret>`)
+            * `<key>` = hash(`<peer-secret>`)
+            * `<iv>` = hash(`<salt>`)
+            * `<proof>` = hex(hmac(`<key>`, "proof:" + `<salt>` + hex(hash(`<token-secret>`))))
   * Signed by requesting peer
 
 ### Security Considerations
@@ -5351,7 +5459,7 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
             "peerSecretEncrypted": "ODVkMmY4ZjJiMjBlNTVkZ...0MmQzZjE0NDgzNTY3YzE5NzFkMw==:ZmFyIG9....1dCBkdWRl:U0lQIHN1Y2tz...IG1vbmtleSBib25rZXJz",
     
             "iceUsernameFrag": "b92f7c1f6285d230796bb89bca57bcf9",
-            "icePasswordEncrypted": "497787ddfd19843eb04479d67198010e:NDk3Nzg3...ZWIwNDQ3OWQ2NzE5ODAxMGU=",
+            "icePasswordEncrypted": "497787ddfd19843eb04479d67198010e:8adf3d9606261a9dbfcf47c8982ab08f:NDk3Nzg3...ZWIwNDQ3OWQ2NzE5ODAxMGU=",
     
             "iceFinal": false,
     
@@ -5384,8 +5492,10 @@ The peer being contacted will use the "peer secret encrypted" to decrypt the req
                         }
                       ]
                     },
-                    "accessToken": "9d934822ccca53ac6e16e279830f4ffe3cfe1d0e",
-                    "accessSecretProofEncrypted": "8b29fe4c606e370df6704ed0abb4e2b2:U0RQIHN1Y2t...zIHJlbGFseSBiYWQ="
+                    "token": {
+                      "$id": "5cfc836dd5fc3ea37906fee13d033cab074e5721",
+                      "secretEncrypted": "8ddfefa04d9a7c10f4cce859225cf0c62a50b220:7426727d00bfbaf5f275bfbda60843b7109cbb86:NzQyN...MDljYmI4Ng=="
+                    }
                   }
                   {
                     "namespace": "https://meta.openpeer.org/candidate/ice",
@@ -5570,24 +5680,24 @@ This reply notification is sent directly from the replying peer to the requestin
 
   * Digest value from signature sent in original request - the reply location might not have the ability to validate the signature of the request but the reply location must validate the signature's hash value is correct and copy this value back to the original requester bundled in its own signed package (since the requester knows the original value and must have the public peer file of the reply location to validate the reply's bundle). This allows the requester to validate the original request remained non-tampered throughout and ignore replies where tampering might have occurred.
   * Context - this identifier is combined with the remote peer's context to form the "requester" / "reply" context ID pairing for MLS
-  * validated - if the location sending this reply knows about the public peer file of the location that issued the `peer-location-find` request and was able to successfully validate the signature on the `peer-location-find` request this is set to true. If true, the location that issued the `peer-location-find` must not send the Peer Identify Request upon connection.
+  * Validated - if the location sending this reply knows about the public peer file of the location that issued the `peer-location-find` request and was able to successfully validate the signature on the `peer-location-find` request this is set to true. If true, the location that issued the `peer-location-find` must not send the Peer Identify Request upon connection.
   * ICE username frag - the username fragment for ICE negotiation
   * ICE password - the password passphrase for ICE negotiation
-  * final - true if the remote party should not expect any more ICE candidates at this time
+  * Final - true if the remote party should not expect any more ICE candidates at this time
   * Location details
     * Location ID of requesting location
     * Contact ID of requesting location
     * Location details
   * Location candidate contact addresses for peer location, each containing:
-    * transport
-    * if class is "ice":
-      * transport
-      * type - "host" or "srflx" or "prflx" or "relay"
+    * Transport
+    * If class is "ice":
+      * Transport
+      * Type - "host" or "srflx" or "prflx" or "relay"
       * IP
-      * port
-      * priority
-      * related IP (optional, mandatory if type is "srflx" or "prflx" or "relay")
-      * related port (optional)
+      * Port
+      * Priority
+      * Related IP (optional, mandatory if type is "srflx" or "prflx" or "relay")
+      * Related port (optional)
   * Signed by replying peer
 
 ### Security Considerations
@@ -5926,18 +6036,18 @@ The requesting peer must send this request over a secure channel.
 
 The replying peer must validate the request in the following ways:
 
-  * the find secret matches the find secret of it's own public peer file
-  * the request has not expired
-  * the nonce has not been seen before (the nonce must be remembered for a reasonable period of time, or at maximum until the expiry time of the request)
-  * the finger print matches the fingerprint of the requesting peer's transport channel
-  * the validity of the public peer file provided
-  * the signature on the request matches the public peer file provided
+  * The find secret matches the find secret of it's own public peer file
+  * The request has not expired
+  * The nonce has not been seen before (the nonce must be remembered for a reasonable period of time, or at maximum until the expiry time of the request)
+  * The finger print matches the fingerprint of the requesting peer's transport channel
+  * The validity of the public peer file provided
+  * The signature on the request matches the public peer file provided
 
 The requesting peer must validate the result in the following ways:
 
-  * the signature on the result matches the peer it requested to find
-  * the digest value in the result matches the digest value from the original signature on the request
-  * the fingerprint in the result matches the fingerprint of the replying's peers transport
+  * The signature on the result matches the peer it requested to find
+  * The digest value in the result matches the digest value from the original signature on the request
+  * The fingerprint in the result matches the fingerprint of the replying's peers transport
 
 ### Example
 

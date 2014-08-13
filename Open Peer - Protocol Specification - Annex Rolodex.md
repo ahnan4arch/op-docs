@@ -32,8 +32,8 @@ A service allowing the efficient fetching and caching of address box of contact 
 Identity Service Requests (Annex)
 =================================
 
-Identity Access Rolodex Credentials Get Request
------------------------------------------------
+Identity Rolodex Credentials Get Request
+----------------------------------------
 
 ### Purpose
 
@@ -41,13 +41,16 @@ This request is sent from the outerframe to the inner frame to fetch identity cr
 
 ### Inputs
 
-  * Client one time use nonce (cryptographically random string)
   * Identity information
+    * Identity access token - as returned from the "Identity Access Complete" notification
+      * Token id - an id associated to the identity
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":identity-rolodex-credentials-get"))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - must be "identity-rolodex-credentials-get"
     * Identity URI - the full identity URI of the logged in user
     * Identity provider - identity provider providing identity service
-    * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":rolodex-credentials-get"))
-    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
 
 ### Returns
 
@@ -69,13 +72,16 @@ The exact meaning of the rolodex server token is arbitrary between the identity 
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
-        "$method": "identity-access-rolodex-credentials-get",
+        "$method": "rolodex-credentials-get",
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
         "identity": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934,
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "identity-rolodex-credentials-get",
+            "expires": 43843298934
+          },
     
           "uri": "identity://domain.com/alice",
           "provider": "domain.com"
@@ -91,7 +97,7 @@ The exact meaning of the rolodex server token is arbitrary between the identity 
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "identity",
-        "$method": "identity-access-rolodex-credentials-get",
+        "$method": "rolodex-credentials-get",
         "$timestamp": 439439493,
     
         "rolodex": {
@@ -132,25 +138,29 @@ This request is sent by the client application to get access to the rolodex serv
 
 ### Inputs
 
-  * Client nonce - a onetime use nonce, i.e. cryptographically random string
   * Identity information
-    * Identity access token - as returned from the "identity access complete" request
-    * Proof of 'identity access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<identity-access-secret>`, "identity-access-validate:" + `<identity>` + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<identity-access-token>` + ":rolodex-access"))
-    * Expiry of the proof for the 'identity access secret' - a window in which access secret proof is considered valid
+    * Identity access token - as returned from the "Identity Access Complete" notification
+      * Token id - an id associated to the identity
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":rolodex-access"))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - must be "rolodex-access"
     * Original identity URI
     * Identity provider (optional, required if identity does not include domain or if domain providing identity service is different)
   * Rolodex information
-    * server token - given by the identity service that only has meaning to the rolodex service
+    * Server token - given by the identity service that only has meaning to the rolodex service
   * Grant information
-    * grant ID - the grant ID that has been given namespace access to the rolodex namespace, i.e. "https://meta.openpeer.org/permission/rolodex"
+    * Grant ID - the grant ID that has been given namespace access to the rolodex namespace, i.e. "https://meta.openpeer.org/permission/rolodex"
 
 ### Returns
 
   * Rolodex information
-    * rolodex access key - a key to access the rolodex service
-    * rolodex access secret - a secret for use to access the rolodex service
-    * rolodex access secret expires - when the access secret will expire and no longer be valid
-    * update next - the timestamp when the next update can/should be issued (but not before)
+    * Rolodex access token - a token to prove access to the rolodex
+      * Token id - an id associated to the rolodex
+      * Token secret - the secret needed to prove the token is valid
+      * Token expires - a window in which the token remain valid (should be sufficiently in the distant future to allow long term access usage)
+    * Update next - the timestamp when the next update can/should be issued (but not before)
   * Agent
     * Product - the user agent identification for the product, typically "name/version (os/system)" information)
     * Name - a human readable friendly name for the product
@@ -171,13 +181,16 @@ Upon seeing an unknown grant ID used in conjunction with a the identity where pr
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "rolodex",
-        "$method": "rolodex-access",
+        "$method": "access",
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
         "identity": {
-          "accessToken": "a913c2c3314ce71aee554986204a349b",
-          "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-          "accessSecretProofExpires": 43843298934,
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "rolodex-access",
+            "expires": 43843298934
+          },
     
           "uri": "identity://domain.com/alice",
           "provider": "domain.com"
@@ -208,13 +221,15 @@ Upon seeing an unknown grant ID used in conjunction with a the identity where pr
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "rolodex",
-        "$method": "rolodex-access",
+        "$method": "access",
         "$timestamp": 439439493,
     
         "rolodex": {
-          "accessToken": "91c4d836e216139f6fe4d417ca19afe78bab87d2",
-          "accessSecret": "943ec6e93c71591d3ee43464059b25ecd6312a07",
-          "accessSecretExpires": 5848443,
+          "token": {
+            "$id": "5cfc836dd5fc3ea37906fee13d033cab074e5721",
+            "secret": "8ddfefa04d9a7c10f4cce859225cf0c62a50b220",
+            "expires": 43843298934
+          },
           "updateNext": 54433434
         },
     
@@ -249,12 +264,15 @@ This request proves that the grant ID challenge is proven valid by way of the na
 
 ### Inputs
 
-  * Client nonce - a onetime use nonce, i.e. cryptographically random string
-  * rolodex information
-    * server token - given by the identity service that only has meaning to the rolodex service
-    * rolodex access token - as returned from the "rolodex access" request
-    * Proof of 'rolodex access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<rolodex-access-secret>`, "rolodex-access-validate:" + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<rolodex-access-token>` + ":rolodex-namespace-grant-challenge-validate"))
-    * Expiry of the proof for the 'rolodex access secret' - a window in which access secret proof is considered valid
+  * Rolodex information
+    * Rolodex access token - as returned from the "Rolodex Access" request
+      * Token id - an id associated to the rolodex
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":rolodex-namespace-grant-challenge-validate"))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - must be "rolodex-namespace-grant-challenge-validate"
+    * Server token - given by the identity service that only has meaning to the rolodex service
   * Grant service challenge as issued by the rolodex service bundled with signature as returned from the namespace grant service
 
 ### Returns
@@ -273,14 +291,17 @@ The rolodex service will validate that the proof bundle is correct and if the ch
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "rolodex",
-        "$method": "rolodex-namespace-grant-challenge-validate",
+        "$method": "namespace-grant-challenge-validate",
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
         "rolodex": {
-           "serverToken": "b3ff46bae8cacd1e572ee5e158bcb04ed9297f20-9619e3bc-4cd41c9c64ab2ed2a03b45ace82c546d",
-           "accessToken": "a913c2c3314ce71aee554986204a349b",
-           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-           "accessSecretProofExpires": 43843298934
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "rolodex-namespace-grant-challenge-validate",
+            "expires": 43843298934
+          },
+           "serverToken": "b3ff46bae8cacd1e572ee5e158bcb04ed9297f20-9619e3bc-4cd41c9c64ab2ed2a03b45ace82c546d"
          },
     
         "namespaceGrantChallengeBundle:" {
@@ -323,7 +344,7 @@ The rolodex service will validate that the proof bundle is correct and if the ch
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "rolodex",
-        "$method": "rolodex-namespace-grant-challenge-validate",
+        "$method": "namespace-grant-challenge-validate",
         "$timestamp": 439439493
       }
     }
@@ -338,21 +359,25 @@ This request is sent by the client application to get updates to the contact lis
 ### Inputs
 
   * Client nonce - a onetime use nonce, i.e. cryptographically random string
-  * rolodex information
-    * server token - given by the identity service that only has meaning to the rolodex service
-    * rolodex access token - as returned from the "rolodex access" request
-    * Proof of 'rolodex access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<rolodex-access-secret>`, "rolodex-access-validate:" + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<rolodex-access-token>` + ":rolodex-contacts-get"))
-    * Expiry of the proof for the 'rolodex access secret' - a window in which access secret proof is considered valid
-    * version - a version string as previously returned from the rolodex update request representing the delta information last obtained from the rolodex service
-    * refresh - request the contact list be refreshed immediately
+  * Rolodex information
+    * Rolodex access token - as returned from the "Rolodex Access" request
+      * Token id - an id associated to the rolodex
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":rolodex-contacts-get"))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - must be "rolodex-contacts-get"
+    * Server token - given by the identity service that only has meaning to the rolodex service
+    * Version - a version string as previously returned from the rolodex update request representing the delta information last obtained from the rolodex service
+    * Refresh - request the contact list be refreshed immediately
 
 ### Returns
 
   * Rolodex information
-    * update next - the timestamp when the next update can/should be issued (but not before)
-    * version - a version string representing the delta information from last update to this update for the rolodex service
-  * list of identities, with each identity containing:
-    * disposition - "pending", "update" or "remove"
+    * Update next - the timestamp when the next update can/should be issued (but not before)
+    * Version - a version string representing the delta information from last update to this update for the rolodex service
+  * List of identities, with each identity containing:
+    * Disposition - "pending", "update" or "remove"
       * "pending" - the remote party wishes to be added to the contact list but has not yet been approved
       * "updated" - the remote party is added to the contact list
       * "removed" - the remote party is no longer in the contact list
@@ -388,14 +413,17 @@ If the result is an error result with error code "424" i.e. "Failed Rolodex Toke
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "rolodex",
-        "$method": "rolodex-contacts-get",
+        "$method": "contacts-get",
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
         "rolodex": {
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "rolodex-contacts-get",
+            "expires": 43843298934
+          },
            "serverToken": "b3ff46bae8cacd1e572ee5e158bcb04ed9297f20-9619e3bc-4cd41c9c64ab2ed2a03b45ace82c546d",
-           "accessToken": "a913c2c3314ce71aee554986204a349b",
-           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-           "accessSecretProofExpires": 43843298934,
            "version": "4341443-54343a",
            "refresh": false
          }
@@ -410,7 +438,7 @@ If the result is an error result with error code "424" i.e. "Failed Rolodex Toke
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "rolodex",
-        "$method": "rolodex-contacts-get",
+        "$method": "contacts-get",
         "$timestamp": 439439493,
     
         "rolodex": {
@@ -453,16 +481,19 @@ This request is sent by the client application to update a contact in the contac
 
 ### Inputs
 
-  * Client nonce - a onetime use nonce, i.e. cryptographically random string
-  * rolodex information
-    * server token - given by the identity service that only has meaning to the rolodex service
-    * rolodex access token - as returned from the "rolodex access" request
-    * Proof of 'rolodex access secret' - proof required to validate that the 'identity access secret' is known, proof = hex(hmac(`<rolodex-access-secret>`, "rolodex-access-validate:" + ":" + `<client-nonce>` + ":" + `<expires>` + ":" + `<rolodex-access-token>` + ":rolodex-contacts-get"))
-    * Expiry of the proof for the 'rolodex access secret' - a window in which access secret proof is considered valid
-    * version - a version string as previously returned from the rolodex update request representing the delta information last obtained from the rolodex service
-    * refresh - request the contact list be refreshed immediately
-  * identity information
-    * disposition - "update", "remove"
+  * Rolodex information
+    * Rolodex access token - as returned from the "Rolodex Access" request
+      * Token id - an id associated to the rolodex
+      * Token proof - proof the token secret is known by the client
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":rolodex-contact-update"))
+      * Token nonce - one time use random string
+      * Token proof expires - how long until the proof expires
+      * Token resource - must be "rolodex-contact-update"
+    * Server token - given by the identity service that only has meaning to the rolodex service
+    * Version - a version string as previously returned from the rolodex update request representing the delta information last obtained from the rolodex service
+    * Refresh - request the contact list be refreshed immediately
+  * Identity information
+    * Disposition - "update", "remove"
       * "update" - add/update the identity to the contact list (if contact was pending then the contact is now approved)
       * "remove" - remove the identity from the contact list
     * Original identity URI
@@ -484,14 +515,17 @@ If the result is an error result with error code "424" i.e. "Failed Rolodex Toke
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "rolodex",
-        "$method": "rolodex-contact-update",
+        "$method": "contact-update",
     
-        "clientNonce": "ed585021eec72de8634ed1a5e24c66c2",
         "rolodex": {
+          "token": {
+            "$id": "a913c2c3314ce71aee554986204a349b",
+            "proof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
+            "nonce": "ed585021eec72de8634ed1a5e24c66c2",
+            "resource": "rolodex-contact-update",
+            "expires": 43843298934
+          },
            "serverToken": "b3ff46bae8cacd1e572ee5e158bcb04ed9297f20-9619e3bc-4cd41c9c64ab2ed2a03b45ace82c546d",
-           "accessToken": "a913c2c3314ce71aee554986204a349b",
-           "accessSecretProof": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-           "accessSecretProofExpires": 43843298934,
            "version": "4341443-54343a",
            "refresh": false
          },
@@ -511,7 +545,7 @@ If the result is an error result with error code "424" i.e. "Failed Rolodex Toke
         "$appid": "xyz123",
         "$id": "abd23",
         "$handler": "rolodex",
-        "$method": "rolodex-contact-update",
+        "$method": "contact-update",
         "$timestamp": 439439493
       }
     }
