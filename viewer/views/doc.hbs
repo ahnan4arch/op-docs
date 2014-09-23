@@ -7,10 +7,14 @@
 		<tr>
 			<td class="links"><a href="/">Home</a></td>
 			<td class="title">{{title}}</td>
-			<td class="copyright">&copy; 2011-2013 Hookflash Inc. All rights reserved.</td>
+			<td class="copyright"></td>
 		</tr>
 	</table>
 </div>
 <div class="ui-layout-west">
 	<div id="toc"></div>
 </div>
+
+<script>
+$("DIV.ui-layout-north .copyright").html("&copy; 2011-" + (new Date().getFullYear()) + " Hookflash Inc. All rights reserved.");
+</script>

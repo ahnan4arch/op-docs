@@ -4,5 +4,11 @@
 		"run": {
 			"packagePath": "viewer"
 		}
+	},
+	"config": {
+		"pio.deploy.converter": {
+			"name": "nodejs-server",
+			"main": "viewer/server.js"
+		}
 	}
 }
