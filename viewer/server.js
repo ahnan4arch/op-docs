@@ -101,9 +101,16 @@ exports.main = function(callback) {
                 });
             } else
             if (!req.params[0]) {
+                var sortedDocs = [];
+                for (var id in docs) {
+                    sortedDocs.push(docs[id]);
+                }
+                sortedDocs.sort(function (a, b) {
+                    return a.filename > b.filename ? -1 : 1;;
+                });
                 return res.render("docs", {
                     title: "Open Peer - Documentation",
-                    docs: docs
+                    docs: sortedDocs
                 });
             }
             return next();
