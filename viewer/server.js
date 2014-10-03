@@ -27,6 +27,7 @@ exports.main = function(callback) {
             if (serviceUid) {
                 res.setHeader("x-service-uid", serviceUid);
             }
+            console.log("Request: " + req.url);
             return next();
         });
 
