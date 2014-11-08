@@ -717,7 +717,10 @@ The "0" package contains the following:
     * Context - (optional) this identifier allows the stream to correlate with other upper layers and the meaning is externally defined / negotiated. In the case of a connecting to a server, the context should include the destination server domain name as the remote server context and the local context can be the local server domain name, "anonymous" if an anonymous context is used or the hash of the peer URI of the connecting peer (all of which much match the keying signature of the local keying material).
     * Encoding - the encoding technique used for this package
       * Type - `pki`, `agreement` or `passphrase` - if "pki" then it's using public key encryption, if `agreement` then it's encoded using special key agreement based on a namespace, if "passphrase" then the encoding is done with a passphrase / algorithm externally defined (typically correlated via the context)
-      * Fingerprint - (optional) if `pki` (or `agreement` where a public key is involved) the fingerprint of the remote party's public key used to encrypt this data, the fingerprint of the public key is hash = hash(`<public-key-der-encoded>`) and for Diffie-Hellman keys it's computed as hash = hmac(`<remote-ephemeral-key`, `<remotestatic-key>`) when using the namespace `https://meta.openpeer.org/dh/modp/2048`. For `agreement` where the remote public agreement keying is not known in advance (i.e. offer agreement key), there is no fingerprint value present. The answer agreement must include the fingerprint of the offer public agreement keying.
+      * Fingerprint - (optional)
+        * if `pki` the fingerprint is the hash of the public key used to encrypt this data, i.e. hash = hash(`<public-key-der-encoded>`)
+        * if `agreement` and a "key" is not provided then the fingerprint is the hash of the public key local to the associated keying bundle and the side receiving the keying bundle must supply the public key associated to the fingerprint. If `agreement` and a "key" is provided then the fingerprint will be that of the public key remote from the associated keying and the side receiving the keying bundle must supply the public key associated to the fingerpint.
+          * For Diffie-Hellman keys it's computed as hash = hmac(`<ephemeral-key`, `<static-key>`) when using the namespace `https://meta.openpeer.org/dh/modp/2048`. If the fingerprint is supplied, the side receiving this keying bundle is expected to have been pre-supplied the keying agreement material requested by this fingerpting out of band (or in a previous keying exchange).
       * Key - if `agreement` value = `<encoded-namespace>` + ":" + `<....namespace-dependent...>`
         * Encoded namespace - `<encoded-namespace>` = base64(`<namespace-uri>`)
         * If namespace is `https://meta.openpeer.org/dh/modp/2048` what follows is `<namespace-dependent>` = base64(`<encoding-peer-static-public-key>`) + ":" + base64(`<encoding-peer-ephemeral-public-key>`) based upon a Diffie-Hellman MODP P, Q and G are defined as hex integer values as defined in Diffie-Hellman MODP Namespace Definitions section. Alternative namespace `1024`, `1538`, `2048`, `3072`, `4096`, `6144`, `8192` are available too. If the remote public agreement keying is known in advance to sending the local public keying agreement material, the agreed key becomes converted into a `passphrase` which is calculated as passphrase = hex(`<agreed-key>`), determined based on context. If the remote public agreement keying is not known in advance, the key uses the agreement mechanism as listed below for the "aes-cfb-32-16-16-sha1-md5" algorithm.
@@ -2377,7 +2380,7 @@ This request proves that a lockbox access is valid and can be used to validate a
     * Lockbox access token - as returned from the "Lockbox Access" request
       * Token id - an id associated to the lockbox
       * Token proof - proof the token secret is known by the client
-        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":" + `<roken-resource>`))
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":" + `<token-resource>`))
       * Token nonce - one time use random string
       * Token proof expires - how long until the proof expires
       * Token resource - any resource string will be used in proof validation
@@ -3107,7 +3110,7 @@ This request proves that an identity access is valid and can be used to validate
     * Identity access token - as returned from the "Identity Access Complete" notification
       * Token id - an id associated to the identity
       * Token proof - proof the token secret is known by the client
-        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":" + `<roken-resource>`))
+        * `<proof>` = hex(hmac(`<token-secret>`, "proof:" + `<token-id>` + ":" + `<token-nonce>` + ":" + `<token-expires>` + ":" + `<token-resource>`))
       * Token nonce - one time use random string
       * Token proof expires - how long until the proof expires
       * Token resource - any resource string will be used in proof validation
@@ -3410,7 +3413,7 @@ If the "lockbox passphrase ID" is specified but the "twice encrypted lockbox pas
           "name": "Identity Service",
           "image": "https://identity.com/identity/identity.png",
           "url": "https://identity.com/identity/",
-          "domains": "trust.com,trust2.com",
+          "domains": "trustedgrant1.com,trustedgrant2.com",
     
           "namespaces": {
             "namespace": [
